@@ -58,6 +58,7 @@ elif [[ -d "/mnt/work/Projects/tauri/tools-iam" ]]; then
 fi
 
 # --- 3. Directory Structure ---
+create_structure() {
     echo "📁 Creating directory structure..."
     
     # Core AI structure
