@@ -40,7 +40,7 @@ function start_session() {
 function end_session() {
     echo "🔄 Ending AI Session..."
     
-    # 1. capture Git
+    # 1. Capture Git
     echo "   - Reading recent git activity..."
     GIT_SUMMARY=$(git log --since="24 hours ago" --pretty=format:"%s; " | tr '\n' ' ' | sed 's/; $//')
     if [[ -z "$GIT_SUMMARY" ]]; then
@@ -48,67 +48,51 @@ function end_session() {
     fi
     RECENT_CHANGES=$(git log --since="24 hours ago" --oneline --pretty=format:"- %ad: %s" --date=short)
 
-    # 2. Interactive
-    echo "Enter a brief summary of what you accomplished in this session:"
-    echo "\`Default: $GIT_SUMMARY\`"
+    # 2. Capture Active Features (INTEGRATION)
+    echo "   - Scanning active features..."
+    ACTIVE_FEATURES=""
+    while IFS= read -r file; do
+        if [[ -f "$file" ]]; then
+            BASENAME=$(basename "$file")
+            TITLE=$(grep "^# Feature:" "$file" | head -n 1 | sed 's/# Feature: //')
+            ACTIVE_FEATURES+="- **$TITLE** (Ref: \`.ai/features/$BASENAME\`)"$'\n'
+        fi
+    done < <(find .ai/features -name "*.md" -mtime -1 2>/dev/null)
+
+    # 3. Smart defaults
+    if [[ -n "$ACTIVE_FEATURES" ]]; then
+        echo "     Found active features: "
+        echo "$ACTIVE_FEATURES"
+    fi
+
+    echo "Enter a brief summary (Press Enter to use Git Log):"
     read -e -p "> " USER_INPUT
     SESSION_SUMMARY="${USER_INPUT:-$GIT_SUMMARY}"
 
-    echo ""
-    echo "Did you make any ARCHITECTURAL or STRUCTURE changes? (y/n)"
-    read -n 1 -r ARCH_CHANGED
-    echo ""
-    ARCH_NOTE=""
-    if [[ $ARCH_CHANGED =~ ^[Yy]$ ]]; then
-        echo "Describe the change:"
-        read -e -p "> " ARCH_DESC
-        ARCH_NOTE="> [!IMPORTANT]
-> **Architectural Update Required**: $ARCH_DESC
-> *Action for Next Session*: Update ARCHITECTURE.md and PROJECT_OVERVIEW.md immediately."
-    fi
-
-    echo ""
-    echo "What are the priority tasks for the NEXT session?"
-    echo "(Type 'done' on a new line to finish)"
-    NEXT_STEPS=""
-    while true; do
-        read -p "- " line
-        [[ "$line" == "done" || -z "$line" ]] && break
-        NEXT_STEPS+="- [ ] $line"$'\n'
-    done
-
-    # 3. Update File
+    # 4. Update File
     if [[ -f "$FOCUS_FILE" ]]; then
         TEMP_FILE=$(mktemp)
         echo "# Current Development Focus" > "$TEMP_FILE"
         echo "" >> "$TEMP_FILE"
         
-        if [[ -n "$ARCH_NOTE" ]]; then
-            echo "$ARCH_NOTE" >> "$TEMP_FILE"
+        # ACTIVE FEATURES SECTION
+        if [[ -n "$ACTIVE_FEATURES" ]]; then
+            echo "## 🚀 Active Features (Work in Progress)" >> "$TEMP_FILE"
+            echo "$ACTIVE_FEATURES" >> "$TEMP_FILE"
             echo "" >> "$TEMP_FILE"
         fi
         
-        echo "## Active Tasks" >> "$TEMP_FILE"
-        if [[ -n "$NEXT_STEPS" ]]; then
-            echo -n "$NEXT_STEPS" >> "$TEMP_FILE"
-        else
-            echo "- [ ] (No next steps defined)" >> "$TEMP_FILE"
-        fi
-        echo "" >> "$TEMP_FILE"
-        
-        echo "## Recent Session: $(date +%Y-%m-%d\ %H:%M)" >> "$TEMP_FILE"
+        # Git Activity
+        echo "## 📅 Recent Session: $(date +%Y-%m-%d\ %H:%M)" >> "$TEMP_FILE"
         echo "**Summary**: $SESSION_SUMMARY" >> "$TEMP_FILE"
         echo "" >> "$TEMP_FILE"
         echo "### Git Activity" >> "$TEMP_FILE"
         echo "$RECENT_CHANGES" >> "$TEMP_FILE"
         echo "" >> "$TEMP_FILE"
         
-        echo "## Blockers" >> "$TEMP_FILE"
-        echo "None" >> "$TEMP_FILE"
-        echo "" >> "$TEMP_FILE"
-        
-        echo "## Context for AI Assistant" >> "$TEMP_FILE"
+        # Restore Context
         EXISTING_CONTEXT=$(grep -A 5 "## Context for AI Assistant" "$FOCUS_FILE" | tail -n +2 | grep -v "Last updated" | grep -v "> \[!IMPORTANT\]")
+        echo "## Context for AI Assistant" >> "$TEMP_FILE"
         echo "${EXISTING_CONTEXT:-- Focus on detecting latest changes.}" >> "$TEMP_FILE"
         
         echo "" >> "$TEMP_FILE"

@@ -58,11 +58,10 @@ elif [[ -d "/mnt/work/Projects/tauri/tools-iam" ]]; then
 fi
 
 # --- 3. Directory Structure ---
-create_structure() {
     echo "📁 Creating directory structure..."
     
     # Core AI structure
-    mkdir -p .ai/{context,prompts/{initialization,templates,system},agents,skills,sessions}
+    mkdir -p .ai/{context,prompts/{initialization,templates,system},agents,skills,sessions,features}
     
     # Project documentation
     mkdir -p docs/{development,architecture,ai-context/session-logs}
@@ -70,7 +69,7 @@ create_structure() {
     # Workflow integration
     mkdir -p .github/{workflows,ISSUE_TEMPLATE}
     mkdir -p scripts/{dev,ai}
-    mkdir -p .cursor
+    mkdir -p .cursor/rules
     
     echo "✅ Directory structure created"
 }
