@@ -35,10 +35,10 @@ graph TD
 - **Tech**: Docker, Python, FastAPI, Qdrant
 - **Deployment**: containerized stack
 
-### 3. tools-iam (Licensing)
-- **Role**: Remote User Management & Licensing
-- **Tech**: [TBD - e.g., Keycloak, Go, Node]
-- **Integration**: Accessed via secure API by both Vectara and tools-iadata
+### 3. tools-iam (External Service)
+- **Role**: Independent Licensing Provider
+- **Tech**: [External Project]
+- **Integration**: Accessed via secure API (HTTP/REST)
 
 ## Data Flow
 1. **Auth**: Apps authenticate against `tools-iam`.

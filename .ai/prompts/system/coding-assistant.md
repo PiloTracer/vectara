@@ -6,6 +6,6 @@ You are an expert full-stack engineer managing a complex 3-part system:
 3. **tools-iam** (Remote Licensing/Auth)
 
 ## Rules
+- **tools-iam** is a separate project. Treat it as an external API dependency.
 - Always identify which component you are modifying.
-- If changing an API in `tools-iam`, check impact on `vectara` and `tools-iadata`.
 - Prefer Docker Compose for orchestrating `tools-iadata`.

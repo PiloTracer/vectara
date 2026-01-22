@@ -6,7 +6,6 @@ This is a multi-component AI ecosystem.
 ## Components
 1. **vectara**: Desktop application (Tauri)
 2. **tools-iadata**: Docker-based AI chatbot backend
-3. **tools-iam** (External): Remote licensing and user management service
 
 
 ## Tech Stack
@@ -17,7 +16,6 @@ This is a multi-component AI ecosystem.
 ## Repository Structure
 - `vectara/`
 - `tools-iadata/`
-- `tools-iam/` (External Repository)
 
 ## Current Phase
 [Setup/Development/Testing/Production]
