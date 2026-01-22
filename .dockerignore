@@ -1,0 +1,49 @@
+# --- Version Control ---
+.git
+.gitignore
+.dockerignore
+
+# --- IDE & System ---
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+
+# --- Dependencies & Build Artifacts (Let Docker install fresh) ---
+node_modules
+dist
+build
+target
+__pycache__
+.venv
+venv
+.next
+.nuxt
+.cache
+
+# --- AI & Documentation (Usually not needed in prod images) ---
+.ai
+.cursor
+docs
+README.md
+LICENSE
+
+# --- Environment & Secrets ---
+.env
+.env.local
+.env.*
+secrets.md
+! .env.example
+
+# --- Logs & Temp ---
+*.log
+*.tmp
+temp.zip
+
+# --- Components (If building strict contexts, otherwise keep) ---
+# Assuming we build from root, we often want to whitelist contexts,
+# but as a general exclude list:
+.misc
+stats.json
+
+access.txt

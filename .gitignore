@@ -1,0 +1,102 @@
+# --- OS & System ---
+.DS_Store
+Thumbs.db
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+
+# --- IDE & Editors ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# --- Logs ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Node / Web ---
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+.output/
+.cache/
+coverage/
+.turbo/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- Rust / Tauri ---
+/target/
+**/*.rs.bk
+
+# --- Docker ---
+.docker/
+docker-compose.override.yml
+
+# --- Environment Secrets ---
+.env
+.env.local
+.env.*.local
+! .env.example
+! .env.dev.example
+! .env.test.example
+secrets.md
+*.pem
+*.key
+
+# --- AI & Tools ---
+.cursor/
+.ai/sessions/*.md
+# Keep session templates/logs if desired, but typically we might ignore dense logs
+# .ai/sessions/
+
+# --- Project Specific ---
+temp.zip
+.misc/
+test_results/
+
+# --- Misc ---
+*.bak
+*.tmp
+
+access.txt
