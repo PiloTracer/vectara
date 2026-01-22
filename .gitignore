@@ -99,4 +99,6 @@ test_results/
 *.bak
 *.tmp
 
+# Other:
+secrets.*
 access.txt
