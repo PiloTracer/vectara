@@ -370,12 +370,38 @@ if [[ -z "$RECENT_CHANGES" ]]; then
     RECENT_CHANGES=$(git log -n 5 --oneline --pretty=format:"- %ad: %s" --date=short)
 fi
 
+GIT_SUMMARY=$(git log --since="24 hours ago" --pretty=format:"%s; " | tr '\n' ' ' | sed 's/; $//')
+if [[ -z "$GIT_SUMMARY" ]]; then
+    GIT_SUMMARY=$(git log -n 3 --pretty=format:"%s; " | tr '\n' ' ' | sed 's/; $//')
+fi
+
 # 2. Interactive Input
 echo "----------------------------------------------------------------"
 echo "🤖 Session Reflection"
 echo "----------------------------------------------------------------"
 echo "Enter a brief summary of what you accomplished in this session:"
-read -e -p "> " SESSION_SUMMARY
+echo "\`Default: $GIT_SUMMARY\`"
+read -e -p "> " USER_INPUT
+
+if [[ -z "$USER_INPUT" ]]; then
+    SESSION_SUMMARY="$GIT_SUMMARY"
+    echo "   Using default git summary."
+else
+    SESSION_SUMMARY="$USER_INPUT"
+fi
+
+echo ""
+echo "Did you make any ARCHITECTURAL or STRUCTURE changes? (y/n)"
+read -n 1 -r ARCH_CHANGED
+echo ""
+ARCH_NOTE=""
+if [[ $ARCH_CHANGED =~ ^[Yy]$ ]]; then
+    echo "Please briefly describe the change (e.g., 'Added new auth service', 'Changed DB schema'):"
+    read -e -p "> " ARCH_DESC
+    ARCH_NOTE="> [!IMPORTANT]
+> **Architectural Update Required**: $ARCH_DESC
+> *Action for Next Session*: Update ARCHITECTURE.md and PROJECT_OVERVIEW.md immediately."
+fi
 
 echo ""
 echo "What are the priority tasks for the NEXT session?"
@@ -396,7 +422,13 @@ if [[ -f "$FOCUS_FILE" ]]; then
     echo "# Current Development Focus" > "$TEMP_FILE"
     echo "" >> "$TEMP_FILE"
     
-    # New Active Tasks (User Input)
+    # Architecture Alert
+    if [[ -n "$ARCH_NOTE" ]]; then
+        echo "$ARCH_NOTE" >> "$TEMP_FILE"
+        echo "" >> "$TEMP_FILE"
+    fi
+    
+    # New Active Tasks
     echo "## Active Tasks" >> "$TEMP_FILE"
     if [[ -n "$NEXT_STEPS" ]]; then
         echo -n "$NEXT_STEPS" >> "$TEMP_FILE"
@@ -419,7 +451,7 @@ if [[ -f "$FOCUS_FILE" ]]; then
     echo "" >> "$TEMP_FILE"
     
     echo "## Context for AI Assistant" >> "$TEMP_FILE"
-    EXISTING_CONTEXT=$(grep -A 5 "## Context for AI Assistant" "$FOCUS_FILE" | tail -n +2 | grep -v "Last updated")
+    EXISTING_CONTEXT=$(grep -A 5 "## Context for AI Assistant" "$FOCUS_FILE" | tail -n +2 | grep -v "Last updated" | grep -v "> \[!IMPORTANT\]")
     if [[ -n "$EXISTING_CONTEXT" ]]; then
         echo "$EXISTING_CONTEXT" >> "$TEMP_FILE"
     else
@@ -431,12 +463,108 @@ if [[ -f "$FOCUS_FILE" ]]; then
     
     mv "$TEMP_FILE" "$FOCUS_FILE"
     echo "✅ $FOCUS_FILE updated."
+    
+    if [[ -n "$ARCH_NOTE" ]]; then
+        echo "⚠️  Flagged architectural changes for next session."
+    fi
 else
     echo "⚠️ $FOCUS_FILE not found."
 fi
 
 echo "✅ Context Updated. Ready for next session."
 EOF
+
+    # New Feature Script
+    cat > scripts/ai/new-feature.sh << 'EOF'
+#!/bin/bash
+# new-feature.sh: Create a new feature with ID and Timestamp
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+FEATURES_DIR="$ROOT_DIR/.ai/features"
+
+mkdir -p "$FEATURES_DIR"
+cd "$FEATURES_DIR"
+
+LATEST_ID=$(ls | grep -E '^[0-9]{4}-' | cut -d'-' -f1 | sort -rn | head -n 1)
+if [[ -z "$LATEST_ID" ]]; then
+    NEXT_ID="0001"
+else
+    NEXT_ID=$(printf "%04d" $((10#$LATEST_ID + 1)))
+fi
+
+echo "🆕 Creating New Feature (ID: $NEXT_ID)"
+read -p "Enter feature name (slug): " FEATURE_NAME
+SLUG=$(echo "$FEATURE_NAME" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g')
+
+DATE_CODE=$(date +%y%m%d)
+FILENAME="${NEXT_ID}-${SLUG}-${DATE_CODE}-${DATE_CODE}.md"
+FULL_PATH="$FEATURES_DIR/$FILENAME"
+
+cat > "$FULL_PATH" << INNEREOF
+# Feature: $FEATURE_NAME
+**ID**: $NEXT_ID
+**Created**: $(date +%Y-%m-%d)
+**Last Updated**: $(date +%Y-%m-%d)
+**Status**: DRAFT
+
+## 1. Objective
+[Describe what this feature achieves]
+
+## 2. Requirements
+- [ ] Requirement A
+- [ ] Requirement B
+
+## 3. Implementation Plan
+- [ ] Step 1
+- [ ] Step 2
+
+## 4. Changelog
+- $(date +%Y-%m-%d): Initial Draft
+INNEREOF
+
+echo "✅ Created feature: $FILENAME"
+EOF
+
+    # Update Feature Script
+    cat > scripts/ai/update-feature.sh << 'EOF'
+#!/bin/bash
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+FEATURES_DIR="$ROOT_DIR/.ai/features"
+cd "$FEATURES_DIR" || exit 1
+
+echo "🔍 Selecting feature to update..."
+OPTIONS=($(ls *.md))
+if [ ${#OPTIONS[@]} -eq 0 ]; then echo "No features found."; exit 1; fi
+
+select FILE in "${OPTIONS[@]}"; do
+    if [[ -n "$FILE" ]]; then break; else echo "Invalid selection."; fi
+done
+
+if [[ "$FILE" =~ ^([0-9]{4}-.+)-([0-9]{6})-([0-9]{6})\.md$ ]]; then
+    BASE="${BASH_REMATCH[1]}"
+    OLD_UPDATED="${BASH_REMATCH[2]}"
+    CREATED="${BASH_REMATCH[3]}"
+else
+    echo "⚠️  Filename format not recognized."
+    exit 1
+fi
+
+TODAY=$(date +%y%m%d)
+if [[ "$OLD_UPDATED" == "$TODAY" ]]; then
+    NEW_FILENAME="$FILE"
+else
+    NEW_FILENAME="${BASE}-${TODAY}-${CREATED}.md"
+    mv "$FILE" "$NEW_FILENAME"
+    echo "🔄 Renamed to: $NEW_FILENAME"
+fi
+
+sed -i.bak "s/^\*\*Last Updated\*\*: .*/\*\*Last Updated\*\*: $(date +%Y-%m-%d)/" "$NEW_FILENAME"
+rm "${NEW_FILENAME}.bak" 2>/dev/null
+echo "✅ Feature updated."
+EOF
+
+    chmod +x scripts/ai/new-feature.sh scripts/ai/update-feature.sh
     chmod +x scripts/ai/update-context.sh
 
     echo "✅ Automation scripts created"
