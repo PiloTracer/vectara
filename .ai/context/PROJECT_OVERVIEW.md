@@ -17,6 +17,9 @@ This is a multi-component AI ecosystem.
 - `vectara/`
 - `tools-iadata/`
 
+## Available Skills (Agent Capabilities)
+- **Tauri Development**: `.ai/skills/tauri-development.md` (Best practices for Shell/Security)
+
 ## Current Phase
 [Setup/Development/Testing/Production]
 
