@@ -37,11 +37,17 @@
 
 ### Feature 1: Initial Configuration Check ("The Gatekeeper")
 Before showing the main UI, `vectara` must:
-1.  **Verify**: Rust backend reads `/mnt/work/Projects/tauri/datalake/tools-iadata/.env.example` (or the actual `.env`).
-2.  **Validate**: Check if keys are set (e.g., `OPENAI_API_KEY`).
-3.  **Decide**:
-    - **IF Valid**: Redirect Webview to the Docker App.
-    - **IF Invalid**: Show a native Tauri reconfiguration screen.
+1.  **Identify Environment**:
+    -   Read local persistence (e.g., `app_config.json`) to see if user selected "dev" or "prd".
+    -   **IF Missing**: Prompt user to select environment.
+    -   **IF Set**: Proceed with that selection.
+2.  **Schema Check**: Read `tools-iadata/.env.example` to understand *required* keys.
+3.  **Runtime Validation**:
+    -   Target File: `tools-iadata/.env.dev` (if Dev) or `.env.prd`.
+    -   Action: Verify that all keys from Schema exist in Target and are not empty.
+4.  **Decide**:
+    -   **IF Valid**: Redirect Webview to the Docker App (e.g. `http://localhost:${FRONT_PORT}`).
+    -   **IF Invalid/Missing**: Show a native Tauri reconfiguration screen to help the user generate the valid `.env` file.
 
 ## 3. System Prompt Behavior
 > "When tasked with Tauri development, always look for opportunities to move performance-critical logic into Rust and provide the corresponding TypeScript interfaces for the frontend to ensure type safety across the bridge."
