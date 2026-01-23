@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
-use tauri::{AppHandle, Manager, Runtime};
+use tauri::AppHandle;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AppModeConfig {
@@ -16,8 +16,6 @@ pub struct ConfigStatus {
     pub environment: String,
     pub docker_url: String, // e.g. "http://localhost:3000" or empty
 }
-
-const CONFIG_FILE_NAME: &str = "app_config.json";
 
 // --- Commands ---
 
@@ -41,7 +39,16 @@ pub fn get_app_mode() -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
-pub fn check_env_config(app: AppHandle) -> Result<ConfigStatus, String> {
+pub fn reset_app_mode() -> Result<(), String> {
+    let path = get_config_path();
+    if path.exists() {
+        fs::remove_file(path).map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub fn check_env_config(_app: AppHandle) -> Result<ConfigStatus, String> {
     // 1. Get Mode
     let mode = match load_config() {
         Ok(Some(cfg)) => cfg.environment,
@@ -49,12 +56,94 @@ pub fn check_env_config(app: AppHandle) -> Result<ConfigStatus, String> {
         Err(e) => return Err(e.to_string()),
     };
 
-    // 2. Resolve Paths
-    // We assume `tools-iadata` is a sibling of the `vectara` root or `datalake` root.
-    // In dev, we can try to traverse up.
-    // CAUTION: In production build, these paths might differ. For now, optimizing for Dev/Source.
+    let (services_path, _, target_file) = resolve_env_paths(&mode)?;
+    let schema_file = services_path.join(".env.example");
+
+    // 3. Schema Check
+    let schema_keys = parse_env_keys(&schema_file)?;
     
-    // Attempt to find project root by looking for 'tools-iadata'
+    // 4. Runtime Validation
+    let target_vars = parse_env_vars(&target_file)?;
+
+    let mut missing_keys = Vec::new();
+    for key in schema_keys {
+        if !target_vars.contains(&key) {
+            missing_keys.push(key);
+        }
+    }
+
+    // 5. Determine URL
+    let target_map = parse_env_map(&target_file)?;
+    let front_port = target_map.get("FRONT_PORT").map(|s| s.as_str()).unwrap_or("3000"); 
+    let docker_url = format!("http://localhost:{}", front_port);
+
+    Ok(ConfigStatus {
+        valid: missing_keys.is_empty(),
+        missing_keys,
+        environment: mode,
+        docker_url,
+    })
+}
+
+#[tauri::command]
+pub fn get_all_env_vars() -> Result<std::collections::HashMap<String, String>, String> {
+    let mode = match load_config() {
+        Ok(Some(cfg)) => cfg.environment,
+        Ok(None) => return Err("Environment not set.".to_string()),
+        Err(e) => return Err(e.to_string()),
+    };
+    
+    let (_, _, target_file) = resolve_env_paths(&mode)?;
+    parse_env_map(&target_file)
+}
+
+#[tauri::command]
+pub fn update_env_var(key: String, value: String) -> Result<(), String> {
+    let mode = match load_config() {
+        Ok(Some(cfg)) => cfg.environment,
+        Ok(None) => return Err("Environment not set.".to_string()),
+        Err(e) => return Err(e.to_string()),
+    };
+    
+    let (_, _, target_file) = resolve_env_paths(&mode)?;
+    
+    // Read existing content
+    let content = fs::read_to_string(&target_file).map_err(|e| e.to_string())?;
+    let mut new_lines = Vec::new();
+    let mut found = false;
+
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.starts_with("#") || trimmed.is_empty() {
+             new_lines.push(line.to_string());
+             continue;
+        }
+
+        if let Some((k, _)) = trimmed.split_once('=') {
+            if k.trim() == key {
+                new_lines.push(format!("{}={}", key, value));
+                found = true;
+            } else {
+                new_lines.push(line.to_string());
+            }
+        } else {
+             new_lines.push(line.to_string());
+        }
+    }
+
+    if !found {
+        new_lines.push(format!("{}={}", key, value));
+    }
+
+    // Join with newlines
+    let new_content = new_lines.join("\n");
+    fs::write(&target_file, new_content).map_err(|e| e.to_string())?;
+    
+    Ok(())
+}
+
+fn resolve_env_paths(mode: &str) -> Result<(PathBuf, PathBuf, PathBuf), String> {
+     // Attempt to find project root by looking for 'tools-iadata'
     let root_candidates = vec![
         "../tools-iadata",       // sibling of vectara
         "../../tools-iadata",    // sibling of vectara/src-tauri
@@ -79,39 +168,10 @@ pub fn check_env_config(app: AppHandle) -> Result<ConfigStatus, String> {
     let schema_file = services_path.join(".env.example");
     let target_file_name = if mode == "dev" { ".env.dev" } else { ".env.prd" };
     let target_file = services_path.join(target_file_name);
-
-    // 3. Schema Check
-    println!("Checking Schema: {:?}", schema_file);
-    let schema_keys = parse_env_keys(&schema_file)?;
     
-    // 4. Runtime Validation
-    println!("Checking Target: {:?}", target_file);
-    let target_vars = parse_env_vars(&target_file)?; // Returns Map or List of present keys
-
-    let mut missing_keys = Vec::new();
-    for key in schema_keys {
-        if !target_vars.contains(&key) {
-            missing_keys.push(key);
-        }
-        // Could also check for empty values here if needed
-    }
-
-    // 5. Determine URL
-    // Parse FRONT_PORT from target vars to build dynamic URL?
-    // For simplicity, let's grep or parse.
-    // But parse_env_vars just got keys. Let's really parse.
-    let target_map = parse_env_map(&target_file)?;
-    let front_port = target_map.get("FRONT_PORT").map(|s| s.as_str()).unwrap_or("3000"); // Default 3000
-    
-    let docker_url = format!("http://localhost:{}", front_port);
-
-    Ok(ConfigStatus {
-        valid: missing_keys.is_empty(),
-        missing_keys,
-        environment: mode,
-        docker_url,
-    })
+    Ok((services_path, schema_file, target_file))
 }
+
 
 // --- Helpers ---
 
@@ -161,9 +221,8 @@ fn parse_env_map(path: &Path) -> Result<std::collections::HashMap<String, String
 }
 
 fn get_config_path() -> PathBuf {
-    // For now, store in current working directory of binary or a known relative path.
-    // In production, should use tauri::api::path::app_data_dir.
-    Path::new("app_config.json").to_path_buf()
+    // Save to project root (../) to avoid triggering cargo-watch in src-tauri
+    Path::new("../.app_config.json").to_path_buf()
 }
 
 fn save_config(config: &AppModeConfig) -> std::io::Result<()> {

@@ -20,9 +20,11 @@ pub fn run() {
             // File Menu
             let file_menu = tauri::menu::Submenu::new(handle, "File", true)?;
             let home_item = MenuItem::new(handle, "Home / Reset", true, Some("home"))?;
+            let settings_item = MenuItem::new(handle, "Settings", true, Some("settings"))?;
             let quit_item = MenuItem::new(handle, "Quit", true, None::<&str>)?;
             
             file_menu.append(&home_item)?;
+            file_menu.append(&settings_item)?;
             file_menu.append(&quit_item)?;
             
             menu.append(&file_menu)?;
@@ -33,15 +35,13 @@ pub fn run() {
                 if event.id() == home_item.id() {
                     println!("Resetting to Home...");
                     if let Some(window) = app_handle.get_webview_window("main") {
-                        // Reset to the built-in index.html
-                        // In dev: http://localhost:1420
-                        // In prod: tauri://localhost
-                        // We can use the Url from context or just simple relocation logic.
-                        // window.eval("window.location.reload()") might just reload the Docker app if redirected.
-                        // We need to navigate explicitly.
-                        let _ = window.eval("window.location.href = window.__TAURI_METADATA__ ? window.__TAURI_METADATA__.__currentWindow.label : '/'");
-                        // Simpler: Just tell it to go to /
-                        let _ = window.eval("window.location.href = '/'");
+                         // Reset hash and location
+                        let _ = window.eval("window.location.hash = ''; window.location.href = '/'");
+                    }
+                } else if event.id() == settings_item.id() {
+                    println!("Opening Settings...");
+                     if let Some(window) = app_handle.get_webview_window("main") {
+                        let _ = window.eval("window.location.hash = '#/settings'");
                     }
                 } else if event.id() == quit_item.id() {
                     app_handle.exit(0);
@@ -56,6 +56,10 @@ pub fn run() {
             config::check_env_config,
             config::set_app_mode,
             config::get_app_mode,
+            config::get_all_env_vars,
+
+            config::update_env_var,
+            config::reset_app_mode,
             docker::check_docker_status,
             docker::start_docker
         ])

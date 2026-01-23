@@ -1,8 +1,7 @@
 use std::process::Command;
-use crate::config::{get_app_mode, ConfigStatus};
-use tauri::AppHandle;
+use crate::config::get_app_mode;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 // Status Enum
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq)]
