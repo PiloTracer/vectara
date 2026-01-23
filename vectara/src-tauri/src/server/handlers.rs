@@ -6,6 +6,8 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use crate::server::state::AppState;
+use tauri_plugin_dialog::DialogExt;
+
 
 // --- Request/Response Structs ---
 
@@ -51,6 +53,15 @@ pub struct FileInfo {
 #[derive(Serialize)]
 pub struct ListDirResponse {
     pub files: Vec<FileInfo>,
+    pub success: bool,
+    pub error: Option<String>,
+}
+
+#[derive(Serialize)]
+pub struct OpenDialogResponse {
+    pub path_id: Option<String>,
+    pub path: Option<String>,
+    pub canceled: bool,
     pub success: bool,
     pub error: Option<String>,
 }
@@ -197,4 +208,61 @@ pub async fn get_authorized_paths(
         .map(|(k, v)| (k.clone(), v.to_string_lossy().to_string()))
         .collect();
     Json(paths_string)
+}
+
+pub async fn open_dialog_handler(
+    State(state): State<AppState>,
+) ->  (StatusCode, Json<OpenDialogResponse>) {
+    let handle = match &state.app_handle {
+        Some(h) => h,
+        None => return (StatusCode::INTERNAL_SERVER_ERROR, Json(OpenDialogResponse {
+            path_id: None, path: None, canceled: false, success: false, error: Some("AppHandle not available".into())
+        })),
+    };
+
+    // Use blocking_pick_folder. 
+    // Since this is an async handler, we should ideally use spawn_blocking if the dialog blocks the thread.
+    // However, for simplicity and low traffic, direct call might be okay if it doesn't panic.
+    // NOTE: app_handle is Clone.
+    let handle_clone = handle.clone();
+    
+    // We execute the dialog on a blocking thread to avoid blocking the async runtime
+    let result = tokio::task::spawn_blocking(move || {
+        handle_clone.dialog().file().blocking_pick_folder()
+    }).await;
+
+    match result {
+        Ok(folder_opt) => {
+             match folder_opt {
+                Some(path) => {
+                    let path_buf = match path.into_path().map_err(|e| e.to_string()) {
+                        Ok(p) => p,
+                        Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(OpenDialogResponse {
+                             path_id: None, path: None, canceled: false, success: false, error: Some(e)
+                        })),
+                    };
+                    
+                    let path_str = path_buf.to_string_lossy().to_string();
+                    let path_id = uuid::Uuid::new_v4().to_string();
+                    
+                    let mut paths = state.authorized_paths.write().await;
+                    paths.insert(path_id.clone(), path_buf);
+                    
+                    (StatusCode::OK, Json(OpenDialogResponse {
+                        path_id: Some(path_id),
+                        path: Some(path_str),
+                        canceled: false,
+                        success: true,
+                        error: None
+                    }))
+                }
+                None => (StatusCode::OK, Json(OpenDialogResponse {
+                    path_id: None, path: None, canceled: true, success: true, error: None
+                })),
+            }
+        }
+        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(OpenDialogResponse {
+             path_id: None, path: None, canceled: false, success: false, error: Some(e.to_string())
+        })),
+    }
 }

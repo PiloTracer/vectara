@@ -142,3 +142,51 @@ async def delete_mcp(mcp_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     await db.delete(mcp)
     await db.commit()
     return {"status": "success"}
+
+# --- Ingestion Endpoint ---
+
+@router.post("/sources/{source_id}/ingest")
+async def ingest_source(source_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Trigger ingestion for a source.
+    For 'LOCAL_BRIDGE', this crawls the host folder via the bridge.
+    """
+    result = await db.execute(select(DataSource).where(DataSource.id == source_id))
+    source = result.scalars().first()
+    if not source:
+        raise HTTPException(status_code=404, detail="Source not found")
+        
+    if source.type == "LOCAL_BRIDGE":
+        from app.services.bridge import FileBridgeClient
+        
+        path_id = source.config.get("bridge_id")
+        if not path_id:
+             raise HTTPException(status_code=400, detail="Missing bridge_id in source config")
+             
+        client = FileBridgeClient()
+        try:
+            print(f"Starting ingestion for path_id {path_id}...")
+            files = await client.walk(path_id)
+            print(f"Found {len(files)} files via bridge.")
+            
+            # For now, we just log them to prove connectivity
+            for f in files[:5]: # Log first 5
+                print(f" - Found: {f['relative_path']} ({f['size']} bytes)")
+                
+                # Verify read
+                if f['size'] < 1000: # Only read small files for test
+                    content = await client.read_file(path_id, f['relative_path'])
+                    print(f"   Sample content: {content[:50]}...")
+            
+            return {
+                "status": "success", 
+                "message": f"Ingested {len(files)} files", 
+                "files_count": len(files)
+            }
+        except Exception as e:
+            print(f"Ingestion failed: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
+        finally:
+            await client.close()
+            
+    return {"status": "skipped", "message": f"Ingestion not implemented for type {source.type}"}

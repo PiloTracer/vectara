@@ -18,23 +18,15 @@ use server::state::AppState;
 pub fn run() {
 
     let app = tauri::Builder::default()
-        .manage(AppState::new())
+
         .setup(|app| {
             let handle = app.handle();
+            let state = AppState::new(Some(handle.clone()));
+            app.manage(state.clone());
             
             // Start HTTP Server
-            let state = app.state::<AppState>();
-            let state_clone = state.clone(); // AppState is Clone (Arc)
-            // Need to deref the state wrapper to get our inner struct?
-            // Actually config::AppState::new() returns Self.
-            // tauri::State<T> is a wrapper. We can clone the inner T if T: Clone.
-            // But app.state() returns State<T>. State<T> implements Clone? Yes, it wraps Arc.
-            // Wait, our `start_http_server` takes `AppState` directly, not `State<AppState>`.
-            // So we need `(*state).clone()`.
-            let inner_state = (*state).clone();
-            
             tauri::async_runtime::spawn(async move {
-                server::start_http_server(inner_state).await;
+                server::start_http_server(state).await;
             });
 
             let menu = Menu::new(handle)?;

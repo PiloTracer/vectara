@@ -8,7 +8,7 @@ pub mod state;
 pub mod handlers;
 
 use state::AppState;
-use handlers::{read_file_handler, write_file_handler, list_directory_handler, get_authorized_paths};
+use handlers::{read_file_handler, write_file_handler, list_directory_handler, get_authorized_paths, open_dialog_handler};
 
 // --- HTTP Server Startup ---
 
@@ -23,6 +23,7 @@ pub async fn start_http_server(state: AppState) {
         .route("/api/file/write", post(write_file_handler))
         .route("/api/file/list", post(list_directory_handler))
         .route("/api/paths", get(get_authorized_paths))
+        .route("/api/dialog/open", post(open_dialog_handler))
         .layer(cors)
         .with_state(state);
 

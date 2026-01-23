@@ -23,17 +23,66 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
     const [path, setPath] = useState("");
     const [url, setUrl] = useState("");
 
+    // Bridge State
+    const [subType, setSubType] = useState<"VOLUME" | "BRIDGE">("VOLUME");
+    const [bridgeId, setBridgeId] = useState("");
+    const [bridgePath, setBridgePath] = useState("");
+    const [isBridgeLoading, setIsBridgeLoading] = useState(false);
+
+    const handleBridgeChoose = async () => {
+        setIsBridgeLoading(true);
+        try {
+            // Browser calls localhost:3737 (Host)
+            const res = await fetch("http://localhost:3737/api/dialog/open", { method: "POST" });
+            const data = await res.json();
+
+            if (data.success && data.path_id) {
+                setBridgeId(data.path_id);
+                setBridgePath(data.path || "Selected Folder");
+                // Clear name if empty
+                if (!name) {
+                    const parts = (data.path || "").split(/[/\\]/);
+                    setName(parts[parts.length - 1] || "Local Folder");
+                }
+            } else if (data.error) {
+                alert("Error: " + data.error);
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Could not connect to Bridge Server (localhost:3737). Is the Desktop App running?");
+        } finally {
+            setIsBridgeLoading(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
-        const config = type === "LOCAL" ? { path } : { url };
+        let config: any = {};
+        let finalType = type;
+
+        if (type === "LOCAL") {
+            if (subType === "BRIDGE") {
+                if (!bridgeId) {
+                    alert("Please select a folder first.");
+                    setIsLoading(false);
+                    return;
+                }
+                finalType = "LOCAL_BRIDGE";
+                config = { bridge_id: bridgeId, display_path: bridgePath };
+            } else {
+                config = { path };
+            }
+        } else {
+            config = { url };
+        }
 
         try {
             await createSource({
                 env_id: envId,
                 name,
-                type,
+                type: finalType,
                 config
             });
             onSuccess();
@@ -125,32 +174,103 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
                 </div>
 
                 {type === "LOCAL" && useLocalEmbedding && (
-                    <div className="space-y-3">
-                        <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider ml-1">
-                            Directory Path
-                        </label>
-                        <div className="
-                            flex items-center w-full bg-slate-900 border border-amber-500/30 rounded-xl px-4 py-3.5
-                            focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500/20
-                            transition-all duration-200
-                        ">
-                            <span className="text-sm font-mono text-slate-400 select-none mr-1 border-r border-slate-700 pr-3">DATA_SOURCES_DIR/</span>
-                            <input
-                                type="text"
-                                required
-                                value={path}
-                                onChange={(e) => setPath(e.target.value)}
-                                className="
-                                    flex-1 bg-transparent border-none p-0 ml-2
-                                    text-sm font-mono text-amber-300 placeholder:text-slate-500
-                                    focus:ring-0 focus:outline-none
-                                "
-                                placeholder="my-docs"
-                            />
+                    <div className="space-y-4">
+                        <div className="flex gap-4 mb-2">
+                            <label className={`
+                                flex items-center gap-2 cursor-pointer
+                                text-sm ${subType === "VOLUME" ? "text-amber-400 font-bold" : "text-slate-500"}
+                            `}>
+                                <input
+                                    type="radio"
+                                    name="subType"
+                                    checked={subType === "VOLUME"}
+                                    onChange={() => setSubType("VOLUME")}
+                                    className="hidden"
+                                />
+                                <span className="w-3 h-3 rounded-full border border-current flex items-center justify-center">
+                                    {subType === "VOLUME" && <span className="w-1.5 h-1.5 bg-current rounded-full" />}
+                                </span>
+                                Docker Volume
+                            </label>
+                            <label className={`
+                                flex items-center gap-2 cursor-pointer
+                                text-sm ${subType === "BRIDGE" ? "text-amber-400 font-bold" : "text-slate-500"}
+                            `}>
+                                <input
+                                    type="radio"
+                                    name="subType"
+                                    checked={subType === "BRIDGE"}
+                                    onChange={() => setSubType("BRIDGE")}
+                                    className="hidden"
+                                />
+                                <span className="w-3 h-3 rounded-full border border-current flex items-center justify-center">
+                                    {subType === "BRIDGE" && <span className="w-1.5 h-1.5 bg-current rounded-full" />}
+                                </span>
+                                Host System (Bridge)
+                            </label>
                         </div>
-                        <p className="text-[11px] text-slate-500 ml-1">
-                            Relative to the configured data sources volume on the host.
-                        </p>
+
+                        {subType === "VOLUME" ? (
+                            <div className="space-y-3">
+                                <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider ml-1">
+                                    Directory Path
+                                </label>
+                                <div className="
+                                    flex items-center w-full bg-slate-900 border border-amber-500/30 rounded-xl px-4 py-3.5
+                                    focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500/20
+                                    transition-all duration-200
+                                ">
+                                    <span className="text-sm font-mono text-slate-400 select-none mr-1 border-r border-slate-700 pr-3">DATA_SOURCES_DIR/</span>
+                                    <input
+                                        type="text"
+                                        required
+                                        value={path}
+                                        onChange={(e) => setPath(e.target.value)}
+                                        className="
+                                            flex-1 bg-transparent border-none p-0 ml-2
+                                            text-sm font-mono text-amber-300 placeholder:text-slate-500
+                                            focus:ring-0 focus:outline-none
+                                        "
+                                        placeholder="my-docs"
+                                    />
+                                </div>
+                                <p className="text-[11px] text-slate-500 ml-1">
+                                    Relative to the configured data sources volume on the host.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <label className="text-[11px] font-bold text-amber-400 uppercase tracking-wider ml-1">
+                                    Select Host Folder
+                                </label>
+                                <div className="flex gap-3">
+                                    <div className="
+                                        flex-1 flex items-center bg-slate-900 border border-amber-500/30 rounded-xl px-4 py-3.5
+                                    ">
+                                        <Folder className="w-4 h-4 text-amber-500 mr-3" />
+                                        <span className={`text-sm font-mono ${bridgePath ? "text-amber-300" : "text-slate-500 italic"}`}>
+                                            {bridgePath || "No folder selected"}
+                                        </span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleBridgeChoose}
+                                        disabled={isBridgeLoading}
+                                        className="
+                                            px-6 py-2 bg-amber-500/10 border border-amber-500/50 
+                                            text-amber-400 text-sm font-bold rounded-xl
+                                            hover:bg-amber-500/20 hover:border-amber-400
+                                            transition-all
+                                        "
+                                    >
+                                        {isBridgeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Choose..."}
+                                    </button>
+                                </div>
+                                <p className="text-[11px] text-slate-500 ml-1">
+                                    Uses API Bridge to access any folder on your computer.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 )}
 
