@@ -2,10 +2,23 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
+from contextlib import asynccontextmanager
+from app.db import init_db
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Init DB
+    print("Initializing Database...")
+    await init_db()
+    print("Database Initialized.")
+    yield
+    # Shutdown logic if needed
+
 app = FastAPI(
     title="Tools IADATA API",
     description="Backend for CodeIva AI Data Lake System",
-    version="0.1.0"
+    version="0.1.0",
+    lifespan=lifespan
 )
 
 # CORS Configuration

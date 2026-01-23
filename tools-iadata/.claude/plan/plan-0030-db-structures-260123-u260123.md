@@ -1,137 +1,129 @@
-# Plan 0030: Database Structures (PostgreSQL)
+# Plan 0030: Database Structures (PostgreSQL) - Rev 2
 
 ## Overview
-This plan defines the relational database structure for **Tools IADATA**. It prioritizes a lightweight, flexible schema to manage multi-environment contexts, chat history, and system configurations.
+This plan defines the relational database structure for **Tools IADATA**. It implements a hierarchy where Environments serve as the container for Sources, MCPs, Agents, and permissions.
 
 **Strategy**:
 - **ORM**: SQLAlchemy (Async)
 - **Migration Strategy**: Idempotent `Base.metadata.create_all()` on startup.
 > [!IMPORTANT]
 > **NO ALEMBIC**. Schema changes must be handled by direct SQL via idempotent scripts or re-creation during dev. DO NOT introduce Alembic for migrations.
-- **Format**: JSONB used heavily for configuration fields to avoid over-normalizing variable data (like model parameters or source paths).
 
-## 1. Schema Design
+## 1. Schema Hierarchy
 
-### A. Core Context (`app/models/environment.py`)
+### A. Context & Access (`app/models/environment.py`)
 
 #### `environments`
-The top-level container for a workspace.
-- `id`: UUID (Primary Key)
-- `name`: String (Unique per owner?)
-- `description`: Text (Nullable)
-- `owner_id`: String (Keycloak User 'sub' ID)
-- `created_at`: DateTime (Default Now)
-- `updated_at`: DateTime
+The root container.
+- `id`: UUID (PK)
+- `name`: String
+- `description`: Text
+- `owner_id`: String (Keycloak 'sub')
+- `settings`: JSONB (Global env settings: default model, embedding strategy)
+- `created_at`: DateTime
+
+#### `environment_access`
+Manages shared access (RBAC).
+- `env_id`: UUID (PK, FK)
+- `user_id`: String (PK, Keycloak 'sub')
+- `role`: String (Enum: 'VIEWER', 'EDITOR', 'ADMIN')
+
+### B. Resources (`app/models/resources.py`)
 
 #### `data_sources`
-Defines inputs available in an environment.
-- `id`: UUID
-- `env_id`: UUID (FK -> environments.id)
+Static/Streaming inputs.
+- `id`: UUID (PK)
+- `env_id`: UUID (FK)
+- `type`: String (Enum: 'LOCAL', 'DRIVE', 'WEB', 'SHAREPOINT')
 - `name`: String
-- `source_type`: String (Enum: 'LOCAL', 'DRIVE', 'WEB', 'SHAREPOINT')
-- `config`: JSONB (Stores paths, URLs, auth tokens, or specific parsing rules)
-- `status`: String (Enum: 'ACTIVE', 'INDEXING', 'ERROR')
+- `config`: JSONB (Paths, URLs, credentials)
+- `indexing_config`: JSONB (Chunk size, exclusion patterns)
+
+#### `mcp_servers`
+Dynamic tool/resource providers.
+- `id`: UUID (PK)
+- `env_id`: UUID (FK)
+- `name`: String
+- `transport_type`: String (Enum: 'STDIO', 'SSE')
+- `command`: String (For STDIO)
+- `url`: String (For SSE)
+- `env_vars`: JSONB (Encrypted env vars for the server)
+- `enabled`: Boolean
+
+#### `system_jobs`
+Long-running async tasks (Indexing, Crawling).
+- `id`: UUID (PK)
+- `resource_id`: UUID (FK -> data_sources.id or mcp_servers.id)
+- `type`: String ('INDEXING', 'VectorSync')
+- `status`: String ('PENDING', 'RUNNING', 'COMPLETED', 'FAILED')
+- `progress`: JSONB ({ "processed": 10, "total": 100 })
+- `error`: Text
+
+### C. Intelligence (`app/models/intelligence.py`)
 
 #### `agents`
-Specific personas or tool configurations.
-- `id`: UUID
-- `env_id`: UUID (FK -> environments.id)
+- `id`: UUID (PK)
+- `env_id`: UUID (FK)
 - `name`: String
-- `role`: String (e.g., 'Analyst', 'Coder')
+- `role`: String
 - `system_prompt`: Text
-- `model_config`: JSONB (Specific model overrides: temperature, model_id)
+- `tools_config`: JSONB (Which MCP tools are enabled for this agent)
+- `model_override`: JSONB (Specific LLM selection)
 
-### B. Chat System (`app/models/chat.py`)
+### D. Chat System (`app/models/chat.py`)
 
 #### `chat_sessions`
-History grouping.
-- `id`: UUID
-- `env_id`: UUID (FK -> environments.id)
-- `user_id`: String (Keycloak 'sub')
+- `id`: UUID (PK)
+- `env_id`: UUID (FK)
+- `user_id`: String
 - `title`: String
-- `created_at`: DateTime
-- `updated_at`: DateTime (Last active)
+- `retrieval_strategy`: JSONB (Snapshot of search settings used)
 
 #### `chat_messages`
-Individual exchanges.
 - `id`: UUID
-- `session_id`: UUID (FK -> chat_sessions.id)
-- `role`: String ('user', 'assistant', 'system')
-- `content`: Text (The message body)
-- `meta`: JSONB (Token usage, citations, retrieval scores)
-- `created_at`: DateTime
+- `session_id`: UUID (FK)
+- `role`: String
+- `content`: Text
+- `sources`: JSONB (Citations/Retrieval results)
 
 ## 2. Implementation Structure
 
-The backend will organize these models into a modular structure:
-
 ```
 back-dl/app/
-├── db.py               # Database connection & init logic
+├── db.py               
 ├── models/
-│   ├── __init__.py     # Export all models for Base Registry
-│   ├── base.py         # SQLAlchemy Declarative Base
-│   ├── environment.py  # Env, DataSource, Agent classes
-│   └── chat.py         # ChatSession, ChatMessage classes
+│   ├── __init__.py     
+│   ├── base.py         
+│   ├── environment.py  # Environment + Access
+│   ├── resources.py    # DataSources + MCPs + Jobs
+│   ├── intelligence.py # Agents
+│   └── chat.py         
 ```
 
-### Idempotency
-The `db.py` module will export an `init_db()` function called by `main.py` on startup/lifespan.
+## 3. Key Python Model Definitions (Draft)
+
+### `models/resources.py` (`sys_jobs` + `mcp`)
 ```python
-async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-```
-
-## 3. Python Model Definitions (Draft)
-
-### `models/base.py`
-```python
-from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.ext.asyncio import AsyncAttrs
-
-class Base(AsyncAttrs, DeclarativeBase):
-    pass
-```
-
-### `models/environment.py`
-```python
-from sqlalchemy import Column, String, ForeignKey, DateTime, Text
-from sqlalchemy.dialects.postgresql import UUID, JSONB
-from sqlalchemy.orm import relationship
-import uuid
-from datetime import datetime
-from .base import Base
-
-class Environment(Base):
-    __tablename__ = "environments"
+class MCPServer(Base):
+    __tablename__ = "mcp_servers"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    env_id = Column(UUID(as_uuid=True), ForeignKey("environments.id"))
     name = Column(String, nullable=False)
-    description = Column(Text)
-    owner_id = Column(String, index=True) # Keycloak Subject ID
-    created_at = Column(DateTime, default=datetime.utcnow)
+    transport_type = Column(String, nullable=False) # STDIO, SSE
+    command = Column(String) # mcp-server-git --repo ...
+    url = Column(String)
+    env_vars = Column(JSONB, default={}) # {"GITHUB_TOKEN": "..."}
+    enabled = Column(Boolean, default=True)
     
-    sources = relationship("DataSource", back_populates="environment", cascade="all, delete")
-    agents = relationship("Agent", back_populates="environment", cascade="all, delete")
+    environment = relationship("Environment", back_populates="mcp_servers")
 
-class DataSource(Base):
-    __tablename__ = "data_sources"
+class SystemJob(Base):
+    __tablename__ = "system_jobs"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    env_id = Column(UUID(as_uuid=True), ForeignKey("environments.id"))
-    name = Column(String)
-    source_type = Column(String) # LOCAL, DRIVE...
-    config = Column(JSONB, default={})
-    status = Column(String, default="ACTIVE")
-    
-    environment = relationship("Environment", back_populates="sources")
-
-class Agent(Base):
-    __tablename__ = "agents"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    env_id = Column(UUID(as_uuid=True), ForeignKey("environments.id"))
-    name = Column(String)
-    system_prompt = Column(Text)
-    model_config = Column(JSONB, default={})
-    
-    environment = relationship("Environment", back_populates="agents")
+    # Generic FK to either DataSource or MCP often handled by explicit nullable Columns or logic
+    resource_id = Column(UUID(as_uuid=True), nullable=True) 
+    type = Column(String)
+    status = Column(String, default="PENDING")
+    progress = Column(JSONB, default={})
+    error = Column(Text)
 ```

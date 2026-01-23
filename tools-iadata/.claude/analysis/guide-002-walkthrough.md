@@ -58,10 +58,35 @@ Once containers are up, `front-dl` (Next.js) becomes the primary interface.
 ### 2.2 Environment Definition (The Core Entity)
 An **Environment** is a database entity (stored in Postgres) that encapsulates a workspace.
 
-#### A. Sources Definition
+#### Hierarchy & Component Order
+The system follows a strict hierarchical order for defining an environment's capabilities:
+1.  **Identity & Access**: Who can access this environment (Roles).
+2.  **Resources (Input)**:
+    - **Data Sources**: Static or streaming data (Files, Drive).
+    - **MCP Servers**: Dynamic context providers (Model Context Protocol).
+3.  **Intelligence (Processing)**:
+    - **LLM Configuration**: The brains (Chat & Logic models).
+    - **Vector Store**: The long-term memory (Qdrant Collections).
+4.  **Agents (Execution)**:
+    - **Personas**: Specialized system prompts using the above resources.
+
+---
+
+#### A. MCP (Model Context Protocol) Integration
+MCPs are treated as **Dynamic Data Providers** that can expose both *Resources* (read-only context) and *Tools* (executable actions).
+
+- **Definition**: Users define MCP Servers (Standard IO or SSE) within an Environment.
+- **Connection**: The Backend acts as the MCP Client, bridging the Agent to the MCP Server.
+- **Scope**:
+    - **Global MCPs**: Available system-wide (e.g., specific internal APIs).
+    - **Env-Scoped MCPs**: Specific to the environment (e.g., a "GitHub MCP" configured for a specific repo).
+- **Security**: MCP definitions include environment variables (API keys) stored encrypted.
+
+#### B. Sources Definition
 Sources are defined within an Environment.
 - **Local Host Directory**:
     - **Architecture**: The container mounts the HOST's `LOCAL_DATA_ROOT` (from Phase 1) to `/mnt/host_data` (Internal).
+...
     - **User Action**: User browses subfolders of `/mnt/host_data` via the UI.
     - **Validation**: Backend verifies read access to the specific subfolder.
 - **Network Location**: Mounted similarly or via SMB/NFS within the container.
