@@ -1,66 +1,143 @@
-iadata_front_   | > front-dl@0.1.0 dev
-iadata_front_   | > next dev
-iadata_front_   | 
-iadata_front_   | ▲ Next.js 16.1.3 (Turbopack)
-iadata_front_   | - Local:         http://localhost:3000
-iadata_front_   | - Network:       http://172.19.0.5:3000
-iadata_front_   | 
-iadata_front_   | ✓ Starting...
-iadata_front_   | ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-iadata_front_   | ✓ Ready in 704ms
-iadata_front_   | ⨯ ./src/app/globals.css
-iadata_front_   | Error evaluating Node.js code
-iadata_front_   | Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
-iadata_front_   |     [at lt (/app/node_modules/tailwindcss/dist/lib.js:38:1643)]
-iadata_front_   |     [at <anonymous> (turbopack:///[turbopack-node]/transforms/postcss.ts:56:14)]
-iadata_front_   |     [at <anonymous>]
-iadata_front_   |     [at Module.init (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33)]
-iadata_front_   |     [at run (turbopack:///[turbopack-node]/ipc/evaluate.ts:77:20)]
-iadata_front_   |     [at process.processTicksAndRejections (node:internal/process/task_queues:95:5)]
-iadata_front_   | 
-iadata_front_   | Import trace:
-iadata_front_   |   Client Component Browser:
-iadata_front_   |     ./src/app/globals.css [Client Component Browser]
-iadata_front_   |     ./src/app/layout.tsx [Server Component]
-iadata_front_   | 
-iadata_front_   | 
-iadata_front_   |  GET /dashboard/sources 500 in 1516ms (compile: 1348ms, proxy.ts: 87ms, render: 82ms)
-iadata_front_   | 
-iadata_front_   | > front-dl@0.1.0 dev
-iadata_front_   | > next dev
-iadata_front_   | 
-iadata_front_   | ▲ Next.js 16.1.3 (Turbopack)
-iadata_front_   | - Local:         http://localhost:3000
-iadata_front_   | - Network:       http://172.19.0.5:3000
-iadata_front_   | 
-iadata_front_   | ✓ Starting...
-iadata_front_   | ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-iadata_front_   | ✓ Ready in 573ms
-iadata_front_   | ⨯ ./src/app/globals.css
-iadata_front_   | Error evaluating Node.js code
-iadata_front_   | Error: It looks like you're trying to use `tailwindcss` directly as a PostCSS plugin. The PostCSS plugin has moved to a separate package, so to continue using Tailwind CSS with PostCSS you'll need to install `@tailwindcss/postcss` and update your PostCSS configuration.
-iadata_front_   |     [at lt (/app/node_modules/tailwindcss/dist/lib.js:38:1643)]
-iadata_front_   |     [at <anonymous> (turbopack:///[turbopack-node]/transforms/postcss.ts:56:14)]
-iadata_front_   |     [at <anonymous>]
-iadata_front_   |     [at Module.init (turbopack:///[turbopack-node]/transforms/postcss.ts:43:33)]
-iadata_front_   |     [at run (turbopack:///[turbopack-node]/ipc/evaluate.ts:77:20)]
-iadata_front_   |     [at process.processTicksAndRejections (node:internal/process/task_queues:95:5)]
-iadata_front_   | 
-iadata_front_   | Import trace:
-iadata_front_   |   Client Component Browser:
-iadata_front_   |     ./src/app/globals.css [Client Component Browser]
-iadata_front_   |     ./src/app/layout.tsx [Server Component]
-iadata_front_   | 
-iadata_front_   | 
-iadata_front_   |  GET /dashboard/sources 500 in 1637ms (compile: 1460ms, proxy.ts: 98ms, render: 79ms)
-iadata_pg_      | 2026-01-23 09:08:40.616 UTC [461] FATAL:  role "root" does not exist
-iadata_front_   |  GET /dashboard/sources 200 in 317ms (compile: 133ms, proxy.ts: 11ms, render: 173ms)
-iadata_back_    | sys:1: SAWarning: relationship 'MCPServer.jobs' will copy column mcp_servers.id to column system_jobs.resource_id, which conflicts with relationship(s): 'DataSource.jobs' (copies data_sources.id to system_jobs.resource_id). If this is not the intention, consider if these relationships should be linked with back_populates, or if viewonly=True should be applied to one or more if they are read-only. For the less common case that foreign key constraints are partially overlapping, the orm.foreign() annotation can be used to isolate the columns that should be written towards.   To silence this warning, add the parameter 'overlaps="jobs"' to the 'MCPServer.jobs' relationship. (Background on this warning at: https://sqlalche.me/e/20/qzyx) (This warning originated from the `configure_mappers()` process, which was invoked automatically in response to a user-initiated operation.)
-iadata_back_    | INFO:     172.19.0.5:42580 - "GET /resources/env/11111111-1111-1111-1111-111111111111/sources HTTP/1.1" 200 OK
-iadata_front_   |  POST /dashboard/sources 200 in 153ms (compile: 4ms, proxy.ts: 11ms, render: 139ms)
-iadata_back_    | INFO:     172.19.0.5:42580 - "GET /environments/11111111-1111-1111-1111-111111111111 HTTP/1.1" 200 OK
-iadata_front_   |  POST /dashboard/sources 200 in 23ms (compile: 2ms, proxy.ts: 7ms, render: 14ms)
-iadata_front_   |  GET /api/auth/session 200 in 605ms (compile: 588ms, render: 18ms)
-iadata_front_   |  GET /api/auth/session 200 in 48ms (compile: 41ms, render: 7ms)
-iadata_pg_      | 2026-01-23 09:08:50.657 UTC [469] FATAL:  role "root" does not exist
-iadata_pg_      | 2026-01-23 09:09:00.702 UTC [476] FATAL:  role "root" does not exist
+iadata_back_dl_dev    | INFO:     172.19.0.5:59544 - "GET /agents/env/11111111-1111-1111-1111-111111111111 HTTP/1.1" 500 Internal Server Error
+iadata_back_dl_dev    | ERROR:    Exception in ASGI application
+iadata_back_dl_dev    | Traceback (most recent call last):
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+iadata_back_dl_dev    |     result = await app(  # type: ignore[func-returns-value]
+iadata_back_dl_dev    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+iadata_back_dl_dev    |     return await self.app(scope, receive, send)
+iadata_back_dl_dev    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1135, in __call__
+iadata_back_dl_dev    |     await super().__call__(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 107, in __call__
+iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+iadata_back_dl_dev    |     raise exc
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+iadata_back_dl_dev    |     await self.app(scope, receive, _send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
+iadata_back_dl_dev    |     await self.app(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+iadata_back_dl_dev    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev    |     raise exc
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev    |     await app(scope, receive, sender)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+iadata_back_dl_dev    |     await self.app(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+iadata_back_dl_dev    |     await route.handle(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+iadata_back_dl_dev    |     await self.app(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 115, in app
+iadata_back_dl_dev    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev    |     raise exc
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev    |     await app(scope, receive, sender)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 101, in app
+iadata_back_dl_dev    |     response = await f(request)
+iadata_back_dl_dev    |                ^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 377, in app
+iadata_back_dl_dev    |     content = await serialize_response(
+iadata_back_dl_dev    |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 215, in serialize_response
+iadata_back_dl_dev    |     raise ResponseValidationError(
+iadata_back_dl_dev    | fastapi.exceptions.ResponseValidationError: 2 validation errors:
+iadata_back_dl_dev    |   {'type': 'dict_type', 'loc': ('response', 0, 'tools_config'), 'msg': 'Input should be a valid dictionary', 'input': None}
+iadata_back_dl_dev    |   {'type': 'dict_type', 'loc': ('response', 1, 'tools_config'), 'msg': 'Input should be a valid dictionary', 'input': None}
+iadata_back_dl_dev    | 
+iadata_back_dl_dev    |   File "/app/app/routers/agents.py", line 46, in get_agents
+iadata_back_dl_dev    |     GET /agents/env/{env_id}
+iadata_front_dl_dev   | ⨯ Error: Failed to fetch agents
+iadata_front_dl_dev   |     at getAgents (src/actions/agents.ts:49:24)
+iadata_front_dl_dev   |   47 | export async function getAgents(envId: string): Promise<Agent[]> {
+iadata_front_dl_dev   |   48 |     const res = await fetch(`${API_BASE}/agents/env/${envId}`, { cache: "no-store" });
+iadata_front_dl_dev   | > 49 |     if (!res.ok) throw new Error("Failed to fetch agents");
+iadata_front_dl_dev   |      |                        ^
+iadata_front_dl_dev   |   50 |     return res.json();
+iadata_front_dl_dev   |   51 | }
+iadata_front_dl_dev   |   52 | {
+iadata_front_dl_dev   |   digest: '1066184740'
+iadata_front_dl_dev   | }
+iadata_front_dl_dev   |  POST /dashboard/agents 500 in 302ms (compile: 3ms, proxy.ts: 11ms, render: 288ms)
+iadata_back_dl_dev    | INFO:     172.19.0.5:59554 - "GET /agents/presets/roles HTTP/1.1" 200 OK
+iadata_front_dl_dev   |  POST /dashboard/agents 200 in 25ms (compile: 3ms, proxy.ts: 15ms, render: 7ms)
+iadata_back_dl_dev    | INFO:     172.19.0.5:59554 - "GET /models/env/11111111-1111-1111-1111-111111111111 HTTP/1.1" 200 OK
+iadata_front_dl_dev   |  POST /dashboard/agents 200 in 17ms (compile: 1683µs, proxy.ts: 6ms, render: 9ms)
+iadata_front_dl_dev   |  GET /api/auth/session 200 in 573ms (compile: 555ms, render: 18ms)
+iadata_front_dl_dev   |  GET /api/auth/session 200 in 44ms (compile: 37ms, render: 7ms)
+iadata_front_dl_dev   |  GET /dashboard/agents 200 in 49ms (compile: 4ms, proxy.ts: 9ms, render: 37ms)
+iadata_front_dl_dev   |  GET /api/auth/session 200 in 58ms (compile: 43ms, render: 15ms)
+iadata_back_dl_dev    | INFO:     172.19.0.5:59116 - "GET /agents/env/11111111-1111-1111-1111-111111111111 HTTP/1.1" 500 Internal Server Error
+iadata_back_dl_dev    | ERROR:    Exception in ASGI application
+iadata_back_dl_dev    | Traceback (most recent call last):
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+iadata_back_dl_dev    |     result = await app(  # type: ignore[func-returns-value]
+iadata_back_dl_dev    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+iadata_back_dl_dev    |     return await self.app(scope, receive, send)
+iadata_back_dl_dev    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1135, in __call__
+iadata_back_dl_dev    |     await super().__call__(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 107, in __call__
+iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+iadata_back_dl_dev    |     raise exc
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+iadata_back_dl_dev    |     await self.app(scope, receive, _send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
+iadata_back_dl_dev    |     await self.app(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+iadata_back_dl_dev    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev    |     raise exc
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev    |     await app(scope, receive, sender)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+iadata_back_dl_dev    |     await self.app(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+iadata_back_dl_dev    |     await route.handle(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+iadata_back_dl_dev    |     await self.app(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 115, in app
+iadata_back_dl_dev    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev    |     raise exc
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev    |     await app(scope, receive, sender)
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 101, in app
+iadata_back_dl_dev    |     response = await f(request)
+iadata_back_dl_dev    |                ^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 377, in app
+iadata_back_dl_dev    |     content = await serialize_response(
+iadata_back_dl_dev    |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 215, in serialize_response
+iadata_back_dl_dev    |     raise ResponseValidationError(
+iadata_back_dl_dev    | fastapi.exceptions.ResponseValidationError: 2 validation errors:
+iadata_back_dl_dev    |   {'type': 'dict_type', 'loc': ('response', 0, 'tools_config'), 'msg': 'Input should be a valid dictionary', 'input': None}
+iadata_back_dl_dev    |   {'type': 'dict_type', 'loc': ('response', 1, 'tools_config'), 'msg': 'Input should be a valid dictionary', 'input': None}
+iadata_back_dl_dev    | 
+iadata_back_dl_dev    |   File "/app/app/routers/agents.py", line 46, in get_agents
+iadata_back_dl_dev    |     GET /agents/env/{env_id}
+iadata_front_dl_dev   | ⨯ Error: Failed to fetch agents
+iadata_front_dl_dev   |     at getAgents (src/actions/agents.ts:49:24)
+iadata_front_dl_dev   |   47 | export async function getAgents(envId: string): Promise<Agent[]> {
+iadata_front_dl_dev   |   48 |     const res = await fetch(`${API_BASE}/agents/env/${envId}`, { cache: "no-store" });
+iadata_front_dl_dev   | > 49 |     if (!res.ok) throw new Error("Failed to fetch agents");
+iadata_front_dl_dev   |      |                        ^
+iadata_front_dl_dev   |   50 |     return res.json();
+iadata_front_dl_dev   |   51 | }
+iadata_front_dl_dev   |   52 | {
+iadata_front_dl_dev   |   digest: '1066184740'
+iadata_front_dl_dev   | }
+iadata_front_dl_dev   |  POST /dashboard/agents 500 in 229ms (compile: 3ms, proxy.ts: 14ms, render: 213ms)
+iadata_front_dl_dev   |  GET /api/auth/session 200 in 218ms (compile: 1541µs, render: 216ms)
+iadata_back_dl_dev    | INFO:     172.19.0.5:59118 - "GET /agents/presets/roles HTTP/1.1" 200 OK
+iadata_front_dl_dev   |  POST /dashboard/agents 200 in 23ms (compile: 3ms, proxy.ts: 11ms, render: 9ms)
+iadata_back_dl_dev    | INFO:     172.19.0.5:59118 - "GET /models/env/11111111-1111-1111-1111-111111111111 HTTP/1.1" 200 OK
+iadata_front_dl_dev   |  POST /dashboard/agents 200 in 14ms (compile: 1964µs, proxy.ts: 6ms, render: 6ms)
