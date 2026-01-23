@@ -12,7 +12,7 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let app = tauri::Builder::default()
         .setup(|app| {
             let handle = app.handle();
             let menu = Menu::new(handle)?;
@@ -33,17 +33,33 @@ pub fn run() {
 
             app.on_menu_event(move |app_handle, event| {
                 if event.id() == home_item.id() {
-                    println!("Resetting to Home...");
+                    println!("Resetting Application State...");
+                    // 1. Reset Config so Gatekeeper doesn't auto-redirect
+                    // We need to call the internal logic of reset_app_mode
+                    let _ = config::delete_config_file(); 
+
+                    // 2. Navigate window to internal app
                     if let Some(window) = app_handle.get_webview_window("main") {
-                         // Reset hash and location
-                        let _ = window.eval("window.location.hash = ''; window.location.href = '/'");
+                        println!("Navigating to Gatekeeper...");
+                        
+                        #[cfg(debug_assertions)]
+                        let _ = window.eval("window.location.href = 'http://localhost:1420/';");
+                        
+                        #[cfg(not(debug_assertions))]
+                        let _ = window.eval("window.location.href = 'tauri://localhost/index.html';");
                     }
                 } else if event.id() == settings_item.id() {
                     println!("Opening Settings...");
                      if let Some(window) = app_handle.get_webview_window("main") {
-                        let _ = window.eval("window.location.hash = '#/settings'");
+                        // Force navigation to Settings hash
+                        #[cfg(debug_assertions)]
+                        let _ = window.eval("window.location.href = 'http://localhost:1420/#/settings';");
+                        
+                        #[cfg(not(debug_assertions))]
+                        let _ = window.eval("window.location.href = 'tauri://localhost/index.html#/settings';");
                     }
                 } else if event.id() == quit_item.id() {
+                    tauri::async_runtime::block_on(async { let _ = docker::stop_docker().await; });
                     app_handle.exit(0);
                 }
             });
@@ -61,8 +77,20 @@ pub fn run() {
             config::update_env_var,
             config::reset_app_mode,
             docker::check_docker_status,
-            docker::start_docker
+            docker::start_docker,
+            docker::stop_docker,
+            docker::restart_docker,
+            docker::get_docker_logs
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application");
+
+    app.run(|_app_handle, event| {
+        if let tauri::RunEvent::ExitRequested { .. } = event {
+            println!("App exiting. ensuring docker is stopped...");
+            tauri::async_runtime::block_on(async {
+                let _ = docker::stop_docker().await;
+            });
+        }
+    });
 }

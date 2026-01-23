@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 interface ConfigStatus {
@@ -15,10 +15,34 @@ export default function Gatekeeper() {
     const [error, setError] = useState<string | null>(null);
     const [dockerState, setDockerState] = useState<string | null>(null);
     const [formValues, setFormValues] = useState<Record<string, string>>({});
+    const [logs, setLogs] = useState<string>("");
+
+    const initialCheckDone = useRef(false);
 
     useEffect(() => {
+        initialCheckDone.current = false;
         checkMode();
     }, []);
+
+    // Poll logs
+    useEffect(() => {
+        let interval: any = null;
+        // Poll logs when waiting, starting, or running
+        if (loading || dockerState === "Running" || dockerState?.startsWith("Starting")) {
+            interval = setInterval(async () => {
+                try {
+                    const output = await invoke<string>("get_docker_logs");
+                    setLogs(output);
+                } catch (e) {
+                    // ignore
+                }
+            }, 2000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        }
+    }, [loading, dockerState]);
+
 
     async function checkMode() {
         try {
@@ -88,9 +112,17 @@ export default function Gatekeeper() {
             console.log("Docker Status:", state);
 
             if (state === "Running") {
-                console.log("Docker running. Waiting for service health...");
-                setDockerState("Running"); // Update UI to show "Waiting..."
-                waitForService(targetUrl);
+                if (!initialCheckDone.current) {
+                    console.log("Initial Check: Docker running. Restarting for fresh state...");
+                    initialCheckDone.current = true;
+                    restartDocker(targetUrl);
+                } else {
+                    console.log("Docker running and fresh. Waiting for service health...");
+                    initialCheckDone.current = true;
+                    setDockerState("Running");
+                    setLoading(false);
+                    waitForService(targetUrl);
+                }
             } else if (typeof state === 'object' && 'Error' in state) {
                 // It's the Error object variant
                 setDockerState("Error: " + state.Error);
@@ -130,12 +162,29 @@ export default function Gatekeeper() {
         try {
             const result = await invoke("start_docker");
             console.log("Start Result:", result);
+            initialCheckDone.current = true;
             // Poll for success
             setTimeout(() => {
                 if (status?.docker_url) checkDocker(status.docker_url);
             }, 5000); // Wait 5s then check again
         } catch (e) {
             setError("Failed to start docker: " + String(e));
+            setLoading(false);
+        }
+    }
+
+    async function restartDocker(targetUrl: string) {
+        setLoading(true);
+        try {
+            setDockerState("Restarting...");
+            const result = await invoke("restart_docker");
+            console.log("Restart Result:", result);
+
+            setTimeout(() => {
+                checkDocker(targetUrl);
+            }, 5000);
+        } catch (e) {
+            setError("Failed to restart docker: " + String(e));
             setLoading(false);
         }
     }
@@ -147,6 +196,7 @@ export default function Gatekeeper() {
                 <div style={styles.centerBox}>
                     <h2>🔄 Agentic Gatekeeper</h2>
                     <p>Verifying Environment Integrity...</p>
+                    <LogTerminal logs={logs} />
                 </div>
             );
         }
@@ -158,6 +208,7 @@ export default function Gatekeeper() {
                     <p>{error}</p>
                     <button style={styles.button} onClick={() => window.location.reload()}>Retry</button>
                     <button style={{ ...styles.button, marginTop: 10, backgroundColor: '#555' }} onClick={() => { setError(null); setMode(null); }}>Back to Selection</button>
+                    <LogTerminal logs={logs} />
                 </div>
             );
         }
@@ -232,6 +283,7 @@ export default function Gatekeeper() {
                         <div style={{ marginTop: 20 }}>
                             <div className="spinner"></div>
                         </div>
+                        <LogTerminal logs={logs} />
                     </div>
                 );
             }
@@ -245,6 +297,7 @@ export default function Gatekeeper() {
                     )}
                     <button style={styles.button} onClick={() => status?.docker_url && checkDocker(status.docker_url)}>Refresh Status</button>
                     <button style={{ ...styles.button, marginLeft: 10, backgroundColor: '#555' }} onClick={() => setMode(null)}>Back to Selection</button>
+                    <LogTerminal logs={logs} />
                 </div>
             );
         }
@@ -258,6 +311,44 @@ export default function Gatekeeper() {
             <div style={styles.content}>
                 {renderContent()}
             </div>
+        </div>
+    );
+}
+
+function LogTerminal({ logs }: { logs: string }) {
+    const ref = useRef<HTMLPreElement>(null);
+    useEffect(() => {
+        if (ref.current) {
+            ref.current.scrollTop = ref.current.scrollHeight;
+        }
+    }, [logs]);
+
+    if (!logs) return null;
+
+    return (
+        <div style={{
+            marginTop: 20,
+            width: '100%',
+            maxWidth: '600px',
+            backgroundColor: '#000',
+            borderRadius: 6,
+            padding: 10,
+            textAlign: 'left',
+            boxSizing: 'border-box'
+        }}>
+            <div style={{ fontSize: '0.8em', color: '#666', borderBottom: '1px solid #333', paddingBottom: 5, marginBottom: 5 }}>Docker Logs (Real-time)</div>
+            <pre ref={ref} style={{
+                height: '200px',
+                overflowY: 'auto',
+                fontSize: '0.75em',
+                color: '#0f0',
+                fontFamily: 'monospace',
+                margin: 0,
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-all'
+            }}>
+                {logs}
+            </pre>
         </div>
     );
 }

@@ -31,25 +31,19 @@ pub fn set_app_mode(mode: String) -> Result<(), String> {
 
 #[tauri::command]
 pub fn get_app_mode() -> Result<Option<String>, String> {
-    println!("Debug: get_app_mode called");
     match load_config() {
-        Ok(Some(cfg)) => {
-            println!("Debug: get_app_mode found: {}", cfg.environment);
-            Ok(Some(cfg.environment))
-        },
-        Ok(None) => {
-            println!("Debug: get_app_mode found None");
-            Ok(None)
-        },
-        Err(e) => {
-            println!("Debug: get_app_mode error: {}", e);
-            Err(e.to_string())
-        },
+        Ok(Some(cfg)) => Ok(Some(cfg.environment)),
+        Ok(None) => Ok(None),
+        Err(e) => Err(e.to_string()),
     }
 }
 
 #[tauri::command]
 pub fn reset_app_mode() -> Result<(), String> {
+    delete_config_file()
+}
+
+pub fn delete_config_file() -> Result<(), String> {
     let path = get_config_path();
     if path.exists() {
         fs::remove_file(path).map_err(|e| e.to_string())?;
@@ -59,26 +53,14 @@ pub fn reset_app_mode() -> Result<(), String> {
 
 #[tauri::command]
 pub fn check_env_config(_app: AppHandle) -> Result<ConfigStatus, String> {
-    println!("Debug: check_env_config called");
     // 1. Get Mode
     let mode = match load_config() {
-        Ok(Some(cfg)) => {
-            println!("Debug: load_config returned mode: {}", cfg.environment);
-            cfg.environment
-        },
-        Ok(None) => {
-            println!("Debug: load_config returned None");
-            return Err("Environment not set.".to_string());
-        },
-        Err(e) => {
-             println!("Debug: load_config error: {}", e);
-             return Err(e.to_string());
-        },
+        Ok(Some(cfg)) => cfg.environment,
+        Ok(None) => return Err("Environment not set.".to_string()),
+        Err(e) => return Err(e.to_string()),
     };
 
-    println!("Debug: resolving env paths for mode: {}", mode);
     let (services_path, _, target_file) = resolve_env_paths(&mode)?;
-    println!("Debug: paths resolved: {:?}", services_path);
     let schema_file = services_path.join(".env.example");
 
     // 3. Schema Check

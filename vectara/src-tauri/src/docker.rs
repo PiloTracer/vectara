@@ -42,45 +42,35 @@ fn resolve_paths(mode: &str) -> Option<(PathBuf, PathBuf)> {
 
 #[tauri::command]
 pub async fn check_docker_status() -> Result<DockerState, String> {
-    println!("Debug: check_docker_status called");
     let mode = get_app_mode().map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
     let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
     
-    // Command: docker compose -f ... --env-file ... ps --format json
-    // Simplified: Just check exit code or output
-    
-    // We want to check if the *entire stack* is up. 
-    // Specifically "front-dl" which is our target.
-    // Let's check for the frontend container specifically.
-    // However, project name might vary. Let's just run 'ps' and see if services are listed.
-    
-    let output = Command::new("docker")
-        .arg("compose")
-        .arg("-f")
-        .arg(&compose_path)
-        .arg("--env-file")
-        .arg(&env_path)
-        .arg("ps")
-        .arg("--format")
-        .arg("json")
-        .output()
-        .map_err(|e| format!("Failed to run docker: {}", e))?;
+    // Offload blocking command to thread pool
+    let output = tauri::async_runtime::spawn_blocking(move || {
+        Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(&compose_path)
+            .arg("--env-file")
+            .arg(&env_path)
+            .arg("ps")
+            .arg("--format")
+            .arg("json")
+            .output()
+    }).await
+    .map_err(|e| format!("Task join error: {}", e))?
+    .map_err(|e| format!("Failed to run docker: {}", e))?;
 
     if !output.status.success() {
-         return Ok(DockerState::Stopped); // Or error, but likely just not running configs match
+         return Ok(DockerState::Stopped);
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    // If output is empty or json list empty, it's stopped.
     if stdout.trim().is_empty() || stdout.contains("[]") {
         return Ok(DockerState::Stopped);
     }
-    
-    // Naive check: if we see "front-dl" or "frontend" logic in running state
-    // For now, if PS returns services, we assume Running.
-    // A better check would be to parse the JSON and check 'State' == 'running' for all.
     
     Ok(DockerState::Running)
 }
@@ -92,18 +82,20 @@ pub async fn start_docker() -> Result<DockerState, String> {
 
     let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
 
-    // Attempt UP
-    let output = Command::new("docker")
-        .arg("compose")
-        .arg("-f")
-        .arg(&compose_path)
-        .arg("--env-file")
-        .arg(&env_path)
-        .arg("up")
-        .arg("-d")
-        // .arg("--build") // Make optional? Script does it. Let's do it to be safe.
-        .output()
-        .map_err(|e| format!("Failed to spawn docker: {}", e))?;
+    // Attempt UP in background
+    let output = tauri::async_runtime::spawn_blocking(move || {
+        Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(&compose_path)
+            .arg("--env-file")
+            .arg(&env_path)
+            .arg("up")
+            .arg("-d")
+            .output()
+    }).await
+    .map_err(|e| format!("Task join error: {}", e))?
+    .map_err(|e| format!("Failed to spawn docker: {}", e))?;
 
     if output.status.success() {
         Ok(DockerState::Starting)
@@ -111,4 +103,102 @@ pub async fn start_docker() -> Result<DockerState, String> {
         let stderr = String::from_utf8_lossy(&output.stderr);
         Ok(DockerState::Error(stderr.to_string()))
     }
+}
+
+#[tauri::command]
+pub async fn stop_docker() -> Result<(), String> {
+    let mode = match get_app_mode() {
+        Ok(Some(m)) => m,
+        _ => return Ok(()), // If no mode set, nothing to stop
+    };
+
+    if let Some((compose_path, env_path)) = resolve_paths(&mode) {
+         // Offload blocking command to thread pool
+        let _ = tauri::async_runtime::spawn_blocking(move || {
+            Command::new("docker")
+                .arg("compose")
+                .arg("-f")
+                .arg(&compose_path)
+                .arg("--env-file")
+                .arg(&env_path)
+                .arg("down")
+                .output()
+        }).await;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+pub async fn restart_docker() -> Result<DockerState, String> {
+    let mode = get_app_mode().map_err(|e| e)?
+        .ok_or("Mode not set".to_string())?;
+
+    let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
+
+    // Offload blocking command to thread pool
+    let output = tauri::async_runtime::spawn_blocking(move || {
+        // 1. Down
+        let _ = Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(&compose_path)
+            .arg("--env-file")
+            .arg(&env_path)
+            .arg("down")
+            .output();
+        
+        // 2. Up
+        Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(&compose_path)
+            .arg("--env-file")
+            .arg(&env_path)
+            .arg("up")
+            .arg("-d")
+            .output()
+    }).await
+    .map_err(|e| format!("Task join error: {}", e))?
+    .map_err(|e| format!("Failed to spawn docker: {}", e))?;
+
+    if output.status.success() {
+        Ok(DockerState::Starting)
+    } else {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        Ok(DockerState::Error(stderr.to_string()))
+    }
+}
+
+#[tauri::command]
+pub async fn get_docker_logs() -> Result<String, String> {
+    let mode = match get_app_mode() {
+        Ok(Some(m)) => m,
+        _ => return Ok("".to_string()),
+    };
+
+    let (compose_path, env_path) = match resolve_paths(&mode) {
+        Some(p) => p,
+        None => return Ok("".to_string()),
+    };
+
+    let output = tauri::async_runtime::spawn_blocking(move || {
+        Command::new("docker")
+            .arg("compose")
+            .arg("-f")
+            .arg(&compose_path)
+            .arg("--env-file")
+            .arg(&env_path)
+            .arg("logs")
+            .arg("--tail")
+            .arg("50")
+            .output()
+    }).await
+    .map_err(|e| format!("Task join error: {}", e))?
+    .map_err(|e| format!("Failed to get logs: {}", e))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    
+    // Combine stdout and stderr
+    Ok(format!("{}\n{}", stdout, stderr))
 }
