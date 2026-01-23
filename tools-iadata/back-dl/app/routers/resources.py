@@ -66,6 +66,26 @@ async def get_sources(env_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
 
 @router.post("/sources", response_model=DataSourceRead)
 async def create_source(source: DataSourceCreate, db: AsyncSession = Depends(get_db)):
+    # Validate and Normalize LOCAL paths
+    if source.type == "LOCAL":
+        import os
+        base_path = "/app/data_sources"
+        user_path = source.config.get("path", "").strip()
+        
+        # If user provides full internal path, verify strict containment
+        # If user provides relative path, prepend base_path
+        if os.path.isabs(user_path):
+            final_path = os.path.normpath(user_path)
+        else:
+            final_path = os.path.join(base_path, user_path)
+            
+        # Security Check: Ensure final_path is inside base_path
+        # Note: In a container, /app/data_sources is the sandbox.
+        if not final_path.startswith(base_path):
+             raise HTTPException(status_code=400, detail=f"Local path must be a subdirectory of {base_path}")
+             
+        source.config["path"] = final_path
+
     db_source = DataSource(
         env_id=source.env_id,
         name=source.name,

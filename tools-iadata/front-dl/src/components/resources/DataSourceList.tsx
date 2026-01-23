@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { DataSource, deleteSource } from "../../actions/resources";
-import { Trash2, Loader2, Database, Folder, Globe } from "lucide-react";
+import { Trash2, Loader2, Database, Folder, Globe, ExternalLink } from "lucide-react";
 
 interface DataSourceListProps {
     sources: DataSource[];
@@ -11,6 +11,7 @@ interface DataSourceListProps {
 
 export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [hoveredId, setHoveredId] = useState<string | null>(null);
 
     const handleDelete = async (id: string) => {
         if (!confirm("Are you sure you want to remove this source?")) return;
@@ -26,52 +27,194 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
         }
     };
 
-    const getIcon = (type: string) => {
-        switch (type) {
-            case "LOCAL": return <Folder className="w-5 h-5 text-blue-400" />;
-            case "WEB": return <Globe className="w-5 h-5 text-green-400" />;
-            default: return <Database className="w-5 h-5 text-gray-400" />;
-        }
-    };
-
     if (sources.length === 0) {
         return (
-            <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
-                <Database className="w-12 h-12 mx-auto text-white/20 mb-3" />
-                <h3 className="text-lg font-medium text-white/80">No Data Sources</h3>
-                <p className="text-white/40 text-sm">Add a source to start indexing data.</p>
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "80px 32px",
+                background: "rgba(255,255,255,0.03)",
+                borderRadius: 24,
+                border: "2px dashed rgba(255,255,255,0.1)",
+            }}>
+                <div style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: "50%",
+                    background: "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.1))",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 24,
+                    border: "1px solid rgba(255,255,255,0.1)",
+                }}>
+                    <Database style={{ width: 40, height: 40, color: "rgba(255,255,255,0.2)" }} />
+                </div>
+                <h3 style={{ fontSize: "1.25rem", fontWeight: 500, color: "#fff", marginBottom: 8 }}>
+                    No Data Sources Configured
+                </h3>
+                <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.875rem", textAlign: "center", maxWidth: 400, lineHeight: 1.6 }}>
+                    Add a local directory or web resource to start building your knowledge base.
+                </p>
             </div>
         );
     }
 
     return (
-        <div className="grid grid-cols-1 gap-4">
-            {sources.map((source) => (
-                <div key={source.id} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center justify-between group hover:bg-white/10 transition-colors">
-                    <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-black/20 flex items-center justify-center border border-white/5">
-                            {getIcon(source.type)}
+        <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+            gap: 24,
+        }}>
+            {sources.map((source) => {
+                const isLocal = source.type === "LOCAL";
+                const isHovered = hoveredId === source.id;
+                const accentColor = isLocal ? "245, 158, 11" : "59, 130, 246";
+
+                return (
+                    <div
+                        key={source.id}
+                        style={{
+                            background: isHovered
+                                ? `linear-gradient(180deg, rgba(${accentColor}, 0.08) 0%, rgba(15, 23, 42, 0.95) 100%)`
+                                : "linear-gradient(180deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%)",
+                            backdropFilter: "blur(12px)",
+                            border: isHovered ? `1px solid rgba(${accentColor}, 0.3)` : "1px solid rgba(255, 255, 255, 0.1)",
+                            borderRadius: 20,
+                            padding: 24,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 16,
+                            transition: "all 0.3s ease",
+                            transform: isHovered ? "translateY(-4px)" : "none",
+                            boxShadow: isHovered ? `0 20px 40px -12px rgba(${accentColor}, 0.15)` : "none",
+                        }}
+                        onMouseEnter={() => setHoveredId(source.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                    >
+                        {/* Header */}
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: 14,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                background: `rgba(${accentColor}, 0.15)`,
+                                border: `1px solid rgba(${accentColor}, 0.3)`,
+                            }}>
+                                {isLocal
+                                    ? <Folder style={{ width: 24, height: 24, color: "#fcd34d" }} />
+                                    : <Globe style={{ width: 24, height: 24, color: "#93c5fd" }} />
+                                }
+                            </div>
+                            <span style={{
+                                padding: "4px 10px",
+                                borderRadius: 999,
+                                fontSize: 10,
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.1em",
+                                background: `rgba(${accentColor}, 0.15)`,
+                                border: `1px solid rgba(${accentColor}, 0.3)`,
+                                color: isLocal ? "#fcd34d" : "#93c5fd",
+                            }}>
+                                {source.type}
+                            </span>
                         </div>
-                        <div>
-                            <h4 className="font-medium text-white/90">{source.name}</h4>
-                            <div className="text-xs text-white/50 flex items-center gap-2 mt-0.5">
-                                <span className="bg-white/10 px-1.5 py-0.5 rounded text-[10px] tracking-wide font-mono">{source.type}</span>
-                                <span className="truncate max-w-[300px]" title={JSON.stringify(source.config)}>
-                                    {source.type === "LOCAL" ? source.config.path : source.config.url}
+
+                        {/* Title */}
+                        <h4 style={{
+                            fontSize: "1.25rem",
+                            fontWeight: 600,
+                            color: "rgba(255,255,255,0.9)",
+                            margin: 0,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                        }} title={source.name}>
+                            {source.name}
+                        </h4>
+
+                        {/* Path */}
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            fontSize: 12,
+                            color: "rgba(255,255,255,0.4)",
+                            fontFamily: "ui-monospace, monospace",
+                            background: "rgba(0,0,0,0.3)",
+                            padding: "10px 12px",
+                            borderRadius: 12,
+                            border: "1px solid rgba(255,255,255,0.05)",
+                        }}>
+                            {!isLocal && <ExternalLink style={{ width: 14, height: 14, flexShrink: 0, opacity: 0.5 }} />}
+                            <span style={{
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis"
+                            }}>
+                                {isLocal ? source.config?.path : source.config?.url}
+                            </span>
+                        </div>
+
+                        {/* Footer */}
+                        <div style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            paddingTop: 16,
+                            marginTop: "auto",
+                            borderTop: "1px solid rgba(255,255,255,0.05)",
+                        }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <span style={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: "50%",
+                                    background: "#22c55e",
+                                    boxShadow: "0 0 8px rgba(34, 197, 94, 0.6)",
+                                }} />
+                                <span style={{
+                                    fontSize: 10,
+                                    textTransform: "uppercase",
+                                    letterSpacing: "0.1em",
+                                    color: "rgba(255,255,255,0.4)",
+                                    fontWeight: 600,
+                                }}>
+                                    READY
                                 </span>
                             </div>
+
+                            <button
+                                onClick={() => handleDelete(source.id)}
+                                disabled={!!deletingId}
+                                style={{
+                                    padding: 10,
+                                    background: "transparent",
+                                    border: "none",
+                                    borderRadius: 10,
+                                    cursor: deletingId ? "not-allowed" : "pointer",
+                                    color: "rgba(255,255,255,0.2)",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                                title="Delete Source"
+                            >
+                                {deletingId === source.id
+                                    ? <Loader2 style={{ width: 16, height: 16 }} />
+                                    : <Trash2 style={{ width: 16, height: 16 }} />
+                                }
+                            </button>
                         </div>
                     </div>
-
-                    <button
-                        onClick={() => handleDelete(source.id)}
-                        disabled={!!deletingId}
-                        className="p-2 text-white/30 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
-                    >
-                        {deletingId === source.id ? <Loader2 className="w-5 h-5 animate-spin" /> : <Trash2 className="w-5 h-5" />}
-                    </button>
-                </div>
-            ))}
+                );
+            })}
         </div>
     );
 }

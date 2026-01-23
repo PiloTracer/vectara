@@ -7,7 +7,7 @@ import { DataSourceList } from "../../../components/resources/DataSourceList";
 import { DataSourceForm } from "../../../components/resources/DataSourceForm";
 import { MCPList } from "../../../components/resources/MCPList";
 import { MCPForm } from "../../../components/resources/MCPForm";
-import { Loader2, Plus, Database, Server } from "lucide-react";
+import { Loader2, Plus, Database, Server, X } from "lucide-react";
 
 export default function ResourcesPage() {
     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
@@ -16,7 +16,6 @@ export default function ResourcesPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    // Data
     const [sources, setSources] = useState<DataSource[]>([]);
     const [mcps, setMcps] = useState<MCPServer[]>([]);
 
@@ -40,72 +39,188 @@ export default function ResourcesPage() {
 
     useEffect(() => {
         fetchData();
-        // Reset creating state when switching tabs or envs
         setIsCreating(false);
     }, [activeEnvironmentId, tab]);
 
     if (!activeEnvironmentId) {
         return (
-            <div className="flex flex-col items-center justify-center h-[60vh] text-white/40">
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                height: "60vh",
+                color: "rgba(255,255,255,0.4)",
+            }}>
                 <p>Select an environment to view resources.</p>
             </div>
         );
     }
 
+    const tabButtonStyle = (isActive: boolean): React.CSSProperties => ({
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "10px 20px",
+        borderRadius: 12,
+        fontSize: 14,
+        fontWeight: 500,
+        border: "none",
+        cursor: "pointer",
+        transition: "all 0.2s ease",
+        background: isActive ? "rgba(255,255,255,0.1)" : "transparent",
+        color: isActive ? "#fff" : "rgba(255,255,255,0.5)",
+        backdropFilter: isActive ? "blur(8px)" : "none",
+    });
+
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
-            <header className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-light text-white mb-2">Resources</h1>
-                    <p className="text-white/40 text-sm">Manage data sources and intelligence servers for <strong className="text-white/70 font-medium">{activeEnvironment?.name}</strong>.</p>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: 32 }}>
+            {/* Header */}
+            <header style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                marginBottom: 32,
+                paddingBottom: 24,
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+            }}>
+                <h1 style={{
+                    fontSize: "2rem",
+                    fontWeight: 300,
+                    color: "#fff",
+                    margin: 0,
+                    letterSpacing: "-0.02em",
+                }}>
+                    Resources
+                </h1>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "rgba(255,255,255,0.5)" }}>
+                    <span>Environment:</span>
+                    <span style={{
+                        padding: "4px 12px",
+                        borderRadius: 999,
+                        background: "rgba(59, 130, 246, 0.15)",
+                        border: "1px solid rgba(59, 130, 246, 0.3)",
+                        color: "#93c5fd",
+                        fontWeight: 500,
+                    }}>
+                        {activeEnvironment?.name}
+                    </span>
                 </div>
             </header>
 
-            {/* Tab Navigation */}
-            <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl w-fit border border-white/10">
-                <button
-                    onClick={() => setTab("SOURCES")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "SOURCES" ? "bg-white text-black shadow-lg" : "text-white/60 hover:text-white hover:bg-white/5"}`}
-                >
-                    <Database className="w-4 h-4" />
-                    Data Sources
-                </button>
-                <button
-                    onClick={() => setTab("MCP")}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${tab === "MCP" ? "bg-white text-black shadow-lg" : "text-white/60 hover:text-white hover:bg-white/5"}`}
-                >
-                    <Server className="w-4 h-4" />
-                    MCP Servers
-                </button>
+            {/* Controls Row */}
+            <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 32,
+                flexWrap: "wrap",
+                gap: 16,
+            }}>
+                {/* Tab Switcher */}
+                <div style={{
+                    display: "flex",
+                    gap: 4,
+                    padding: 4,
+                    background: "rgba(0,0,0,0.3)",
+                    borderRadius: 16,
+                    border: "1px solid rgba(255,255,255,0.1)",
+                }}>
+                    <button onClick={() => setTab("SOURCES")} style={tabButtonStyle(tab === "SOURCES")}>
+                        <Database style={{ width: 16, height: 16, color: tab === "SOURCES" ? "#22d3ee" : "inherit" }} />
+                        Data Sources
+                    </button>
+                    <button onClick={() => setTab("MCP")} style={tabButtonStyle(tab === "MCP")}>
+                        <Server style={{ width: 16, height: 16, color: tab === "MCP" ? "#a78bfa" : "inherit" }} />
+                        MCP Servers
+                    </button>
+                </div>
+
+                {/* Add Button */}
+                {!isCreating && (
+                    <button
+                        onClick={() => setIsCreating(true)}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "10px 20px",
+                            background: "#fff",
+                            color: "#000",
+                            border: "none",
+                            borderRadius: 12,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            boxShadow: "0 4px 20px rgba(255,255,255,0.15)",
+                            transition: "all 0.2s ease",
+                        }}
+                    >
+                        <Plus style={{ width: 16, height: 16 }} />
+                        Add {tab === "SOURCES" ? "Source" : "Server"}
+                    </button>
+                )}
             </div>
 
-            {/* Main Content Area */}
-            <div className="min-h-[400px]">
-                {/* Header Actions */}
-                {!isCreating && (
-                    <div className="flex justify-end mb-4">
-                        <button
-                            onClick={() => setIsCreating(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors shadow-lg shadow-blue-900/20"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Add {tab === "SOURCES" ? "Source" : "MCP Server"}
-                        </button>
-                    </div>
-                )}
-
-                {/* Loading State */}
+            {/* Main Content */}
+            <div style={{ minHeight: 400 }}>
+                {/* Loading */}
                 {isLoading && !isCreating && sources.length === 0 && mcps.length === 0 ? (
-                    <div className="flex justify-center py-20">
-                        <Loader2 className="w-8 h-8 text-white/20 animate-spin" />
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        padding: "80px 0",
+                    }}>
+                        <Loader2 style={{ width: 40, height: 40, color: "#22d3ee", animation: "spin 1s linear infinite" }} />
+                        <p style={{ color: "rgba(255,255,255,0.3)", marginTop: 16 }}>Loading resources...</p>
                     </div>
                 ) : (
                     <>
-                        {/* Creation Forms */}
+                        {/* Create Form */}
                         {isCreating && (
-                            <div className="bg-white/5 border border-white/10 rounded-xl p-6 mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
-                                <div className="mb-6 pb-4 border-b border-white/5">
-                                    <h3 className="text-lg font-medium text-white">Add New {tab === "SOURCES" ? "Data Source" : "MCP Server"}</h3>
+                            <div style={{
+                                background: "linear-gradient(180deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.98) 100%)",
+                                backdropFilter: "blur(16px)",
+                                border: "1px solid rgba(255,255,255,0.1)",
+                                borderRadius: 24,
+                                padding: 32,
+                                marginBottom: 32,
+                                position: "relative",
+                            }}>
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    marginBottom: 24,
+                                    paddingBottom: 16,
+                                    borderBottom: "1px solid rgba(255,255,255,0.05)",
+                                }}>
+                                    <div>
+                                        <h3 style={{ fontSize: "1.25rem", fontWeight: 500, color: "#fff", margin: 0 }}>
+                                            Add New {tab === "SOURCES" ? "Data Source" : "MCP Server"}
+                                        </h3>
+                                        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 14, marginTop: 4 }}>
+                                            Configure your {tab === "SOURCES" ? "data source" : "server"} connection details.
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => setIsCreating(false)}
+                                        style={{
+                                            padding: 8,
+                                            background: "rgba(255,255,255,0.05)",
+                                            border: "none",
+                                            borderRadius: 8,
+                                            cursor: "pointer",
+                                            color: "rgba(255,255,255,0.4)",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                        }}
+                                    >
+                                        <X style={{ width: 20, height: 20 }} />
+                                    </button>
                                 </div>
                                 {tab === "SOURCES" ? (
                                     <DataSourceForm

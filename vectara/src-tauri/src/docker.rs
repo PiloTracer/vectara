@@ -99,19 +99,28 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DockerState, String> 
 
     let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
 
+    // Check for Local LLM setting
+    let use_local_llm = crate::config::get_env_var(&env_path, "USE_LOCAL_EMBEDDING")
+        .map(|v| v.to_lowercase() == "true")
+        .unwrap_or(false);
+
+    let profiles = if use_local_llm { "local-llm" } else { "" };
+
     // Attempt UP in background
     let output = tauri::async_runtime::spawn_blocking(move || {
-        Command::new("docker")
-            .arg("compose")
+        let mut cmd = Command::new("docker");
+        cmd.arg("compose")
             .arg("--ansi")
             .arg("always")
             .arg("-f")
             .arg(&compose_path)
             .arg("--env-file")
             .arg(&env_path)
+            .env("COMPOSE_PROFILES", profiles) // Inject Profile
             .arg("up")
-            .arg("-d")
-            .output()
+            .arg("-d");
+        
+        cmd.output()
     }).await
     .map_err(|e| format!("Task join error: {}", e))?
     .map_err(|e| format!("Failed to spawn docker: {}", e))?;
@@ -228,4 +237,43 @@ pub async fn get_docker_logs(app: tauri::AppHandle) -> Result<String, String> {
     
     // Combine stdout and stderr
     Ok(format!("{}\n{}", stdout, stderr))
+}
+
+#[tauri::command]
+pub async fn pull_local_model(app: tauri::AppHandle, model: String) -> Result<String, String> {
+    let mode = get_app_mode(app).map_err(|e| e)?
+        .ok_or("Mode not set".to_string())?;
+
+    let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
+
+    let model_clone = model.clone();
+    // Offload blocking command
+    // docker compose -f ... exec llm-dl ollama pull <model>
+    let output = tauri::async_runtime::spawn_blocking(move || {
+        Command::new("docker")
+            .arg("compose")
+            .arg("--ansi")
+            .arg("always")
+            .arg("-f")
+            .arg(&compose_path)
+            .arg("--env-file")
+            .arg(&env_path)
+            .arg("exec")
+            .arg("llm-dl")
+            .arg("ollama")
+            .arg("pull")
+            .arg(&model_clone)
+            .output()
+    }).await
+    .map_err(|e| format!("Task join error: {}", e))?
+    .map_err(|e| format!("Failed to pull model: {}", e))?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    
+    if output.status.success() {
+         Ok(format!("Model '{}' pulled successfully.\n{}", model, stdout))
+    } else {
+         Err(format!("Failed to pull model '{}':\n{}", model, stderr))
+    }
 }

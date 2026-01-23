@@ -98,7 +98,7 @@ Sources are defined within an Environment.
 To handle the "No Qdrant" or "Hybrid" scenarios:
 
 1.  **Chat Models**: Used for reasoning (GPT-4, Gemini).
-2.  **Embedding Models**: Used for vectorization (Local `BAAI/bge-m3` or OpenAI `text-embedding-3-small`).
+2.  **Embedding Models**: Used for vectorization (Local `BAAI/bge-m3` or `dolphin-x1-8b` or OpenAI `text-embedding-3-small`).
 3.  **Ingestion Pipeline**:
     - **With Qdrant (Standard)**:
         `Source -> Chunking -> Embedding Model -> Vector -> Qdrant (Indices)`

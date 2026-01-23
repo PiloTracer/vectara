@@ -16,7 +16,7 @@ class DataSource(Base):
     
     environment = relationship("Environment", back_populates="data_sources")
     # One source can have multiple jobs (current and history)
-    jobs = relationship("SystemJob", primaryjoin="foreign(SystemJob.resource_id) == DataSource.id", cascade="all, delete")
+    jobs = relationship("SystemJob", primaryjoin="foreign(SystemJob.resource_id) == DataSource.id", cascade="all, delete", overlaps="jobs")
 
 class MCPServer(Base):
     __tablename__ = "mcp_servers"
@@ -31,7 +31,7 @@ class MCPServer(Base):
     enabled = Column(Boolean, default=True)
     
     environment = relationship("Environment", back_populates="mcp_servers")
-    jobs = relationship("SystemJob", primaryjoin="foreign(SystemJob.resource_id) == MCPServer.id", cascade="all, delete")
+    jobs = relationship("SystemJob", primaryjoin="foreign(SystemJob.resource_id) == MCPServer.id", cascade="all, delete", overlaps="jobs")
 
 class SystemJob(Base):
     __tablename__ = "system_jobs"

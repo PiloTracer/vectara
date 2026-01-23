@@ -250,3 +250,16 @@ fn load_config(app: &AppHandle) -> std::io::Result<Option<AppModeConfig>> {
     let config: AppModeConfig = serde_json::from_str(&content)?;
     Ok(Some(config))
 }
+
+pub fn get_env_var(env_path: &PathBuf, key: &str) -> Option<String> {
+    if let Ok(content) = fs::read_to_string(env_path) {
+        for line in content.lines() {
+            if let Some((k, v)) = line.split_once('=') {
+                if k.trim() == key {
+                    return Some(v.trim().to_string());
+                }
+            }
+        }
+    }
+    None
+}

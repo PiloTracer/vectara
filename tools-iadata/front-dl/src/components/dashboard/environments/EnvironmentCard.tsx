@@ -9,7 +9,7 @@ interface EnvironmentCardProps {
 }
 
 export default function EnvironmentCard({ env }: EnvironmentCardProps) {
-    const { activeEnvironmentId, setActiveEnvironmentId } = useEnvironment();
+    const { activeEnvironmentId, setActiveEnvironment } = useEnvironment();
     const isActive = activeEnvironmentId === env.id;
 
     return (
@@ -28,7 +28,7 @@ export default function EnvironmentCard({ env }: EnvironmentCardProps) {
                 position: "relative",
                 boxShadow: isActive ? "0 0 20px rgba(56, 189, 248, 0.2)" : "none",
             }}
-            onClick={() => setActiveEnvironmentId(env.id)}
+            onClick={() => setActiveEnvironment(env)}
         >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
                 <div>

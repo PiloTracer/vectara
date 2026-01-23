@@ -13,15 +13,22 @@ const SECTIONS = {
     QDRANT: ["QDRANT_HOST", "QDRANT_PORT"],
     DATA: ["DATA_SOURCES_DIR", "BACKUP_DIR", "IMPORT_DIR"],
     AUTH: ["AUTH_ISSUER_BASE", "AUTH_REALM", "AUTH_CLIENT_ID", "AUTH_CLIENT_SECRET"],
+    LLM: ["USE_LOCAL_EMBEDDING", "LOCAL_MODEL_NAME"],
 };
+
+interface GpuInfo {
+    available: boolean;
+    name: string | null;
+}
 
 export default function Settings() {
     const [loading, setLoading] = useState(true);
     const [envMap, setEnvMap] = useState<Record<string, string>>({});
     const [status, setStatus] = useState<ConfigStatus | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<"POSTGRES" | "QDRANT" | "DATA" | "AUTH" | "ADVANCED">("POSTGRES");
+    const [activeTab, setActiveTab] = useState<"POSTGRES" | "QDRANT" | "DATA" | "AUTH" | "LLM" | "ADVANCED">("POSTGRES");
     const [osType, setOsType] = useState<string>("unknown");
+    const [gpuInfo, setGpuInfo] = useState<GpuInfo | null>(null);
 
     useEffect(() => {
         loadData();
@@ -30,14 +37,16 @@ export default function Settings() {
     async function loadData() {
         try {
             setLoading(true);
-            const [statusRes, envRes, osRes] = await Promise.all([
+            const [statusRes, envRes, osRes, gpuRes] = await Promise.all([
                 invoke<ConfigStatus>("check_env_config"),
                 invoke<Record<string, string>>("get_all_env_vars"),
-                invoke<string>("get_os_type")
+                invoke<string>("get_os_type"),
+                invoke<GpuInfo>("detect_gpu")
             ]);
             setStatus(statusRes);
             setEnvMap(envRes);
             setOsType(osRes);
+            setGpuInfo(gpuRes);
             setLoading(false);
         } catch (e) {
             console.error(e);
@@ -107,7 +116,8 @@ export default function Settings() {
     };
 
     // Calculate advanced keys (all keys NOT in known sections)
-    const knownKeys = new Set([...SECTIONS.POSTGRES, ...SECTIONS.QDRANT, ...SECTIONS.DATA, ...SECTIONS.AUTH]);
+    // Calculate advanced keys (all keys NOT in known sections)
+    const knownKeys = new Set([...SECTIONS.POSTGRES, ...SECTIONS.QDRANT, ...SECTIONS.DATA, ...SECTIONS.AUTH, ...SECTIONS.LLM]);
     const advancedKeys = Object.keys(envMap).filter(k => !knownKeys.has(k)).sort();
 
     if (loading) return (
@@ -128,6 +138,7 @@ export default function Settings() {
                 <button style={activeTab === "QDRANT" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("QDRANT")}>Qdrant</button>
                 <button style={activeTab === "DATA" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("DATA")}>Data Sources</button>
                 <button style={activeTab === "AUTH" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("AUTH")}>Authentication</button>
+                <button style={activeTab === "LLM" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("LLM")}>LLM & AI</button>
                 <button style={activeTab === "ADVANCED" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("ADVANCED")}>Advanced</button>
             </div>
 
@@ -150,6 +161,75 @@ export default function Settings() {
                         {activeTab === "QDRANT" && renderFields(SECTIONS.QDRANT)}
                         {activeTab === "DATA" && renderFields(SECTIONS.DATA)}
                         {activeTab === "AUTH" && renderFields(SECTIONS.AUTH)}
+                        {activeTab === "LLM" && (
+                            <>
+                                <div style={{
+                                    padding: '10px 15px',
+                                    backgroundColor: gpuInfo?.available ? '#1a4a1a' : '#4a3a1a',
+                                    borderRadius: 4,
+                                    border: `1px solid ${gpuInfo?.available ? '#4caf50' : '#ff9800'}`,
+                                    fontSize: '0.9em',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 10,
+                                    marginBottom: 10
+                                }}>
+                                    <div style={{
+                                        width: 10, height: 10, borderRadius: '50%',
+                                        backgroundColor: gpuInfo?.available ? '#4caf50' : '#ff9800'
+                                    }} />
+                                    {gpuInfo?.available
+                                        ? `GPU Detected: ${gpuInfo.name}`
+                                        : "Running on CPU Mode (Slower Inference)"}
+                                </div>
+                                <div style={styles.field}>
+                                    <label style={styles.label}>Enable Local AI Stack</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5 }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: 10 }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={envMap["USE_LOCAL_EMBEDDING"] === "true"}
+                                                onChange={(e) => setEnvMap(prev => ({ ...prev, "USE_LOCAL_EMBEDDING": e.target.checked ? "true" : "false" }))}
+                                            />
+                                            <span>Enable Docker Service (Ollama)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                {["LOCAL_MODEL_NAME"].map(key => (
+                                    <div key={key} style={styles.field}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                            <label style={styles.label}>Local Model Name</label>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 10 }}>
+                                            <input
+                                                type="text"
+                                                value={envMap[key] || ""}
+                                                onChange={(e) => setEnvMap(prev => ({ ...prev, [key]: e.target.value }))}
+                                                style={{ ...styles.input, flex: 1 }}
+                                                placeholder={`Enter ${key}`}
+                                            />
+                                            <button
+                                                style={{ ...styles.button, flex: '0 0 auto', backgroundColor: '#333', fontSize: '0.8em', padding: '0 15px' }}
+                                                onClick={async () => {
+                                                    setMessage(`Pulling model ${envMap[key]}... This may take a while.`);
+                                                    setLoading(true);
+                                                    try {
+                                                        const res = await invoke<string>("pull_local_model", { model: envMap[key] });
+                                                        setMessage(res);
+                                                    } catch (e) {
+                                                        setMessage("Error pulling model: " + String(e));
+                                                    } finally {
+                                                        setLoading(false);
+                                                    }
+                                                }}
+                                            >
+                                                Pull Model
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </>
+                        )}
                         {activeTab === "ADVANCED" && (
                             <>
                                 <p style={{ color: '#888', fontSize: '0.9em', margin: '0 0 15px 0' }}>
