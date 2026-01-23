@@ -9,6 +9,9 @@ import { MCPList } from "../../../components/resources/MCPList";
 import { MCPForm } from "../../../components/resources/MCPForm";
 import { Loader2, Plus, Database, Server, X } from "lucide-react";
 
+// Feature flag: Set to true to show MCP Servers tab (currently hidden, reserved for future use)
+const SHOW_MCP_TAB = false;
+
 export default function ResourcesPage() {
     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
 
@@ -75,35 +78,39 @@ export default function ResourcesPage() {
 
             {/* Controls Row */}
             <div className="flex justify-between items-center mb-8 gap-4 flex-wrap">
-                {/* Tab Switcher */}
-                <div className="flex bg-slate-900/50 p-1.5 rounded-xl border border-white/5">
-                    <button
-                        onClick={() => setTab("SOURCES")}
-                        className={`
-                            flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                            ${tab === "SOURCES"
-                                ? "bg-white/10 text-white shadow-lg shadow-black/20"
-                                : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                            }
-                        `}
-                    >
-                        <Database className={`w-4 h-4 ${tab === "SOURCES" ? "text-cyan-400" : ""}`} />
-                        Data Sources
-                    </button>
-                    <button
-                        onClick={() => setTab("MCP")}
-                        className={`
-                            flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
-                            ${tab === "MCP"
-                                ? "bg-white/10 text-white shadow-lg shadow-black/20"
-                                : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                            }
-                        `}
-                    >
-                        <Server className={`w-4 h-4 ${tab === "MCP" ? "text-violet-400" : ""}`} />
-                        MCP Servers
-                    </button>
-                </div>
+                {/* Tab Switcher - Only show if there are multiple tabs */}
+                {SHOW_MCP_TAB ? (
+                    <div className="flex bg-slate-900/50 p-1.5 rounded-xl border border-white/5">
+                        <button
+                            onClick={() => setTab("SOURCES")}
+                            className={`
+                                flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                                ${tab === "SOURCES"
+                                    ? "bg-white/10 text-white shadow-lg shadow-black/20"
+                                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                                }
+                            `}
+                        >
+                            <Database className={`w-4 h-4 ${tab === "SOURCES" ? "text-cyan-400" : ""}`} />
+                            Data Sources
+                        </button>
+                        <button
+                            onClick={() => setTab("MCP")}
+                            className={`
+                                flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200
+                                ${tab === "MCP"
+                                    ? "bg-white/10 text-white shadow-lg shadow-black/20"
+                                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                                }
+                            `}
+                        >
+                            <Server className={`w-4 h-4 ${tab === "MCP" ? "text-violet-400" : ""}`} />
+                            MCP Servers
+                        </button>
+                    </div>
+                ) : (
+                    <div /> // Empty spacer when no tabs
+                )}
 
                 {/* Add Button */}
                 {!isCreating && (
@@ -120,7 +127,7 @@ export default function ResourcesPage() {
                         "
                     >
                         <Plus className="w-5 h-5" />
-                        Add {tab === "SOURCES" ? "Source" : "Server"}
+                        Add Source
                     </button>
                 )}
             </div>

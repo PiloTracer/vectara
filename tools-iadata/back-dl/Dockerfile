@@ -6,10 +6,14 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install system dependencies
+# Install system dependencies including Tesseract OCR
 RUN apt-get update && apt-get install -y \
     gcc \
     libpq-dev \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    tesseract-ocr-spa \
+    libmagic1 \
     && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies

@@ -3,13 +3,16 @@
 ## 🚀 Active Features (Work in Progress)
 - **initial-check** (Ref: `.ai/features/0001-initial-check-260122-260122 copy.md`)
 - **local-llms** (Ref: `.ai/features/0501-local-LLMS-260123-260123.md`)
+- **api-bridge-client** (Ref: `.ai/features/0511-api-bridge-client-260123-260123.md`)
 - **api-bridge** (Ref: `.ai/features/0510-api-bridge-260123-260123.md`)
 
 
-## 📅 Recent Session: 2026-01-23 12:50
-**Summary**: Host side of the API bridge to allow access to host's filesystem, application compiled fine, and run with no issues.
+## 📅 Recent Session: 2026-01-23 14:48
+**Summary**: groundwork for data repo consumption
 
 ### Git Activity
+- 2026-01-23: API Bridge Client
+- 2026-01-23: Host API Bridge server
 - 2026-01-23: re-engineered 'session end' and 'session start'
 - 2026-01-23: ui-improvements
 - 2026-01-23: llm-agents ui
