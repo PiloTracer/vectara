@@ -41,8 +41,8 @@ fn resolve_paths(mode: &str) -> Option<(PathBuf, PathBuf)> {
 }
 
 #[tauri::command]
-pub async fn check_docker_status() -> Result<DockerState, String> {
-    let mode = get_app_mode().map_err(|e| e)?
+pub async fn check_docker_status(app: tauri::AppHandle) -> Result<DockerState, String> {
+    let mode = get_app_mode(app).map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
     let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
@@ -76,8 +76,8 @@ pub async fn check_docker_status() -> Result<DockerState, String> {
 }
 
 #[tauri::command]
-pub async fn start_docker() -> Result<DockerState, String> {
-    let mode = get_app_mode().map_err(|e| e)?
+pub async fn start_docker(app: tauri::AppHandle) -> Result<DockerState, String> {
+    let mode = get_app_mode(app).map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
     let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
@@ -106,8 +106,8 @@ pub async fn start_docker() -> Result<DockerState, String> {
 }
 
 #[tauri::command]
-pub async fn stop_docker() -> Result<(), String> {
-    let mode = match get_app_mode() {
+pub async fn stop_docker(app: tauri::AppHandle) -> Result<(), String> {
+    let mode = match get_app_mode(app) {
         Ok(Some(m)) => m,
         _ => return Ok(()), // If no mode set, nothing to stop
     };
@@ -129,8 +129,8 @@ pub async fn stop_docker() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn restart_docker() -> Result<DockerState, String> {
-    let mode = get_app_mode().map_err(|e| e)?
+pub async fn restart_docker(app: tauri::AppHandle) -> Result<DockerState, String> {
+    let mode = get_app_mode(app).map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
     let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
@@ -170,8 +170,8 @@ pub async fn restart_docker() -> Result<DockerState, String> {
 }
 
 #[tauri::command]
-pub async fn get_docker_logs() -> Result<String, String> {
-    let mode = match get_app_mode() {
+pub async fn get_docker_logs(app: tauri::AppHandle) -> Result<String, String> {
+    let mode = match get_app_mode(app) {
         Ok(Some(m)) => m,
         _ => return Ok("".to_string()),
     };

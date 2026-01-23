@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::fs;
 use std::path::{Path, PathBuf};
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AppModeConfig {
@@ -20,18 +20,18 @@ pub struct ConfigStatus {
 // --- Commands ---
 
 #[tauri::command]
-pub fn set_app_mode(mode: String) -> Result<(), String> {
+pub fn set_app_mode(app: AppHandle, mode: String) -> Result<(), String> {
     if mode != "dev" && mode != "prd" {
         return Err("Invalid mode. Must be 'dev' or 'prd'.".to_string());
     }
 
     let config = AppModeConfig { environment: mode };
-    save_config(&config).map_err(|e| e.to_string())
+    save_config(&app, &config).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
-pub fn get_app_mode() -> Result<Option<String>, String> {
-    match load_config() {
+pub fn get_app_mode(app: AppHandle) -> Result<Option<String>, String> {
+    match load_config(&app) {
         Ok(Some(cfg)) => Ok(Some(cfg.environment)),
         Ok(None) => Ok(None),
         Err(e) => Err(e.to_string()),
@@ -39,12 +39,12 @@ pub fn get_app_mode() -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
-pub fn reset_app_mode() -> Result<(), String> {
-    delete_config_file()
+pub fn reset_app_mode(app: AppHandle) -> Result<(), String> {
+    delete_config_file(&app)
 }
 
-pub fn delete_config_file() -> Result<(), String> {
-    let path = get_config_path();
+pub fn delete_config_file(app: &AppHandle) -> Result<(), String> {
+    let path = get_config_path(app)?;
     if path.exists() {
         fs::remove_file(path).map_err(|e| e.to_string())?;
     }
@@ -52,9 +52,9 @@ pub fn delete_config_file() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn check_env_config(_app: AppHandle) -> Result<ConfigStatus, String> {
+pub fn check_env_config(app: AppHandle) -> Result<ConfigStatus, String> {
     // 1. Get Mode
-    let mode = match load_config() {
+    let mode = match load_config(&app) {
         Ok(Some(cfg)) => cfg.environment,
         Ok(None) => return Err("Environment not set.".to_string()),
         Err(e) => return Err(e.to_string()),
@@ -67,17 +67,24 @@ pub fn check_env_config(_app: AppHandle) -> Result<ConfigStatus, String> {
     let schema_keys = parse_env_keys(&schema_file)?;
     
     // 4. Runtime Validation
-    let target_vars = parse_env_vars(&target_file)?;
+    // Use map to check values
+    let target_map = parse_env_map(&target_file)?;
 
     let mut missing_keys = Vec::new();
     for key in schema_keys {
-        if !target_vars.contains(&key) {
-            missing_keys.push(key);
+        match target_map.get(&key) {
+            Some(value) if !value.trim().is_empty() => {
+                // Key exists and is not empty (after trim)
+            },
+            _ => {
+                // Key missing OR value is empty/whitespace
+                missing_keys.push(key);
+            }
         }
     }
 
     // 5. Determine URL
-    let target_map = parse_env_map(&target_file)?;
+    // target_map is already loaded
     let front_port = target_map.get("FRONT_PORT").map(|s| s.as_str()).unwrap_or("3000"); 
     let docker_url = format!("http://localhost:{}", front_port);
 
@@ -90,8 +97,8 @@ pub fn check_env_config(_app: AppHandle) -> Result<ConfigStatus, String> {
 }
 
 #[tauri::command]
-pub fn get_all_env_vars() -> Result<std::collections::HashMap<String, String>, String> {
-    let mode = match load_config() {
+pub fn get_all_env_vars(app: AppHandle) -> Result<std::collections::HashMap<String, String>, String> {
+    let mode = match load_config(&app) {
         Ok(Some(cfg)) => cfg.environment,
         Ok(None) => return Err("Environment not set.".to_string()),
         Err(e) => return Err(e.to_string()),
@@ -102,8 +109,8 @@ pub fn get_all_env_vars() -> Result<std::collections::HashMap<String, String>, S
 }
 
 #[tauri::command]
-pub fn update_env_var(key: String, value: String) -> Result<(), String> {
-    let mode = match load_config() {
+pub fn update_env_var(app: AppHandle, key: String, value: String) -> Result<(), String> {
+    let mode = match load_config(&app) {
         Ok(Some(cfg)) => cfg.environment,
         Ok(None) => return Err("Environment not set.".to_string()),
         Err(e) => return Err(e.to_string()),
@@ -194,20 +201,7 @@ fn parse_env_keys(path: &Path) -> Result<HashSet<String>, String> {
     Ok(keys)
 }
 
-fn parse_env_vars(path: &Path) -> Result<HashSet<String>, String> {
-    let content = fs::read_to_string(path).map_err(|_| "Target env file missing".to_string())?; // Soft verify existence provided it fails gracefully
-    let mut keys = HashSet::new();
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed.starts_with('#') || trimmed.is_empty() {
-            continue;
-        }
-        if let Some((key, _)) = trimmed.split_once('=') {
-            keys.insert(key.trim().to_string());
-        }
-    }
-    Ok(keys)
-}
+
 
 fn parse_env_map(path: &Path) -> Result<std::collections::HashMap<String, String>, String> {
      let content = fs::read_to_string(path).unwrap_or_default();
@@ -224,18 +218,26 @@ fn parse_env_map(path: &Path) -> Result<std::collections::HashMap<String, String
     Ok(map)
 }
 
-fn get_config_path() -> PathBuf {
-    // Save to project root (../) to avoid triggering cargo-watch in src-tauri
-    Path::new("../.app_config.json").to_path_buf()
+fn get_config_path(app: &AppHandle) -> Result<PathBuf, String> {
+    let path = app.path().app_config_dir().map_err(|e| e.to_string())?;
+    // Ensure dir exists
+    if !path.exists() {
+        fs::create_dir_all(&path).map_err(|e| e.to_string())?;
+    }
+    Ok(path.join("app_config.json"))
 }
 
-fn save_config(config: &AppModeConfig) -> std::io::Result<()> {
+fn save_config(app: &AppHandle, config: &AppModeConfig) -> std::io::Result<()> {
+    let path = get_config_path(app).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
     let json = serde_json::to_string_pretty(config)?;
-    fs::write(get_config_path(), json)
+    fs::write(path, json)
 }
 
-fn load_config() -> std::io::Result<Option<AppModeConfig>> {
-    let path = get_config_path();
+fn load_config(app: &AppHandle) -> std::io::Result<Option<AppModeConfig>> {
+    let path = match get_config_path(app) {
+        Ok(p) => p,
+        Err(_) => return Ok(None),
+    };
     if !path.exists() {
         return Ok(None);
     }

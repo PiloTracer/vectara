@@ -207,7 +207,7 @@ export default function Gatekeeper() {
                     <h2 style={{ color: "red" }}>⚠️ System Error</h2>
                     <p>{error}</p>
                     <button style={styles.button} onClick={() => window.location.reload()}>Retry</button>
-                    <button style={{ ...styles.button, marginTop: 10, backgroundColor: '#555' }} onClick={() => { setError(null); setMode(null); }}>Back to Selection</button>
+                    <button style={{ ...styles.button, marginTop: 10, backgroundColor: '#555' }} onClick={async () => { await invoke("stop_docker"); setError(null); setMode(null); }}>Back to Selection</button>
                     <LogTerminal logs={logs} />
                 </div>
             );
@@ -265,7 +265,7 @@ export default function Gatekeeper() {
                     </div>
 
                     <div style={styles.buttonGroup}>
-                        <button style={{ ...styles.button, backgroundColor: '#555' }} onClick={() => { setMode(null); }}>
+                        <button style={{ ...styles.button, backgroundColor: '#555' }} onClick={async () => { await invoke("stop_docker"); setMode(null); }}>
                             ← Different Environment
                         </button>
                     </div>
@@ -296,7 +296,7 @@ export default function Gatekeeper() {
                         <button style={styles.button} onClick={startDocker}>Start Services</button>
                     )}
                     <button style={styles.button} onClick={() => status?.docker_url && checkDocker(status.docker_url)}>Refresh Status</button>
-                    <button style={{ ...styles.button, marginLeft: 10, backgroundColor: '#555' }} onClick={() => setMode(null)}>Back to Selection</button>
+                    <button style={{ ...styles.button, marginLeft: 10, backgroundColor: '#555' }} onClick={async () => { await invoke("stop_docker"); setMode(null); }}>Back to Selection</button>
                     <LogTerminal logs={logs} />
                 </div>
             );

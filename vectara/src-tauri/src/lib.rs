@@ -36,7 +36,10 @@ pub fn run() {
                     println!("Resetting Application State...");
                     // 1. Reset Config so Gatekeeper doesn't auto-redirect
                     // We need to call the internal logic of reset_app_mode
-                    let _ = config::delete_config_file(); 
+                    let _ = config::delete_config_file(app_handle); 
+                    // Strict Shutdown: Stop Docker when resetting
+                    let app_clone = app_handle.clone();
+                    tauri::async_runtime::block_on(async move { let _ = docker::stop_docker(app_clone).await; }); 
 
                     // 2. Navigate window to internal app
                     if let Some(window) = app_handle.get_webview_window("main") {
@@ -50,6 +53,9 @@ pub fn run() {
                     }
                 } else if event.id() == settings_item.id() {
                     println!("Opening Settings...");
+                    // Strict Shutdown: Stop Docker when going to Settings
+                    let app_clone = app_handle.clone();
+                    tauri::async_runtime::block_on(async move { let _ = docker::stop_docker(app_clone).await; });
                      if let Some(window) = app_handle.get_webview_window("main") {
                         // Force navigation to Settings hash
                         #[cfg(debug_assertions)]
@@ -59,7 +65,8 @@ pub fn run() {
                         let _ = window.eval("window.location.href = 'tauri://localhost/index.html#/settings';");
                     }
                 } else if event.id() == quit_item.id() {
-                    tauri::async_runtime::block_on(async { let _ = docker::stop_docker().await; });
+                    let app_clone = app_handle.clone();
+                    tauri::async_runtime::block_on(async move { let _ = docker::stop_docker(app_clone).await; });
                     app_handle.exit(0);
                 }
             });
@@ -88,8 +95,9 @@ pub fn run() {
     app.run(|_app_handle, event| {
         if let tauri::RunEvent::ExitRequested { .. } = event {
             println!("App exiting. ensuring docker is stopped...");
-            tauri::async_runtime::block_on(async {
-                let _ = docker::stop_docker().await;
+            let app_clone = _app_handle.clone();
+            tauri::async_runtime::block_on(async move {
+                let _ = docker::stop_docker(app_clone).await;
             });
         }
     });
