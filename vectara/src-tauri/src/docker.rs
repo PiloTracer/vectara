@@ -66,6 +66,8 @@ pub async fn check_docker_status(app: tauri::AppHandle) -> Result<DockerState, S
     let output = tauri::async_runtime::spawn_blocking(move || {
         Command::new("docker")
             .arg("compose")
+            .arg("--ansi")
+            .arg("always")
             .arg("-f")
             .arg(&compose_path)
             .arg("--env-file")
@@ -101,6 +103,8 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DockerState, String> 
     let output = tauri::async_runtime::spawn_blocking(move || {
         Command::new("docker")
             .arg("compose")
+            .arg("--ansi")
+            .arg("always")
             .arg("-f")
             .arg(&compose_path)
             .arg("--env-file")
@@ -132,6 +136,8 @@ pub async fn stop_docker(app: tauri::AppHandle) -> Result<(), String> {
         let _ = tauri::async_runtime::spawn_blocking(move || {
             Command::new("docker")
                 .arg("compose")
+                .arg("--ansi")
+                .arg("always")
                 .arg("-f")
                 .arg(&compose_path)
                 .arg("--env-file")
@@ -155,6 +161,8 @@ pub async fn restart_docker(app: tauri::AppHandle) -> Result<DockerState, String
         // 1. Down
         let _ = Command::new("docker")
             .arg("compose")
+            .arg("--ansi")
+            .arg("always")
             .arg("-f")
             .arg(&compose_path)
             .arg("--env-file")
@@ -165,6 +173,8 @@ pub async fn restart_docker(app: tauri::AppHandle) -> Result<DockerState, String
         // 2. Up
         Command::new("docker")
             .arg("compose")
+            .arg("--ansi")
+            .arg("always")
             .arg("-f")
             .arg(&compose_path)
             .arg("--env-file")
@@ -199,6 +209,8 @@ pub async fn get_docker_logs(app: tauri::AppHandle) -> Result<String, String> {
     let output = tauri::async_runtime::spawn_blocking(move || {
         Command::new("docker")
             .arg("compose")
+            .arg("--ansi")
+            .arg("always")
             .arg("-f")
             .arg(&compose_path)
             .arg("--env-file")

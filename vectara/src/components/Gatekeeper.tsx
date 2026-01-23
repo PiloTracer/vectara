@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import Ansi from "ansi-to-react";
 
 interface ConfigStatus {
     valid: boolean;
@@ -341,13 +342,13 @@ function LogTerminal({ logs }: { logs: string }) {
                 height: '200px',
                 overflowY: 'auto',
                 fontSize: '0.75em',
-                color: '#0f0',
+                color: '#ccc', // Changed default color to grey as ANSI will handle colors
                 fontFamily: 'monospace',
                 margin: 0,
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-all'
             }}>
-                {logs}
+                <Ansi>{logs}</Ansi>
             </pre>
         </div>
     );
