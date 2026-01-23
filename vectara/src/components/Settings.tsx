@@ -12,6 +12,7 @@ const SECTIONS = {
     POSTGRES: ["DB_USER", "DB_PASSWORD", "DB_NAME", "DB_HOST", "DB_PORT", "DB_HOST_PORT"],
     QDRANT: ["QDRANT_HOST", "QDRANT_PORT"],
     DATA: ["DATA_SOURCES_DIR", "BACKUP_DIR", "IMPORT_DIR"],
+    AUTH: ["AUTH_ISSUER_BASE", "AUTH_REALM", "AUTH_CLIENT_ID", "AUTH_CLIENT_SECRET"],
 };
 
 export default function Settings() {
@@ -19,7 +20,7 @@ export default function Settings() {
     const [envMap, setEnvMap] = useState<Record<string, string>>({});
     const [status, setStatus] = useState<ConfigStatus | null>(null);
     const [message, setMessage] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<"POSTGRES" | "QDRANT" | "DATA" | "ADVANCED">("POSTGRES");
+    const [activeTab, setActiveTab] = useState<"POSTGRES" | "QDRANT" | "DATA" | "AUTH" | "ADVANCED">("POSTGRES");
 
     useEffect(() => {
         loadData();
@@ -87,7 +88,7 @@ export default function Settings() {
     };
 
     // Calculate advanced keys (all keys NOT in known sections)
-    const knownKeys = new Set([...SECTIONS.POSTGRES, ...SECTIONS.QDRANT, ...SECTIONS.DATA]);
+    const knownKeys = new Set([...SECTIONS.POSTGRES, ...SECTIONS.QDRANT, ...SECTIONS.DATA, ...SECTIONS.AUTH]);
     const advancedKeys = Object.keys(envMap).filter(k => !knownKeys.has(k)).sort();
 
     if (loading) return (
@@ -107,6 +108,7 @@ export default function Settings() {
                 <button style={activeTab === "POSTGRES" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("POSTGRES")}>Postgres</button>
                 <button style={activeTab === "QDRANT" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("QDRANT")}>Qdrant</button>
                 <button style={activeTab === "DATA" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("DATA")}>Data Sources</button>
+                <button style={activeTab === "AUTH" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("AUTH")}>Authentication</button>
                 <button style={activeTab === "ADVANCED" ? styles.tabActive : styles.tab} onClick={() => setActiveTab("ADVANCED")}>Advanced</button>
             </div>
 
@@ -128,6 +130,7 @@ export default function Settings() {
                         {activeTab === "POSTGRES" && renderFields(SECTIONS.POSTGRES)}
                         {activeTab === "QDRANT" && renderFields(SECTIONS.QDRANT)}
                         {activeTab === "DATA" && renderFields(SECTIONS.DATA)}
+                        {activeTab === "AUTH" && renderFields(SECTIONS.AUTH)}
                         {activeTab === "ADVANCED" && (
                             <>
                                 <p style={{ color: '#888', fontSize: '0.9em', margin: '0 0 15px 0' }}>
