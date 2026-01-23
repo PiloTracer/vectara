@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { FolderManager } from "./FolderManager";
 
 interface ConfigStatus {
     valid: boolean;
@@ -159,7 +160,14 @@ export default function Settings() {
                     <div style={styles.grid}>
                         {activeTab === "POSTGRES" && renderFields(SECTIONS.POSTGRES)}
                         {activeTab === "QDRANT" && renderFields(SECTIONS.QDRANT)}
-                        {activeTab === "DATA" && renderFields(SECTIONS.DATA)}
+                        {activeTab === "DATA" && (
+                            <>
+                                {renderFields(SECTIONS.DATA)}
+                                <div style={{ marginTop: 20 }}>
+                                    <FolderManager />
+                                </div>
+                            </>
+                        )}
                         {activeTab === "AUTH" && renderFields(SECTIONS.AUTH)}
                         {activeTab === "LLM" && (
                             <>

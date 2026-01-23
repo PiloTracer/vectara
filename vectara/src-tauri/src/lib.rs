@@ -8,15 +8,35 @@ mod config;
 mod docker;
 mod auth;
 mod hardware;
+mod server;
 
 use tauri::menu::{Menu, MenuItem};
 use tauri::Manager;
+use server::state::AppState;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+
     let app = tauri::Builder::default()
+        .manage(AppState::new())
         .setup(|app| {
             let handle = app.handle();
+            
+            // Start HTTP Server
+            let state = app.state::<AppState>();
+            let state_clone = state.clone(); // AppState is Clone (Arc)
+            // Need to deref the state wrapper to get our inner struct?
+            // Actually config::AppState::new() returns Self.
+            // tauri::State<T> is a wrapper. We can clone the inner T if T: Clone.
+            // But app.state() returns State<T>. State<T> implements Clone? Yes, it wraps Arc.
+            // Wait, our `start_http_server` takes `AppState` directly, not `State<AppState>`.
+            // So we need `(*state).clone()`.
+            let inner_state = (*state).clone();
+            
+            tauri::async_runtime::spawn(async move {
+                server::start_http_server(inner_state).await;
+            });
+
             let menu = Menu::new(handle)?;
             
             // File Menu
@@ -94,8 +114,12 @@ pub fn run() {
             auth::authenticate_user,
             auth::get_current_user,
             hardware::detect_gpu,
-            docker::pull_local_model
+            docker::pull_local_model,
+            server::authorize_folder,
+            server::revoke_folder,
+            server::get_authorized_folders
         ])
+        .plugin(tauri_plugin_dialog::init())
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
 
