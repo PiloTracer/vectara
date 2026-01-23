@@ -42,6 +42,7 @@ fn resolve_paths(mode: &str) -> Option<(PathBuf, PathBuf)> {
 
 #[tauri::command]
 pub async fn check_docker_status() -> Result<DockerState, String> {
+    println!("Debug: check_docker_status called");
     let mode = get_app_mode().map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
