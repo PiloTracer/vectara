@@ -33,8 +33,9 @@ app.add_middleware(
 )
 
 # --- Routers ---
-from app.routers import environments
+from app.routers import environments, resources
 app.include_router(environments.router)
+app.include_router(resources.router)
 
 @app.get("/")
 async def root():

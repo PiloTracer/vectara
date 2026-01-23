@@ -1,355 +1,537 @@
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | Import traces:
-iadata_front_dl_dev   |   Server Component:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component Browser:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component SSR:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |  GET /dashboard 500 in 224ms (compile: 137ms, proxy.ts: 8ms, render: 79ms)
-iadata_front_dl_dev   | ⨯ ./src/context/EnvironmentContext.tsx:1:17
-iadata_front_dl_dev   | Ecmascript file had an error
-iadata_front_dl_dev   | > 1 | import React, { createContext, useContext, useState, useEffect } from "react";
-iadata_front_dl_dev   |     |                 ^^^^^^^^^^^^^
-iadata_front_dl_dev   |   2 | import { Environment, getEnvironment } from "../actions/environments";
-iadata_front_dl_dev   |   3 |
-iadata_front_dl_dev   |   4 | interface EnvironmentContextType {
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | You're importing a component that needs `createContext`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | Import traces:
-iadata_front_dl_dev   |   Server Component:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component Browser:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component SSR:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | ./src/context/EnvironmentContext.tsx:1:54
-iadata_front_dl_dev   | Ecmascript file had an error
-iadata_front_dl_dev   | > 1 | import React, { createContext, useContext, useState, useEffect } from "react";
-iadata_front_dl_dev   |     |                                                      ^^^^^^^^^
-iadata_front_dl_dev   |   2 | import { Environment, getEnvironment } from "../actions/environments";
-iadata_front_dl_dev   |   3 |
-iadata_front_dl_dev   |   4 | interface EnvironmentContextType {
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | You're importing a component that needs `useEffect`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | Import traces:
-iadata_front_dl_dev   |   Server Component:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component Browser:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component SSR:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | ./src/context/EnvironmentContext.tsx:1:44
-iadata_front_dl_dev   | Ecmascript file had an error
-iadata_front_dl_dev   | > 1 | import React, { createContext, useContext, useState, useEffect } from "react";
-iadata_front_dl_dev   |     |                                            ^^^^^^^^
-iadata_front_dl_dev   |   2 | import { Environment, getEnvironment } from "../actions/environments";
-iadata_front_dl_dev   |   3 |
-iadata_front_dl_dev   |   4 | interface EnvironmentContextType {
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |  Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | Import traces:
-iadata_front_dl_dev   |   Server Component:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component Browser:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component SSR:
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/EnvironmentSelector.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/components/layout/Sidebar.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/components/layout/Shell.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |  GET /dashboard 500 in 22ms (compile: 8ms, proxy.ts: 8ms, render: 6ms)
-iadata_front_dl_dev   |  GET /dashboard 200 in 241ms (compile: 84ms, proxy.ts: 5ms, render: 152ms)
-iadata_front_dl_dev   |  GET /api/auth/session 200 in 117ms (compile: 99ms, render: 18ms)
-iadata_front_dl_dev   |  GET /api/auth/session 200 in 12ms (compile: 3ms, render: 9ms)
-iadata_pg_dl_dev      | 2026-01-23 07:58:02.969 UTC [27] LOG:  checkpoint starting: time
-iadata_pg_dl_dev      | 2026-01-23 07:58:03.793 UTC [27] LOG:  checkpoint complete: wrote 8 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.705 s, sync=0.038 s, total=0.824 s; sync files=8, longest=0.038 s, average=0.005 s; distance=17 kB, estimate=223 kB
-iadata_back_dl_dev    | INFO:     Stopping reloader process [1]
-iadata_back_dl_dev exited with code 0 (restarting)
-iadata_back_dl_dev    | INFO:     Will watch for changes in these directories: ['/app']
-iadata_back_dl_dev    | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-iadata_back_dl_dev    | INFO:     Started reloader process [1] using WatchFiles
-iadata_back_dl_dev    | /usr/local/lib/python3.11/site-packages/pydantic/_internal/_config.py:383: UserWarning: Valid config keys have changed in V2:
-iadata_back_dl_dev    | * 'orm_mode' has been renamed to 'from_attributes'
-iadata_back_dl_dev    |   warnings.warn(message, UserWarning)
-iadata_back_dl_dev    | INFO:     Started server process [8]
-iadata_back_dl_dev    | INFO:     Waiting for application startup.
-iadata_back_dl_dev    | Initializing Database...
-iadata_back_dl_dev    | Executing SQL script: 010-schema-changes.sql
-iadata_back_dl_dev    | Executing SQL script: 100-populate-test.sql
-iadata_back_dl_dev    | Database Initialized.
-iadata_back_dl_dev    | INFO:     Application startup complete.
-iadata_front_dl_dev   | ✓ Compiled in 47ms
-iadata_front_dl_dev   | ⨯ ./src/actions/environments.ts:23:1
-iadata_front_dl_dev   | Parsing ecmascript source code failed
-iadata_front_dl_dev   |   21 | }
-iadata_front_dl_dev   |   22 |
-iadata_front_dl_dev   | > 23 | return await fetchFromBackend("/environments", {
-iadata_front_dl_dev   |      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-iadata_front_dl_dev   | > 24 |     method: "POST",
-iadata_front_dl_dev   |      | ^^^^^^^^^^^^^^^^^^^
-iadata_front_dl_dev   | > 25 |     body: JSON.stringify(data),
-iadata_front_dl_dev   |      | ^^^^^^^^^^^^^^^^^^^
-iadata_front_dl_dev   | > 26 | });
-iadata_front_dl_dev   |      | ^^^^
-iadata_front_dl_dev   |   27 | }
-iadata_front_dl_dev   |   28 |
-iadata_front_dl_dev   |   29 | export async function getEnvironment(id: string): Promise<Environment | null> {
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | Return statement is not allowed here
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | Import traces:
-iadata_front_dl_dev   |   Client Component Browser:
-iadata_front_dl_dev   |     ./src/actions/environments.ts [Client Component Browser]
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component Browser]
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |   Client Component SSR:
-iadata_front_dl_dev   |     ./src/actions/environments.ts [Client Component SSR]
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Client Component SSR]
-iadata_front_dl_dev   |     ./src/context/EnvironmentContext.tsx [Server Component]
-iadata_front_dl_dev   |     ./src/app/dashboard/layout.tsx [Server Component]
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   | 
-iadata_front_dl_dev   |  GET /dashboard 500 in 23ms (compile: 9ms, proxy.ts: 8ms, render: 6ms)
-iadata_front_dl_dev   | ✓ Compiled in 113ms
-iadata_front_dl_dev   |  GET /dashboard 200 in 253ms (compile: 124ms, proxy.ts: 9ms, render: 120ms)
-iadata_front_dl_dev   |  GET /api/auth/session 200 in 56ms (compile: 44ms, render: 12ms)
-iadata_front_dl_dev   |  GET /api/auth/session 200 in 6ms (compile: 1198µs, render: 5ms)
-iadata_back_dl_dev    | INFO:     172.19.0.5:55022 - "GET /environments HTTP/1.1" 307 Temporary Redirect
 iadata_back_dl_dev    | sys:1: SAWarning: relationship 'MCPServer.jobs' will copy column mcp_servers.id to column system_jobs.resource_id, which conflicts with relationship(s): 'DataSource.jobs' (copies data_sources.id to system_jobs.resource_id). If this is not the intention, consider if these relationships should be linked with back_populates, or if viewonly=True should be applied to one or more if they are read-only. For the less common case that foreign key constraints are partially overlapping, the orm.foreign() annotation can be used to isolate the columns that should be written towards.   To silence this warning, add the parameter 'overlaps="jobs"' to the 'MCPServer.jobs' relationship. (Background on this warning at: https://sqlalche.me/e/20/qzyx) (This warning originated from the `configure_mappers()` process, which was invoked automatically in response to a user-initiated operation.)
-iadata_back_dl_dev    | INFO:     172.19.0.5:55026 - "GET /environments/ HTTP/1.1" 500 Internal Server Error
-iadata_back_dl_dev    | ERROR:    Exception in ASGI application
-iadata_back_dl_dev    | Traceback (most recent call last):
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
-iadata_back_dl_dev    |     result = await app(  # type: ignore[func-returns-value]
-iadata_back_dl_dev    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-iadata_back_dl_dev    |     return await self.app(scope, receive, send)
-iadata_back_dl_dev    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1135, in __call__
-iadata_back_dl_dev    |     await super().__call__(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 107, in __call__
-iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
-iadata_back_dl_dev    |     raise exc
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
-iadata_back_dl_dev    |     await self.app(scope, receive, _send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
-iadata_back_dl_dev    |     await self.app(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-iadata_back_dl_dev    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-iadata_back_dl_dev    |     raise exc
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-iadata_back_dl_dev    |     await app(scope, receive, sender)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-iadata_back_dl_dev    |     await self.app(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
-iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
-iadata_back_dl_dev    |     await route.handle(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
-iadata_back_dl_dev    |     await self.app(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 115, in app
-iadata_back_dl_dev    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-iadata_back_dl_dev    |     raise exc
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-iadata_back_dl_dev    |     await app(scope, receive, sender)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 101, in app
-iadata_back_dl_dev    |     response = await f(request)
-iadata_back_dl_dev    |                ^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 377, in app
-iadata_back_dl_dev    |     content = await serialize_response(
-iadata_back_dl_dev    |               ^^^^^^^^^^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 215, in serialize_response
-iadata_back_dl_dev    |     raise ResponseValidationError(
-iadata_back_dl_dev    | fastapi.exceptions.ResponseValidationError: 4 validation errors:
-iadata_back_dl_dev    |   {'type': 'string_type', 'loc': ('response', 0, 'created_at'), 'msg': 'Input should be a valid string', 'input': datetime.datetime(2026, 1, 23, 7, 34, 26, 15204)}
-iadata_back_dl_dev    |   {'type': 'string_type', 'loc': ('response', 1, 'created_at'), 'msg': 'Input should be a valid string', 'input': datetime.datetime(2026, 1, 23, 7, 34, 26, 15204)}
-iadata_back_dl_dev    |   {'type': 'string_type', 'loc': ('response', 2, 'created_at'), 'msg': 'Input should be a valid string', 'input': datetime.datetime(2026, 1, 23, 7, 58, 8, 359929)}
-iadata_back_dl_dev    |   {'type': 'string_type', 'loc': ('response', 3, 'created_at'), 'msg': 'Input should be a valid string', 'input': datetime.datetime(2026, 1, 23, 7, 58, 8, 359929)}
-iadata_back_dl_dev    | 
-iadata_back_dl_dev    |   File "/app/app/routers/environments.py", line 34, in get_environments
-iadata_back_dl_dev    |     GET /environments/
-iadata_front_dl_dev   | Fetch Backend Error: Error: Backend Error 500: Internal Server Error
-iadata_front_dl_dev   |     at fetchFromBackend (src/lib/backend.ts:28:19)
-iadata_front_dl_dev   |     at async getEnvironments (src/actions/environments.ts:16:16)
-iadata_front_dl_dev   |     at async EnvironmentsPage (src/app/dashboard/environments/page.tsx:6:26)
-iadata_front_dl_dev   |   26 |         if (!res.ok) {
-iadata_front_dl_dev   |   27 |             const errorText = await res.text();
-iadata_front_dl_dev   | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
-iadata_front_dl_dev   |      |                   ^
-iadata_front_dl_dev   |   29 |         }
-iadata_front_dl_dev   |   30 |
-iadata_front_dl_dev   |   31 |         return await res.json();
-iadata_front_dl_dev   | Failed to fetch environments: Error: Backend Error 500: Internal Server Error
-iadata_front_dl_dev   |     at fetchFromBackend (src/lib/backend.ts:28:19)
-iadata_front_dl_dev   |     at async getEnvironments (src/actions/environments.ts:16:16)
-iadata_front_dl_dev   |     at async EnvironmentsPage (src/app/dashboard/environments/page.tsx:6:26)
-iadata_front_dl_dev   |   26 |         if (!res.ok) {
-iadata_front_dl_dev   |   27 |             const errorText = await res.text();
-iadata_front_dl_dev   | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
-iadata_front_dl_dev   |      |                   ^
-iadata_front_dl_dev   |   29 |         }
-iadata_front_dl_dev   |   30 |
-iadata_front_dl_dev   |   31 |         return await res.json();
-iadata_front_dl_dev   |  GET /dashboard/environments 200 in 400ms (compile: 346ms, proxy.ts: 6ms, render: 48ms)
-iadata_back_dl_dev    | INFO:     172.19.0.5:39776 - "POST /environments HTTP/1.1" 307 Temporary Redirect
-iadata_back_dl_dev    | INFO:     172.19.0.5:39780 - "POST /environments/ HTTP/1.1" 500 Internal Server Error
-iadata_back_dl_dev    | ERROR:    Exception in ASGI application
-iadata_back_dl_dev    | Traceback (most recent call last):
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
-iadata_back_dl_dev    |     result = await app(  # type: ignore[func-returns-value]
-iadata_back_dl_dev    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-iadata_back_dl_dev    |     return await self.app(scope, receive, send)
-iadata_back_dl_dev    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1135, in __call__
-iadata_back_dl_dev    |     await super().__call__(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 107, in __call__
-iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
-iadata_back_dl_dev    |     raise exc
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
-iadata_back_dl_dev    |     await self.app(scope, receive, _send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
-iadata_back_dl_dev    |     await self.app(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-iadata_back_dl_dev    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-iadata_back_dl_dev    |     raise exc
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-iadata_back_dl_dev    |     await app(scope, receive, sender)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
-iadata_back_dl_dev    |     await self.app(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
-iadata_back_dl_dev    |     await self.middleware_stack(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
-iadata_back_dl_dev    |     await route.handle(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
-iadata_back_dl_dev    |     await self.app(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 115, in app
-iadata_back_dl_dev    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-iadata_back_dl_dev    |     raise exc
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-iadata_back_dl_dev    |     await app(scope, receive, sender)
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 101, in app
-iadata_back_dl_dev    |     response = await f(request)
-iadata_back_dl_dev    |                ^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 377, in app
-iadata_back_dl_dev    |     content = await serialize_response(
-iadata_back_dl_dev    |               ^^^^^^^^^^^^^^^^^^^^^^^^^
-iadata_back_dl_dev    |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 215, in serialize_response
-iadata_back_dl_dev    |     raise ResponseValidationError(
-iadata_back_dl_dev    | fastapi.exceptions.ResponseValidationError: 1 validation error:
-iadata_back_dl_dev    |   {'type': 'string_type', 'loc': ('response', 'created_at'), 'msg': 'Input should be a valid string', 'input': datetime.datetime(2026, 1, 23, 8, 0, 55, 732009)}
-iadata_back_dl_dev    | 
-iadata_back_dl_dev    |   File "/app/app/routers/environments.py", line 41, in create_environment
-iadata_back_dl_dev    |     POST /environments/
-iadata_front_dl_dev   | Fetch Backend Error: Error: Backend Error 500: Internal Server Error
-iadata_front_dl_dev   |     at fetchFromBackend (src/lib/backend.ts:28:19)
-iadata_front_dl_dev   |     at async createEnvironment (src/actions/environments.ts:24:12)
-iadata_front_dl_dev   |   26 |         if (!res.ok) {
-iadata_front_dl_dev   |   27 |             const errorText = await res.text();
-iadata_front_dl_dev   | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
-iadata_front_dl_dev   |      |                   ^
-iadata_front_dl_dev   |   29 |         }
-iadata_front_dl_dev   |   30 |
-iadata_front_dl_dev   |   31 |         return await res.json();
-iadata_front_dl_dev   | ⨯ Error: Backend Error 500: Internal Server Error
-iadata_front_dl_dev   |     at fetchFromBackend (src/lib/backend.ts:28:19)
-iadata_front_dl_dev   |     at async createEnvironment (src/actions/environments.ts:24:12)
-iadata_front_dl_dev   |   26 |         if (!res.ok) {
-iadata_front_dl_dev   |   27 |             const errorText = await res.text();
-iadata_front_dl_dev   | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
-iadata_front_dl_dev   |      |                   ^
-iadata_front_dl_dev   |   29 |         }
-iadata_front_dl_dev   |   30 |
-iadata_front_dl_dev   |   31 |         return await res.json(); {
-iadata_front_dl_dev   |   digest: '3805624581'
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   |  POST /dashboard/environments 500 in 478ms (compile: 3ms, proxy.ts: 10ms, render: 465ms)
+iadata_back_dl_dev    | INFO:     172.19.0.5:42614 - "GET /environments/ HTTP/1.1" 200 OK
+iadata_front_dl_dev   |  GET /dashboard/environments 200 in 1802ms (compile: 1508ms, proxy.ts: 87ms, render: 206ms)
+iadata_front_dl_dev   |  GET /api/auth/session 200 in 556ms (compile: 536ms, render: 20ms)
+iadata_front_dl_dev   |  GET /api/auth/session 200 in 43ms (compile: 37ms, render: 6ms)
+iadata_front_dl_dev   | ⨯ ./src/app/dashboard/sources/page.tsx:10:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |    8 | import { MCPList } from "../../../components/resources/MCPList";
+iadata_front_dl_dev   |    9 | import { MCPForm } from "../../../components/resources/MCPForm";
+iadata_front_dl_dev   | > 10 | import { Loader2, Plus, Database, Server } from "lucide-react";
+iadata_front_dl_dev   |      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   11 |
+iadata_front_dl_dev   |   12 | export default function ResourcesPage() {
+iadata_front_dl_dev   |   13 |     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/app/dashboard/sources/page.tsx:10:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |    8 | import { MCPList } from "../../../components/resources/MCPList";
+iadata_front_dl_dev   |    9 | import { MCPForm } from "../../../components/resources/MCPForm";
+iadata_front_dl_dev   | > 10 | import { Loader2, Plus, Database, Server } from "lucide-react";
+iadata_front_dl_dev   |      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   11 |
+iadata_front_dl_dev   |   12 | export default function ResourcesPage() {
+iadata_front_dl_dev   |   13 |     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Plus, FolderOpen, Link as LinkIcon, Save } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Plus, FolderOpen, Link as LinkIcon, Save } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { DataSource, deleteSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Database, Folder, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceListProps {
+iadata_front_dl_dev   |   8 |     sources: DataSource[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { DataSource, deleteSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Database, Folder, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceListProps {
+iadata_front_dl_dev   |   8 |     sources: DataSource[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Terminal, Globe, Save, Plus, X } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Terminal, Globe, Save, Plus, X } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { MCPServer, deleteMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Server, Terminal, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPListProps {
+iadata_front_dl_dev   |   8 |     mcps: MCPServer[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { MCPServer, deleteMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Server, Terminal, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPListProps {
+iadata_front_dl_dev   |   8 |     mcps: MCPServer[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |  GET /dashboard/sources 500 in 516ms (compile: 445ms, proxy.ts: 8ms, render: 62ms)
+iadata_front_dl_dev   | ⨯ ./src/app/dashboard/sources/page.tsx:10:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |    8 | import { MCPList } from "../../../components/resources/MCPList";
+iadata_front_dl_dev   |    9 | import { MCPForm } from "../../../components/resources/MCPForm";
+iadata_front_dl_dev   | > 10 | import { Loader2, Plus, Database, Server } from "lucide-react";
+iadata_front_dl_dev   |      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   11 |
+iadata_front_dl_dev   |   12 | export default function ResourcesPage() {
+iadata_front_dl_dev   |   13 |     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/app/dashboard/sources/page.tsx:10:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |    8 | import { MCPList } from "../../../components/resources/MCPList";
+iadata_front_dl_dev   |    9 | import { MCPForm } from "../../../components/resources/MCPForm";
+iadata_front_dl_dev   | > 10 | import { Loader2, Plus, Database, Server } from "lucide-react";
+iadata_front_dl_dev   |      | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   11 |
+iadata_front_dl_dev   |   12 | export default function ResourcesPage() {
+iadata_front_dl_dev   |   13 |     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Plus, FolderOpen, Link as LinkIcon, Save } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Plus, FolderOpen, Link as LinkIcon, Save } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { DataSource, deleteSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Database, Folder, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceListProps {
+iadata_front_dl_dev   |   8 |     sources: DataSource[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/DataSourceList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { DataSource, deleteSource } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Database, Folder, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface DataSourceListProps {
+iadata_front_dl_dev   |   8 |     sources: DataSource[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/DataSourceList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Terminal, Globe, Save, Plus, X } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPForm.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { createMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Loader2, Terminal, Globe, Save, Plus, X } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPFormProps {
+iadata_front_dl_dev   |   8 |     envId: string;
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPForm.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { MCPServer, deleteMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Server, Terminal, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPListProps {
+iadata_front_dl_dev   |   8 |     mcps: MCPServer[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | ./src/components/resources/MCPList.tsx:5:1
+iadata_front_dl_dev   | Module not found: Can't resolve 'lucide-react'
+iadata_front_dl_dev   |   3 | import React, { useState } from "react";
+iadata_front_dl_dev   |   4 | import { MCPServer, deleteMCP } from "../../actions/resources";
+iadata_front_dl_dev   | > 5 | import { Trash2, Loader2, Server, Terminal, Globe } from "lucide-react";
+iadata_front_dl_dev   |     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_front_dl_dev   |   6 |
+iadata_front_dl_dev   |   7 | interface MCPListProps {
+iadata_front_dl_dev   |   8 |     mcps: MCPServer[];
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | Import traces:
+iadata_front_dl_dev   |   Client Component Browser:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component Browser]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |   Client Component SSR:
+iadata_front_dl_dev   |     ./src/components/resources/MCPList.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Client Component SSR]
+iadata_front_dl_dev   |     ./src/app/dashboard/sources/page.tsx [Server Component]
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | https://nextjs.org/docs/messages/module-not-found
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   | 
+iadata_front_dl_dev   |  GET /dashboard/sources 500 in 34ms (compile: 23ms, proxy.ts: 7ms, render: 4ms)
