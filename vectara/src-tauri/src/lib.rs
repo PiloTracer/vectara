@@ -6,6 +6,7 @@ fn greet(name: &str) -> String {
 
 mod config;
 mod docker;
+mod auth;
 
 use tauri::menu::{Menu, MenuItem};
 use tauri::Manager;
@@ -88,7 +89,9 @@ pub fn run() {
             docker::start_docker,
             docker::stop_docker,
             docker::restart_docker,
-            docker::get_docker_logs
+            docker::get_docker_logs,
+            auth::authenticate_user,
+            auth::get_current_user
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application");
