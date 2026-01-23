@@ -175,16 +175,6 @@ export default function Gatekeeper() {
 
     return (
         <div style={styles.container}>
-            {/* Top Menu Bar */}
-            <nav style={styles.navBar}>
-                <div
-                    style={styles.navItem}
-                    onClick={() => { setMode(null); setStatus(null); setError(null); setDockerState(null); }}
-                >
-                    Home
-                </div>
-            </nav>
-
             {/* Main ContentArea */}
             <div style={styles.content}>
                 {renderContent()}
@@ -201,17 +191,6 @@ const styles = {
         fontFamily: "sans-serif",
         backgroundColor: "#1a1a1a",
         color: "#ffffff",
-    },
-    navBar: {
-        display: "flex",
-        padding: "1rem",
-        backgroundColor: "#2a2a2a",
-        borderBottom: "1px solid #333",
-    },
-    navItem: {
-        cursor: "pointer",
-        fontWeight: "bold",
-        marginRight: "20px",
     },
     content: {
         flex: 1,
