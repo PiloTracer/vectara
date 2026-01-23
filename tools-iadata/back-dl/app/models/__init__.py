@@ -3,6 +3,7 @@ from .environment import Environment, EnvironmentAccess
 from .resources import DataSource, MCPServer, SystemJob
 from .intelligence import Agent
 from .chat import ChatSession, ChatMessage
+from .llm import LLMModel
 
 # Expose Base regarding metadata for db.py
 __all__ = [
@@ -10,5 +11,7 @@ __all__ = [
     "Environment", "EnvironmentAccess", 
     "DataSource", "MCPServer", "SystemJob",
     "Agent",
-    "ChatSession", "ChatMessage"
+    "ChatSession", "ChatMessage",
+    "LLMModel"
 ]
+
