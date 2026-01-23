@@ -99,7 +99,7 @@ INSERT INTO mcp_servers (id, env_id, name, transport_type, command, env_vars, en
 
 -- Env 3: Excel Analyzer
 INSERT INTO mcp_servers (id, env_id, name, transport_type, command, env_vars, enabled) VALUES (
-    '3c3c3c3c-3c3c3c3c-3c3c3c3c-3c3c3c3c3c3c', '33333333-3333-3333-3333-333333333333',
+    '3c3c3c3c-3c3c-3c3c-3c3c-3c3c3c3c3c3c', '33333333-3333-3333-3333-333333333333',
     'Data Analysis Tool', 'STDIO', 'python scripts/mcp_pandas.py', '{}', true
 ) ON CONFLICT (id) DO NOTHING;
 

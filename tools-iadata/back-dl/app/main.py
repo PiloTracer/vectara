@@ -32,6 +32,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Routers ---
+from app.routers import environments
+app.include_router(environments.router)
+
 @app.get("/")
 async def root():
     return {
