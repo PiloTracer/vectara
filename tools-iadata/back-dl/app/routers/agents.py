@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.db import get_db
 from app.models.intelligence import Agent
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 import uuid
 
@@ -37,6 +37,11 @@ class AgentRead(BaseModel):
     system_prompt: Optional[str]
     tools_config: Optional[dict] = {}
     model_override: Optional[dict] = {}
+    
+    @field_validator('tools_config', 'model_override', mode='before')
+    @classmethod
+    def default_empty_dict(cls, v):
+        return v or {}
 
     class Config:
         from_attributes = True

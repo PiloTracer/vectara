@@ -1,13 +1,23 @@
 # Current Development Focus
 
 ## 🚀 Active Features (Work in Progress)
-- **initial-check** (Ref: `.ai/features/0001-initial-check-260122-260122.md`)
+- **initial-check** (Ref: `.ai/features/0001-initial-check-260122-260122 copy.md`)
+- **local-llms** (Ref: `.ai/features/0501-local-LLMS-260123-260123.md`)
 
 
-## 📅 Recent Session: 2026-01-23 00:52
-**Summary**: Majority of the initial-check feature has been implemented
+## 📅 Recent Session: 2026-01-23 12:03
+**Summary**: UI improvements
 
 ### Git Activity
+- 2026-01-23: llm-agents ui
+- 2026-01-23: llm-models ui
+- 2026-01-23: data-sources ui
+- 2026-01-23: ui-resources
+- 2026-01-23: full-ui-environments
+- 2026-01-23: full-ui
+- 2026-01-23: db-structures and db-test-data
+- 2026-01-23: db-structures creation
+- 2026-01-23: inital-check: context update
 - 2026-01-23: commit tools-iadata
 - 2026-01-22: docs-> keycloack integration is not necessray at this level
 - 2026-01-22: keycloak integration guides
