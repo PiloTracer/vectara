@@ -80,6 +80,9 @@ docker-compose.override.yml
 ! .env.example
 ! .env.dev.example
 ! .env.test.example
+.env.prd
+.env.dev
+.env.stg
 secrets.md
 *.pem
 *.key

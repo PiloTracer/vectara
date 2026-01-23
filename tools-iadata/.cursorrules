@@ -1,0 +1,25 @@
+# Antigravity Context & Rules
+
+**LIMIT THIS SESSION THE CURRENT PATH - DO NOT ACCESS FILES UP ABOVE IN THE DIRECTORY STRUCTURE - LIMIT YOUR WORK ONLY TO THE FILES AND DIRECTORIES CONTAINED STARTING IN THIS DIRECTORY.**
+
+## Required Context
+You must always consider the context defined in the following files:
+- **Project Context**: `DOCS_CONTEXT.md`
+- **Tech Stack**: `DOCS_TECH_STACK.md`
+
+## Operational Rules
+1. **Protected Files**:
+   - `package.json` is off-limits.
+   - `.env` files are off-limits. Use `.env.example`.
+   - `docker-compose.dev.yml` is critical.
+
+2. **Data Privacy**:
+   - No real user data. Use synthetic data.
+   - No PII in logs.
+
+3. **Workflow**:
+   - No code changes without permission (unless in initial setup phase as instructed).
+   - "Planning means planning".
+
+4. **Secrets**:
+   - No secrets in repo. All config via `.env`.
