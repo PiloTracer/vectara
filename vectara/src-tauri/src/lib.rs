@@ -80,6 +80,7 @@ pub fn run() {
             config::set_app_mode,
             config::get_app_mode,
             config::get_all_env_vars,
+            config::get_os_type,
 
             config::update_env_var,
             config::reset_app_mode,

@@ -109,6 +109,11 @@ pub fn get_all_env_vars(app: AppHandle) -> Result<std::collections::HashMap<Stri
 }
 
 #[tauri::command]
+pub fn get_os_type() -> String {
+    std::env::consts::OS.to_string()
+}
+
+#[tauri::command]
 pub fn update_env_var(app: AppHandle, key: String, value: String) -> Result<(), String> {
     let mode = match load_config(&app) {
         Ok(Some(cfg)) => cfg.environment,

@@ -37,7 +37,22 @@ fn resolve_paths(mode: &str) -> Option<(PathBuf, PathBuf)> {
     let compose_file_name = if mode == "dev" { "docker-compose.dev.yml" } else { "docker-compose.prd.yml" };
     let env_file_name = if mode == "dev" { ".env.dev" } else { ".env.prd" };
 
-    Some((services_path.join(compose_file_name), services_path.join(env_file_name)))
+    let compose_path = services_path.join(compose_file_name);
+    let env_path = services_path.join(env_file_name);
+
+    // Helper to strip UNC prefix on Windows
+    fn clean_path(p: PathBuf) -> PathBuf {
+        #[cfg(target_os = "windows")]
+        {
+            let s = p.to_string_lossy().to_string();
+            if s.starts_with(r"\\?\") {
+                return PathBuf::from(&s[4..]);
+            }
+        }
+        p
+    }
+
+    Some((clean_path(compose_path), clean_path(env_path)))
 }
 
 #[tauri::command]

@@ -21,6 +21,7 @@ export default function Settings() {
     const [status, setStatus] = useState<ConfigStatus | null>(null);
     const [message, setMessage] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<"POSTGRES" | "QDRANT" | "DATA" | "AUTH" | "ADVANCED">("POSTGRES");
+    const [osType, setOsType] = useState<string>("unknown");
 
     useEffect(() => {
         loadData();
@@ -29,12 +30,14 @@ export default function Settings() {
     async function loadData() {
         try {
             setLoading(true);
-            const [statusRes, envRes] = await Promise.all([
+            const [statusRes, envRes, osRes] = await Promise.all([
                 invoke<ConfigStatus>("check_env_config"),
-                invoke<Record<string, string>>("get_all_env_vars")
+                invoke<Record<string, string>>("get_all_env_vars"),
+                invoke<string>("get_os_type")
             ]);
             setStatus(statusRes);
             setEnvMap(envRes);
+            setOsType(osRes);
             setLoading(false);
         } catch (e) {
             console.error(e);
@@ -71,11 +74,27 @@ export default function Settings() {
         }
     }
 
+    const getPathTooltip = (key: string, os: string) => {
+        if (!key.endsWith("_DIR") && !key.endsWith("_PATH")) return null;
+
+        let example = "/path/to/data";
+        if (os === "windows") example = "C:\\Users\\Data";
+
+        return (
+            <span style={{ fontSize: '0.8em', color: '#666', fontStyle: 'italic' }}>
+                Ex: {example}
+            </span>
+        );
+    };
+
     // Helper to render fields for a specific section
     const renderFields = (keys: string[]) => {
         return keys.map(key => (
             <div key={key} style={styles.field}>
-                <label style={styles.label}>{key}</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <label style={styles.label}>{key}</label>
+                    {getPathTooltip(key, osType)}
+                </div>
                 <input
                     type="text"
                     value={envMap[key] || ""}
