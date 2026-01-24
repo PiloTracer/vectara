@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, Depends, HTTPException, Body, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, delete
 from app.db import get_db
@@ -12,6 +12,29 @@ router = APIRouter(
     prefix="/resources",
     tags=["resources"]
 )
+
+@router.on_event("startup")
+async def router_startup():
+    from app.services.vector_service import VectorService
+    from app.services.embedding_service import EmbeddingService
+    from app.services.llm_service import LLMService
+    
+    try:
+        # 1. Ensure Vector Collection
+        service = VectorService()
+        await service.ensure_collection()
+        
+        # 2. Ensure Models (Auto-Pull)
+        # We fire these and await them. For faster startup we could use asyncio.gather,
+        # but sequential is safer to avoid overloading Ollama if both are pulling.
+        embed_service = EmbeddingService()
+        await embed_service.ensure_model_available()
+        
+        llm_service = LLMService()
+        await llm_service.ensure_model_available()
+        
+    except Exception as e:
+        print(f"Warning: Failed to initialize Resources/Models: {e}")
 
 # --- Pydantic Schemas ---
 
@@ -53,6 +76,18 @@ class MCPRead(BaseModel):
     url: Optional[str] = None
     env_vars: dict
     enabled: bool
+
+    class Config:
+        from_attributes = True
+
+# Job Status
+class JobRead(BaseModel):
+    id: uuid.UUID
+    resource_id: Optional[uuid.UUID]
+    type: str
+    status: str
+    progress: dict
+    error: Optional[str]
 
     class Config:
         from_attributes = True
@@ -145,48 +180,60 @@ async def delete_mcp(mcp_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
 
 # --- Ingestion Endpoint ---
 
+
+# --- Ingestion Endpoint ---
+
 @router.post("/sources/{source_id}/ingest")
-async def ingest_source(source_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+async def ingest_source(
+    source_id: uuid.UUID, 
+    background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db)
+):
     """
-    Trigger ingestion for a source.
-    For 'LOCAL_BRIDGE', this crawls the host folder via the bridge.
+    Trigger asynchronous ingestion for a data source.
+    Returns a Job ID to track progress.
     """
+    from app.models.resources import SystemJob
+    from app.services.ingestion_service import process_ingestion_task
+    
+    # Verify source exists
     result = await db.execute(select(DataSource).where(DataSource.id == source_id))
     source = result.scalars().first()
     if not source:
         raise HTTPException(status_code=404, detail="Source not found")
-        
-    if source.type == "LOCAL_BRIDGE":
-        from app.services.bridge import FileBridgeClient
-        
-        path_id = source.config.get("bridge_id")
-        if not path_id:
-             raise HTTPException(status_code=400, detail="Missing bridge_id in source config")
-             
-        client = FileBridgeClient()
-        try:
-            print(f"Starting ingestion for path_id {path_id}...")
-            files = await client.walk(path_id)
-            print(f"Found {len(files)} files via bridge.")
-            
-            # For now, we just log them to prove connectivity
-            for f in files[:5]: # Log first 5
-                print(f" - Found: {f['relative_path']} ({f['size']} bytes)")
-                
-                # Verify read
-                if f['size'] < 1000: # Only read small files for test
-                    content = await client.read_file(path_id, f['relative_path'])
-                    print(f"   Sample content: {content[:50]}...")
-            
-            return {
-                "status": "success", 
-                "message": f"Ingested {len(files)} files", 
-                "files_count": len(files)
-            }
-        except Exception as e:
-            print(f"Ingestion failed: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
-        finally:
-            await client.close()
-            
-    return {"status": "skipped", "message": f"Ingestion not implemented for type {source.type}"}
+    
+    # Create Job Record
+    job = SystemJob(
+        id=uuid.uuid4(),
+        resource_id=source.id,
+        type="INGESTION",
+        status="PENDING",
+        progress={"message": "Queued for processing"}
+    )
+    db.add(job)
+    await db.commit()
+    
+    # Queue Background Task
+    background_tasks.add_task(process_ingestion_task, job.id, source.id)
+    
+    return {
+        "status": "queued",
+        "job_id": job.id,
+        "message": "Ingestion started in background"
+    }
+
+# --- Endpoints: Job Status ---
+
+@router.get("/jobs/{job_id}", response_model=JobRead)
+async def get_job_status(job_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """
+    Get the status of a background job.
+    """
+    from app.models.resources import SystemJob
+    
+    result = await db.execute(select(SystemJob).where(SystemJob.id == job_id))
+    job = result.scalars().first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return job

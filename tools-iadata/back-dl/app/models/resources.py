@@ -42,3 +42,24 @@ class SystemJob(Base):
     status = Column(String, default="PENDING") # PENDING, RUNNING, COMPLETED, FAILED
     progress = Column(JSONB, default={}) # {processed: X, total: Y}
     error = Column(Text, nullable=True)
+
+
+class OAuthToken(Base):
+    """
+    Stores OAuth tokens for cloud data sources.
+    Tokens are encrypted at rest using the app's secret key.
+    """
+    __tablename__ = "oauth_tokens"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    source_id = Column(UUID(as_uuid=True), ForeignKey("data_sources.id", ondelete="CASCADE"), unique=True)
+    provider = Column(String, nullable=False)  # GOOGLE_DRIVE, SHAREPOINT
+    access_token = Column(Text, nullable=False)  # Encrypted
+    refresh_token = Column(Text, nullable=True)  # Encrypted
+    token_type = Column(String, default="Bearer")
+    expires_at = Column(JSONB, nullable=True)  # ISO timestamp
+    scopes = Column(JSONB, default=[])
+    
+    # Relationship
+    data_source = relationship("DataSource", backref="oauth_token")
+

@@ -24,6 +24,12 @@ export interface MCPServer {
     enabled: boolean;
 }
 
+export interface OAuthStatus {
+    connected: boolean;
+    provider?: string;
+    expires_at?: string;
+}
+
 // --- Data Sources ---
 
 export async function getSources(envId: string): Promise<DataSource[]> {
@@ -68,6 +74,44 @@ export async function createMCP(data: { env_id: string; name: string; transport_
 
 export async function deleteMCP(id: string) {
     return await fetchFromBackend(`/resources/mcp/${id}`, {
+        method: "DELETE",
+    });
+}
+
+// --- Ingestion ---
+
+export async function ingestSource(sourceId: string): Promise<{ status: string; job_id: string; message: string }> {
+    return await fetchFromBackend(`/resources/sources/${sourceId}/ingest`, {
+        method: "POST",
+    });
+}
+
+// --- OAuth ---
+
+export async function initGoogleOAuth(sourceId: string, returnUrl?: string): Promise<{ auth_url: string }> {
+    return await fetchFromBackend("/oauth/google/init", {
+        method: "POST",
+        body: JSON.stringify({ source_id: sourceId, return_url: returnUrl }),
+    });
+}
+
+export async function initMicrosoftOAuth(sourceId: string, returnUrl?: string): Promise<{ auth_url: string }> {
+    return await fetchFromBackend("/oauth/microsoft/init", {
+        method: "POST",
+        body: JSON.stringify({ source_id: sourceId, return_url: returnUrl }),
+    });
+}
+
+export async function getOAuthStatus(sourceId: string): Promise<OAuthStatus> {
+    try {
+        return await fetchFromBackend(`/oauth/status/${sourceId}`);
+    } catch (err) {
+        return { connected: false };
+    }
+}
+
+export async function disconnectOAuth(sourceId: string) {
+    return await fetchFromBackend(`/oauth/disconnect/${sourceId}`, {
         method: "DELETE",
     });
 }

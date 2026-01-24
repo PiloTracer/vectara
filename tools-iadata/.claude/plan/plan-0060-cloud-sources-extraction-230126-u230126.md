@@ -2,7 +2,8 @@
 
 **Document ID:** plan-0060-cloud-sources-extraction-230126-u230126  
 **Date:** 2026-01-23  
-**Status:** Proposed Implementation
+**Status:** Superseded by plan-0061
+**Superseded By:** [plan-0061-cloud-integration](file:///mnt/work/Projects/tauri/datalake/tools-iadata/.claude/plan/plan-0061-cloud-integration-260123-u260123.md)
 
 ---
 

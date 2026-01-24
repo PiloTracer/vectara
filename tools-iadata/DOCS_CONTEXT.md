@@ -1,5 +1,8 @@
 # Tools IADATA - Project Context
 
+> [!TIP]
+> **Model Setup**: For setting up custom models like `Dolphin-X1`, see [docs/manual_model_setup.md](file:///mnt/work/Projects/tauri/datalake/tools-iadata/docs/manual_model_setup.md).
+
 ## Overview
 **Tools IADATA** is the configurable AI data-lake system for the CodeIva ecosystem. It manages environments, data sources, agents, and LLM integrations to power corporate intelligence.
 

@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { createSource } from "../../actions/resources";
-import { Loader2, Folder, Link as LinkIcon, Save, X } from "lucide-react";
+import { Loader2, Folder, Link as LinkIcon, Save, X, Cloud, Building2 } from "lucide-react";
 
 interface DataSourceFormProps {
     envId: string;
@@ -28,6 +28,11 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
     const [bridgeId, setBridgeId] = useState("");
     const [bridgePath, setBridgePath] = useState("");
     const [isBridgeLoading, setIsBridgeLoading] = useState(false);
+
+    // Cloud source fields
+    const [folderId, setFolderId] = useState("");
+    const [siteUrl, setSiteUrl] = useState("");
+    const [sharePointFolder, setSharePointFolder] = useState("");
 
     const handleBridgeChoose = async () => {
         setIsBridgeLoading(true);
@@ -74,8 +79,17 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
             } else {
                 config = { path };
             }
-        } else {
+        } else if (type === "WEB") {
             config = { url };
+        } else if (type === "GOOGLE_DRIVE") {
+            config = { folder_id: folderId || "root" };
+        } else if (type === "SHAREPOINT") {
+            if (!siteUrl) {
+                alert("Please enter the SharePoint site URL.");
+                setIsLoading(false);
+                return;
+            }
+            config = { site_url: siteUrl, folder: sharePointFolder };
         }
 
         try {
@@ -88,7 +102,6 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
             onSuccess();
         } catch (err) {
             console.error("Failed to create source:", err);
-            // Ideally use your Toast system here instead of alert
             alert("Failed to create source");
         } finally {
             setIsLoading(false);
@@ -101,7 +114,7 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
                 <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider ml-1">
                     Source Type
                 </label>
-                <div className={`grid ${useLocalEmbedding ? "grid-cols-2" : "grid-cols-1"} gap-4`}>
+                <div className="grid grid-cols-2 gap-4">
                     {useLocalEmbedding && (
                         <button
                             type="button"
@@ -147,6 +160,52 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
                             </span>
                             <span className="text-xs text-slate-500 mt-0.5 block">
                                 Scrape URL or connect via API
+                            </span>
+                        </div>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setType("GOOGLE_DRIVE")}
+                        className={`
+                            relative group flex flex-col items-start gap-3 p-5 rounded-xl border text-left transition-all duration-300
+                            ${type === "GOOGLE_DRIVE"
+                                ? "bg-green-500/10 border-green-500/50 shadow-[0_0_20px_-5px_rgba(34,197,94,0.3)]"
+                                : "bg-slate-900/50 border-white/5 hover:border-white/10 hover:bg-slate-800/50"
+                            }
+                        `}
+                    >
+                        <div className={`p-2 rounded-lg ${type === 'GOOGLE_DRIVE' ? 'bg-green-500/20 text-green-400' : 'bg-slate-800 text-slate-400 group-hover:text-slate-200'}`}>
+                            <Cloud className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className={`block text-sm font-semibold ${type === 'GOOGLE_DRIVE' ? 'text-green-100' : 'text-slate-200'}`}>
+                                Google Drive
+                            </span>
+                            <span className="text-xs text-slate-500 mt-0.5 block">
+                                Connect via Google OAuth
+                            </span>
+                        </div>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setType("SHAREPOINT")}
+                        className={`
+                            relative group flex flex-col items-start gap-3 p-5 rounded-xl border text-left transition-all duration-300
+                            ${type === "SHAREPOINT"
+                                ? "bg-purple-500/10 border-purple-500/50 shadow-[0_0_20px_-5px_rgba(168,85,247,0.3)]"
+                                : "bg-slate-900/50 border-white/5 hover:border-white/10 hover:bg-slate-800/50"
+                            }
+                        `}
+                    >
+                        <div className={`p-2 rounded-lg ${type === 'SHAREPOINT' ? 'bg-purple-500/20 text-purple-400' : 'bg-slate-800 text-slate-400 group-hover:text-slate-200'}`}>
+                            <Building2 className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <span className={`block text-sm font-semibold ${type === 'SHAREPOINT' ? 'text-purple-100' : 'text-slate-200'}`}>
+                                SharePoint
+                            </span>
+                            <span className="text-xs text-slate-500 mt-0.5 block">
+                                Microsoft 365 document library
                             </span>
                         </div>
                     </button>
@@ -299,6 +358,85 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
                         </div>
                     </div>
                 )}
+
+                {type === "GOOGLE_DRIVE" && (
+                    <div className="space-y-3">
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider ml-1">
+                            Google Drive Folder ID
+                        </label>
+                        <div className="relative">
+                            <div className="absolute left-4 top-4 text-slate-400 pointer-events-none">
+                                <Cloud className="w-4 h-4" />
+                            </div>
+                            <input
+                                type="text"
+                                required
+                                value={folderId}
+                                onChange={(e) => setFolderId(e.target.value)}
+                                className="
+                                    w-full bg-slate-900 border border-slate-700 rounded-xl pl-11 pr-4 py-3.5
+                                    text-sm font-mono text-green-200 placeholder:text-slate-500
+                                    focus:outline-none focus:border-green-500/60 focus:ring-2 focus:ring-green-500/20
+                                    transition-all duration-200
+                                "
+                                placeholder="1B2M2Y8As2..."
+                            />
+                        </div>
+                        <p className="text-[11px] text-slate-500 ml-1">
+                            The ID from the folder URL (e.g. drive.google.com/drive/folders/<b>ID</b>)
+                        </p>
+                    </div>
+                )}
+
+                {type === "SHAREPOINT" && (
+                    <div className="space-y-4">
+                        <div className="space-y-3">
+                            <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider ml-1">
+                                SharePoint Site URL
+                            </label>
+                            <div className="relative">
+                                <div className="absolute left-4 top-4 text-slate-400 pointer-events-none">
+                                    <Building2 className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="text"
+                                    required
+                                    value={siteUrl}
+                                    onChange={(e) => setSiteUrl(e.target.value)}
+                                    className="
+                                        w-full bg-slate-900 border border-slate-700 rounded-xl pl-11 pr-4 py-3.5
+                                        text-sm font-mono text-purple-200 placeholder:text-slate-500
+                                        focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20
+                                        transition-all duration-200
+                                    "
+                                    placeholder="mycompany.sharepoint.com/sites/Marketing"
+                                />
+                            </div>
+                        </div>
+                        <div className="space-y-3">
+                            <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider ml-1">
+                                Document Library / Path
+                            </label>
+                            <div className="relative">
+                                <div className="absolute left-4 top-4 text-slate-400 pointer-events-none">
+                                    <Folder className="w-4 h-4" />
+                                </div>
+                                <input
+                                    type="text"
+                                    value={sharePointFolder}
+                                    onChange={(e) => setSharePointFolder(e.target.value)}
+                                    className="
+                                        w-full bg-slate-900 border border-slate-700 rounded-xl pl-11 pr-4 py-3.5
+                                        text-sm font-mono text-purple-200 placeholder:text-slate-500
+                                        focus:outline-none focus:border-purple-500/60 focus:ring-2 focus:ring-purple-500/20
+                                        transition-all duration-200
+                                    "
+                                    placeholder="Shared Documents/Reports (Optional)"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             <div className="flex items-center justify-end gap-4 pt-10 border-t border-slate-700/50 mt-12">
@@ -335,6 +473,6 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
                     Save Source
                 </button>
             </div>
-        </form>
+        </form >
     );
 }

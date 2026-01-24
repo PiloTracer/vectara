@@ -80,6 +80,12 @@ INSERT INTO data_sources (id, env_id, type, name, config, indexing_config) VALUE
     'Competitor News', '{"url": "https://techcrunch.com", "depth": 1}', '{"chunk_size": 500}'
 ) ON CONFLICT (id) DO NOTHING;
 
+-- Env 1: Google Drive Integration
+INSERT INTO data_sources (id, env_id, type, name, config, indexing_config) VALUES (
+    '1b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b', '11111111-1111-1111-1111-111111111111', 'GOOGLE_DRIVE',
+    'Shared Drive - Projects', '{"folder_id": "root", "google_drive_name": "My Drive"}', '{"chunk_size": 1000}'
+) ON CONFLICT (id) DO NOTHING;
+
 
 -- =========================================================================
 -- 3. MCP SERVERS
