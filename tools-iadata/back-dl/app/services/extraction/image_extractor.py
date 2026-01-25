@@ -48,6 +48,10 @@ class ImageExtractor(BaseExtractor):
         """
         Extract text from an image using OCR.
         
+        Strategy:
+            1. Try LLM-based OCR first (if enabled) for high-quality extraction
+            2. Fall back to Tesseract OCR if LLM unavailable or fails
+        
         Args:
             file_path: Path to the image file
             content: Optional pre-loaded image bytes
@@ -55,32 +59,59 @@ class ImageExtractor(BaseExtractor):
         Returns:
             ExtractedDocument with OCR text
         """
+        from PIL import Image
+        import io
+        
+        # Load image bytes if not provided
+        if content is None:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+        
+        # 1. Try LLM-based OCR first
+        try:
+            from app.services.ocr_service import OCRService
+            ocr_service = OCRService()
+            llm_text = await ocr_service.extract_text(content)
+            
+            if llm_text:
+                # LLM OCR succeeded
+                image = Image.open(io.BytesIO(content))
+                width, height = image.size
+                
+                return ExtractedDocument(
+                    content=llm_text,
+                    metadata={
+                        "source": str(file_path),
+                        "type": "image",
+                        "format": image.format or file_path.suffix.upper().lstrip('.'),
+                        "dimensions": f"{width}x{height}",
+                        "ocr_method": "llm_vision"
+                    }
+                )
+        except Exception as e:
+            logger.debug(f"LLM OCR not available, using Tesseract: {e}")
+        
+        # 2. Fall back to Tesseract
         if not self._check_tesseract():
             return ExtractedDocument(
                 content="",
                 metadata={
                     "source": str(file_path),
                     "type": "image",
-                    "error": "Tesseract OCR not available"
+                    "error": "No OCR method available"
                 }
             )
         
         try:
             import pytesseract
-            from PIL import Image
-            import io
             
-            # Load image
-            if content:
-                image = Image.open(io.BytesIO(content))
-            else:
-                image = Image.open(file_path)
+            image = Image.open(io.BytesIO(content))
             
             # Convert to RGB if necessary (for RGBA/P mode images)
             if image.mode in ('RGBA', 'P'):
                 image = image.convert('RGB')
             
-            # Perform OCR
+            # Perform Tesseract OCR
             text = pytesseract.image_to_string(image, lang=self.lang)
             
             # Get image metadata
@@ -94,6 +125,7 @@ class ImageExtractor(BaseExtractor):
                     "format": image.format or file_path.suffix.upper().lstrip('.'),
                     "dimensions": f"{width}x{height}",
                     "mode": image.mode,
+                    "ocr_method": "tesseract",
                     "ocr_language": self.lang
                 }
             )

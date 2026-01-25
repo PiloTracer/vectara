@@ -1,18 +1,42 @@
 # Implementation Plan: Local LLM Management Architecture
 
-**Document ID:** plan-0070-local-llm-architecture-250126-u250126  
+**Document ID:** plan-0070-local-llm-architecture-200125-u260125  
 **Date:** 2026-01-25  
-**Status:** Proposed  
-**Supersedes:** `/mnt/work/Projects/tauri/datalake/.ai/features/0501-local-LLMS-260123-260123.md` (now deprecated)
+**Status:** ✅ IMPLEMENTED  
+**Last Verified:** 2026-01-25 02:23 CST
+
+---
+
+## Implementation Status Report
+
+> [!NOTE]
+> **Verification Date**: 2026-01-25 02:23 CST
+> **Result**: All items implemented and verified ✅
+
+| # | Task | Status | File |
+|---|------|--------|------|
+| 1 | `.env.example` with OCR vars | ✅ Done | [.env.example](file:///mnt/work/Projects/tauri/datalake/tools-iadata/.env.example) |
+| 2 | `config.py` with OCR settings | ✅ Done | [config.py](file:///mnt/work/Projects/tauri/datalake/tools-iadata/back-dl/app/config.py) L32-34 |
+| 3 | `VECTOR_SIZE = 1024` | ✅ Done | [vector_service.py](file:///mnt/work/Projects/tauri/datalake/tools-iadata/back-dl/app/services/vector_service.py) L19 |
+| 4 | `ocr_service.py` (HuggingFace) | ✅ Done | [ocr_service.py](file:///mnt/work/Projects/tauri/datalake/tools-iadata/back-dl/app/services/ocr_service.py) |
+| 5 | `image_extractor.py` OCR integration | ✅ Done | [image_extractor.py](file:///mnt/work/Projects/tauri/datalake/tools-iadata/back-dl/app/services/extraction/image_extractor.py) |
+| 6 | Startup sequence with OCR | ✅ Done | [resources.py](file:///mnt/work/Projects/tauri/datalake/tools-iadata/back-dl/app/routers/resources.py) L40-42 |
+| 7 | `requirements.txt` dependencies | ✅ Done | [requirements.txt](file:///mnt/work/Projects/tauri/datalake/tools-iadata/back-dl/requirements.txt) L23-25 |
+| 8 | Deprecate `0501-local-LLMS` | ✅ Done | File deleted by user |
+
+### Model Configuration (Verified)
+
+| Role | Env Variable | Value | Source |
+|------|--------------|-------|--------|
+| Chat | `LOCAL_MODEL_NAME` | `qwen2.5:3b` | Ollama |
+| Embedding | `LOCAL_EMBEDDING_MODEL_NAME` | `bge-m3` | Ollama |
+| OCR | `LOCAL_OCR_MODEL_NAME` | `lightonai/LightOnOCR-2-1B` | HuggingFace |
 
 ---
 
 ## 1. Executive Summary
 
 This plan establishes the **authoritative architecture** for local LLM management in the Vectara/IADATA system. It defines three distinct model roles, their configuration, auto-acquisition strategy, and integration points.
-
-> [!NOTE]
-> **Documentation Ownership**: LLM configuration belongs in `tools-iadata/.claude/plan/` (runtime scope), NOT in `.ai/features/` (Tauri shell scope). The feature file `0501` is now legacy.
 
 ---
 
@@ -22,9 +46,9 @@ The system supports **three distinct model roles**, each serving a specific purp
 
 | Role | Purpose | Default Model | Required? | Controlled By |
 |------|---------|---------------|-----------|---------------|
-| **Chat/LLM** | Agent descriptions, Q&A, RAG responses | `qwen2.5:latest` | Optional | `LOCAL_MODEL_NAME` |
+| **Chat/LLM** | Agent descriptions, Q&A, RAG responses | `qwen2.5:3b` | Optional | `LOCAL_MODEL_NAME` |
 | **Embedding** | Text → Vector conversion for Qdrant | `bge-m3:latest` | If `USE_LOCAL_EMBEDDING=true` | `LOCAL_EMBEDDING_MODEL_NAME` |
-| **OCR** | Vision-based text extraction from images | `lighton/lightonocr:2b` | Optional | `LOCAL_OCR_MODEL_NAME` |
+| **OCR** | Vision-based text extraction from images | `lightonai/LightOnOCR-2-1B` | Optional | `LOCAL_OCR_MODEL_NAME` |
 
 ### 2.1 When Each Model Is Used
 
@@ -58,7 +82,7 @@ The system supports **three distinct model roles**, each serving a specific purp
 
 | Property | Value |
 |----------|-------|
-| **Ollama Name** | `qwen2.5:latest` (defaults to 7B) |
+| **Ollama Name** | `qwen2.5:3b` (recommended for CPU) |
 | **Recommended Variant** | `qwen2.5:3b` for low-memory systems |
 | **Parameters** | 3B - 7B |
 | **RAM Required** | 4GB (3B) / 8GB (7B) |
@@ -77,24 +101,22 @@ The system supports **three distinct model roles**, each serving a specific purp
 | **Use Case** | Text → Vector for Qdrant storage |
 | **Why This Model** | Best multilingual embedding model under 1B parameters |
 
-> [!IMPORTANT]
-> **Vector Size Update**: Current `VectorService` uses `VECTOR_SIZE = 768`. BGE-M3 outputs 1024-dimensional vectors. This must be corrected!
+> [!NOTE]
+> **Vector Size**: BGE-M3 outputs 1024-dimensional vectors. `VectorService.VECTOR_SIZE` has been updated to match.
 
 ### 3.3 OCR Model: LightOnOCR-2-1B
 
 | Property | Value |
 |----------|-------|
-| **Ollama Name** | `lighton/lightonocr:2b` (pending availability) |
-| **HuggingFace** | `lightonai/LightOnOCR-2-1B` |
+| **HuggingFace ID** | `lightonai/LightOnOCR-2-1B` |
+| **Model Size** | ~1B parameters |
 | **GGUF Size** | ~800MB (Q4_K_S quantization) |
 | **RAM Required** | 4-8GB |
 | **Use Case** | Extract text from scanned documents and images |
 | **Fallback** | Tesseract OCR (already installed in Docker) |
 
-> [!WARNING]
-> **Ollama Availability**: As of 2026-01, LightOnOCR is not natively in Ollama's library. Implementation requires either:
-> 1. Using `ollama create` with a custom Modelfile
-> 2. Direct HuggingFace inference via `transformers`
+> [!NOTE]
+> **Acquisition**: LightOnOCR is publicly available on HuggingFace and can be automatically downloaded using the `transformers` library. No Ollama required for this model - it runs directly via Python.
 
 ---
 
@@ -103,36 +125,14 @@ The system supports **three distinct model roles**, each serving a specific purp
 ### 4.1 Updated `.env.example`
 
 ```env
-# =============================================
-# LOCAL AI CONFIGURATION
-# =============================================
-
-# Master Switch - Enables local embedding and vector storage
+# LLM & Local AI
 USE_LOCAL_EMBEDDING=false
-
-# Ollama Connection (host.docker.internal for host-side Ollama)
 OLLAMA_HOST=host.docker.internal
 OLLAMA_PORT=11434
-
-# ---------------------------------------------
-# MODEL DEFINITIONS (All models must run on CPU)
-# ---------------------------------------------
-
-# Chat/LLM Model - For agent descriptions and RAG responses
-# Options: qwen2.5, qwen2.5:3b (lighter), llama3.2, mistral
-LOCAL_MODEL_NAME=qwen2.5
-
-# Embedding Model - For text → vector conversion
-# Options: bge-m3 (recommended), nomic-embed-text, mxbai-embed-large
+LOCAL_MODEL_NAME=qwen2.5:3b
 LOCAL_EMBEDDING_MODEL_NAME=bge-m3
-
-# OCR Model - For vision-based text extraction (OPTIONAL)
-# Set to empty string to use Tesseract fallback only
-# Options: lighton/lightonocr:2b (when available), llava
-LOCAL_OCR_MODEL_NAME=
-
-# Enable LLM-based OCR (vs Tesseract-only)
 USE_LOCAL_OCR=false
+LOCAL_OCR_MODEL_NAME=lightonai/LightOnOCR-2-1B
 ```
 
 ### 4.2 Updated `config.py`
@@ -149,25 +149,23 @@ USE_LOCAL_OCR: bool = os.getenv("USE_LOCAL_OCR", "false").lower() == "true"
 
 ## 5. Service Architecture
 
-### 5.1 Services to Create/Modify
+### 5.1 Services Status
 
-| Service | Status | Changes Needed |
+| Service | Status | Implementation |
 |---------|--------|----------------|
-| `embedding_service.py` | ✅ Exists | Update `VECTOR_SIZE` to 1024 |
-| `llm_service.py` | ✅ Exists | No changes |
-| `ocr_service.py` | ❌ NEW | Create for LightOnOCR integration |
-| `vector_service.py` | ✅ Exists | Update `VECTOR_SIZE = 1024` |
+| `embedding_service.py` | ✅ Complete | VECTOR_SIZE handled by `vector_service.py` |
+| `llm_service.py` | ✅ Complete | No changes needed |
+| `ocr_service.py` | ✅ Complete | Created with HuggingFace transformers |
+| `vector_service.py` | ✅ Complete | `VECTOR_SIZE = 1024` |
 
 ### 5.2 New File: `back-dl/app/services/ocr_service.py`
 
 ```python
 """
-Service for LLM-based OCR using vision models.
+OCR Service using HuggingFace LightOnOCR model.
 Falls back to Tesseract if disabled or unavailable.
 """
 import logging
-import httpx
-import base64
 from typing import Optional
 from app.config import settings
 
@@ -175,50 +173,49 @@ logger = logging.getLogger(__name__)
 
 class OCRService:
     """
-    LLM-based OCR using vision models (e.g., LightOnOCR).
-    Falls back to Tesseract if model unavailable.
+    LLM-based OCR using LightOnOCR from HuggingFace.
+    Downloads model automatically on first use.
+    Falls back to Tesseract if unavailable.
     """
+    
+    _model = None
+    _processor = None
     
     def __init__(self):
         self.enabled = settings.USE_LOCAL_OCR and bool(settings.LOCAL_OCR_MODEL_NAME)
-        self.base_url = settings.OLLAMA_BASE_URL
         self.model_name = settings.LOCAL_OCR_MODEL_NAME
         
     async def ensure_model_available(self) -> bool:
-        """Check/pull OCR model. Similar to EmbeddingService."""
+        """Load model from HuggingFace (downloads on first use)."""
         if not self.enabled:
             return True
-        # ... (same pattern as embedding_service.py)
-        
-    async def extract_text(self, image_bytes: bytes) -> Optional[str]:
-        """
-        Extract text from image using vision model.
-        Returns None to signal fallback to Tesseract.
-        """
-        if not self.enabled:
-            return None
-            
         try:
-            b64_image = base64.b64encode(image_bytes).decode('utf-8')
-            
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                resp = await client.post(
-                    f"{self.base_url}/api/generate",
-                    json={
-                        "model": self.model_name,
-                        "prompt": "Extract all text from this image. Return only the text, no commentary.",
-                        "images": [b64_image],
-                        "stream": False
-                    }
-                )
-                
-                if resp.status_code == 200:
-                    return resp.json().get("response", "").strip()
-                    
+            from transformers import AutoProcessor, AutoModelForVision2Seq
+            if OCRService._model is None:
+                logger.info(f"Loading OCR model '{self.model_name}' from HuggingFace...")
+                OCRService._processor = AutoProcessor.from_pretrained(self.model_name)
+                OCRService._model = AutoModelForVision2Seq.from_pretrained(self.model_name)
+                logger.info(f"OCR model '{self.model_name}' loaded successfully.")
+            return True
         except Exception as e:
-            logger.warning(f"OCR model failed, falling back to Tesseract: {e}")
+            logger.error(f"Failed to load OCR model: {e}")
+            return False
             
-        return None  # Signal fallback
+    async def extract_text(self, image_bytes: bytes) -> Optional[str]:
+        """Extract text from image using LightOnOCR."""
+        if not self.enabled or OCRService._model is None:
+            return None
+        try:
+            from PIL import Image
+            import io
+            image = Image.open(io.BytesIO(image_bytes))
+            inputs = OCRService._processor(images=image, return_tensors="pt")
+            generated_ids = OCRService._model.generate(**inputs, max_new_tokens=1024)
+            text = OCRService._processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+            return text.strip()
+        except Exception as e:
+            logger.warning(f"OCR extraction failed: {e}")
+            return None
 ```
 
 ### 5.3 Update Extraction Pipeline

@@ -24,10 +24,14 @@ class Settings(BaseSettings):
     
     # LLM & Embeddings
     USE_LOCAL_EMBEDDING: bool = os.getenv("USE_LOCAL_EMBEDDING", "false").lower() == "true"
-    LOCAL_MODEL_NAME: str = os.getenv("LOCAL_MODEL_NAME", "qwen2.5") # Chat Model
+    LOCAL_MODEL_NAME: str = os.getenv("LOCAL_MODEL_NAME", "qwen2.5:3b") # Chat Model (3B for CPU)
     LOCAL_EMBEDDING_MODEL_NAME: str = os.getenv("LOCAL_EMBEDDING_MODEL_NAME", "bge-m3") # Embedding Model
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "llm-dl")
     OLLAMA_PORT: int = int(os.getenv("OLLAMA_PORT", 11434))
+    
+    # OCR Model (Vision-based text extraction)
+    USE_LOCAL_OCR: bool = os.getenv("USE_LOCAL_OCR", "false").lower() == "true"
+    LOCAL_OCR_MODEL_NAME: str = os.getenv("LOCAL_OCR_MODEL_NAME", "")
     
     @property
     def OLLAMA_BASE_URL(self) -> str:

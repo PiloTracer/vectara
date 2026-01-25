@@ -18,20 +18,28 @@ async def router_startup():
     from app.services.vector_service import VectorService
     from app.services.embedding_service import EmbeddingService
     from app.services.llm_service import LLMService
+    from app.services.ocr_service import OCRService
+    from app.config import settings
     
     try:
         # 1. Ensure Vector Collection
         service = VectorService()
-        await service.ensure_collection()
+        service.ensure_collection()
         
         # 2. Ensure Models (Auto-Pull)
-        # We fire these and await them. For faster startup we could use asyncio.gather,
-        # but sequential is safer to avoid overloading Ollama if both are pulling.
-        embed_service = EmbeddingService()
-        await embed_service.ensure_model_available()
+        # Sequential to avoid overloading Ollama if multiple models need pulling.
+        # Order: Embedding (critical) -> Chat (important) -> OCR (optional)
+        
+        if settings.USE_LOCAL_EMBEDDING:
+            embed_service = EmbeddingService()
+            await embed_service.ensure_model_available()
         
         llm_service = LLMService()
         await llm_service.ensure_model_available()
+        
+        if settings.USE_LOCAL_OCR:
+            ocr_service = OCRService()
+            await ocr_service.ensure_model_available()
         
     except Exception as e:
         print(f"Warning: Failed to initialize Resources/Models: {e}")

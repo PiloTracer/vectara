@@ -14,11 +14,9 @@ class VectorService:
     """
     
     COLLECTION_NAME = "documents"
-    # Default vector size for 'nomic-embed-text' is 768. 
-    # dolphin-x1-8b might vary, but usually 4096 or similar if LLM direct, 
-    # but we usually use a dedicated embed model.
-    # For Resilience: We try to detect or use a safe default.
-    VECTOR_SIZE = 768 # Standard for many efficient embed models
+    # BGE-M3 (BAAI/bge-m3) outputs 1024-dimensional vectors.
+    # This is the default embedding model for this system.
+    VECTOR_SIZE = 1024
     
     def __init__(self):
         self.enabled = settings.USE_LOCAL_EMBEDDING
