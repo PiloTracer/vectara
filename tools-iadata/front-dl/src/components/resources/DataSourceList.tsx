@@ -194,7 +194,7 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {sources.map((source) => {
-                const isLocal = source.type === "LOCAL";
+                const isLocal = source.type === "LOCAL" || source.type === "LOCAL_BRIDGE";
                 const isDrive = source.type === "GOOGLE_DRIVE";
                 const isSharePoint = source.type === "SHAREPOINT";
 
