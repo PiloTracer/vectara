@@ -96,6 +96,13 @@ async function detectEnv() {
     const DEPLOY_SUFFIX = (getVar('DEPLOY_SUFFIX') || '').toLowerCase();
     let BACKUP_DIR = getVar('BACKUP_DIR') || `./backups_${DEPLOY_SUFFIX}`;
     let IMPORT_DIR = getVar('IMPORT_DIR') || `./data/import`;
+    let USE_LOCAL_EMBEDDING = (getVar('USE_LOCAL_EMBEDDING') || 'false').toLowerCase() === 'true';
+
+    // Enable Docker Compose Profile for LLM if enabled
+    if (USE_LOCAL_EMBEDDING) {
+        process.env.COMPOSE_PROFILES = 'local-llm';
+        console.log(`${colors.green}🟢 Local LLM Stack Enabled${colors.reset}`);
+    }
 
     // Resolve relative paths
     if (!path.isAbsolute(BACKUP_DIR)) BACKUP_DIR = path.resolve(PROJECT_ROOT, BACKUP_DIR);

@@ -73,6 +73,14 @@ if [ -f "$ENV_FILE" ]; then
     # Extract Paths
     BACKUP_DIR=$(grep "^BACKUP_DIR=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r')
     IMPORT_DIR=$(grep "^IMPORT_DIR=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r')
+    EXPORT_DIR=$(grep "^EXPORT_DIR=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r')
+    
+    # Check for Local LLM
+    USE_LOCAL=$(grep "^USE_LOCAL_EMBEDDING=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r' | tr '[:upper:]' '[:lower:]')
+    if [ "$USE_LOCAL" = "true" ]; then
+        export COMPOSE_PROFILES="local-llm"
+        echo "🟢 Local LLM Stack Enabled"
+    fi
 fi
 
 if [ -z "$PROJ_NAME" ]; then
