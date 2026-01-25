@@ -142,5 +142,4 @@ class ImageExtractor(BaseExtractor):
             )
 
 
-# Register the extractor
-ExtractorRegistry.register(ImageExtractor)
+

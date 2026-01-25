@@ -65,31 +65,33 @@ class ExtractorRegistry:
     Registry for document extractors.
     Provides automatic extractor selection based on file type.
     """
+    _extractors: List[BaseExtractor] = []
     
-    def __init__(self):
-        self._extractors: List[BaseExtractor] = []
+    @classmethod
+    def register(cls, extractor: BaseExtractor) -> None:
+        """Register an extractor instance."""
+        cls._extractors.append(extractor)
     
-    def register(self, extractor: BaseExtractor) -> None:
-        """Register an extractor."""
-        self._extractors.append(extractor)
-    
-    def get_extractor(self, filename: str) -> Optional[BaseExtractor]:
+    @classmethod
+    def get_extractor(cls, filename: str) -> Optional[BaseExtractor]:
         """Get the appropriate extractor for a file."""
-        for extractor in self._extractors:
+        for extractor in cls._extractors:
             if extractor.can_handle(filename):
                 return extractor
         return None
     
-    async def extract(self, file_bytes: bytes, filename: str) -> Optional[ExtractedDocument]:
+    @classmethod
+    async def extract(cls, file_bytes: bytes, filename: str) -> Optional[ExtractedDocument]:
         """Extract content from a file using the appropriate extractor."""
-        extractor = self.get_extractor(filename)
+        extractor = cls.get_extractor(filename)
         if extractor:
             return await extractor.extract(file_bytes, filename)
         return None
     
-    def supported_extensions(self) -> List[str]:
+    @classmethod
+    def supported_extensions(cls) -> List[str]:
         """Get all supported extensions across all extractors."""
         extensions = []
-        for extractor in self._extractors:
+        for extractor in cls._extractors:
             extensions.extend(extractor.supported_extensions())
         return list(set(extensions))

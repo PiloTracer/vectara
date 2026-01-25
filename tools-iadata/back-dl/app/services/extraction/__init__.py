@@ -15,3 +15,9 @@ __all__ = [
     "ImageExtractor",
 ]
 
+# Register Extractors
+ExtractorRegistry.register(PDFExtractor())
+ExtractorRegistry.register(OfficeExtractor())
+ExtractorRegistry.register(TextExtractor())
+ExtractorRegistry.register(ImageExtractor())
+

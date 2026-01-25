@@ -88,6 +88,31 @@ pub async fn check_docker_status(app: tauri::AppHandle) -> Result<DockerState, S
     if stdout.trim().is_empty() || stdout.contains("[]") {
         return Ok(DockerState::Stopped);
     }
+
+    // Parse JSON lines to check service states
+    let lines: Vec<&str> = stdout.lines().collect();
+    let mut is_llm_init_running = false;
+
+    for line in lines {
+        if let Ok(container) = serde_json::from_str::<serde_json::Value>(line) {
+            // Check for llm-init in running state
+            if let Some(service) = container.get("Service").and_then(|s| s.as_str()) {
+                let state = container.get("State").and_then(|s| s.as_str()).unwrap_or("");
+                
+                if service == "llm-init" && state == "running" {
+                    is_llm_init_running = true;
+                }
+            }
+        }
+    }
+
+    if is_llm_init_running {
+        return Ok(DockerState::Starting);
+    }
+    
+    // If backend isn't running yet but we have output, we might be starting or partially up.
+    // However, the main goal here is to block "Running" if llm-init is busy.
+    // If llm-init is DONE (exited 0), it won't be "running", so we proceed.
     
     Ok(DockerState::Running)
 }

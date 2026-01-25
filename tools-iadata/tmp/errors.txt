@@ -1,203 +1,383 @@
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.700515Z  INFO qdrant: Distributed mode disabled
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.700535Z  INFO qdrant: Telemetry reporting enabled, id: f3b10e53-f765-4381-b274-eba80ee451a2
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.735919Z  INFO qdrant::tonic: Qdrant gRPC listening on 6334
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.735933Z  INFO qdrant::tonic: TLS disabled for gRPC API
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.737107Z  INFO qdrant::actix: TLS disabled for REST API
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.737135Z  INFO qdrant::actix: Qdrant HTTP listening on 6333
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.737138Z  INFO actix_server::builder: starting 31 workers
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.737142Z  INFO actix_server::server: Actix runtime found; starting in Actix runtime
-iadata_qdrant_dl_dev  | 2026-01-25T09:25:50.737147Z  INFO actix_server::server: starting service: "actix-web-service-0.0.0.0:6333", workers: 31, listening on: 0.0.0.0:6333
-iadata_front_dl_dev   |     port: 8000
-iadata_front_dl_dev   |   }
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   |  POST /dashboard/agents 500 in 202ms (compile: 3ms, proxy.ts: 13ms, render: 186ms)
-iadata_front_dl_dev   |  GET /api/auth/session 200 in 32ms (compile: 2ms, render: 30ms)
-iadata_front_dl_dev   | ⨯ TypeError: fetch failed
-iadata_qdrant_dl_dev  | 2026-01-25T09:26:03.184535Z  INFO actix_web::middleware::logger: 172.20.0.5 "GET /collections HTTP/1.1" 200 82 "-" "python-client/1.16.2 python/3.11.14" 0.000140
-iadata_qdrant_dl_dev  | 2026-01-25T09:26:03.188035Z  INFO storage::content_manager::toc::collection_meta_ops: Creating collection documents
-iadata_llm_dl_dev     | Couldn't find '/root/.ollama/id_ed25519'. Generating new private key.
-iadata_llm_dl_dev     | Your new public key is: 
-iadata_qdrant_dl_dev  | 2026-01-25T09:26:03.215093Z  INFO actix_web::middleware::logger: 172.20.0.5 "PUT /collections/documents HTTP/1.1" 200 71 "-" "python-client/1.16.2 python/3.11.14" 0.029431
-iadata_front_dl_dev   |     at async getRolePresets (src/actions/agents.ts:41:17)
-iadata_llm_dl_dev     | 
-iadata_llm_dl_dev     | ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEeNKeJrhQQvY5BKfEfbRMy1Gcc3RxrDdelcDq3SHagv
-iadata_llm_dl_dev     | 
-iadata_front_dl_dev   |   39 |
-iadata_front_dl_dev   |   40 | export async function getRolePresets(): Promise<RolePreset[]> {
-iadata_front_dl_dev   | > 41 |     const res = await fetch(`${API_BASE}/agents/presets/roles`, { cache: "no-store" });
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.191Z level=INFO source=routes.go:1629 msg="server config" env="map[CUDA_VISIBLE_DEVICES: GGML_VK_VISIBLE_DEVICES: GPU_DEVICE_ORDINAL: HIP_VISIBLE_DEVICES: HSA_OVERRIDE_GFX_VERSION: HTTPS_PROXY: HTTP_PROXY: NO_PROXY: OLLAMA_CONTEXT_LENGTH:4096 OLLAMA_DEBUG:INFO OLLAMA_FLASH_ATTENTION:false OLLAMA_GPU_OVERHEAD:0 OLLAMA_HOST:http://0.0.0.0:11434 OLLAMA_KEEP_ALIVE:5m0s OLLAMA_KV_CACHE_TYPE: OLLAMA_LLM_LIBRARY: OLLAMA_LOAD_TIMEOUT:5m0s OLLAMA_MAX_LOADED_MODELS:0 OLLAMA_MAX_QUEUE:512 OLLAMA_MODELS:/root/.ollama/models OLLAMA_MULTIUSER_CACHE:false OLLAMA_NEW_ENGINE:false OLLAMA_NOHISTORY:false OLLAMA_NOPRUNE:false OLLAMA_NUM_PARALLEL:1 OLLAMA_ORIGINS:[http://localhost https://localhost http://localhost:* https://localhost:* http://127.0.0.1 https://127.0.0.1 http://127.0.0.1:* https://127.0.0.1:* http://0.0.0.0 https://0.0.0.0 http://0.0.0.0:* https://0.0.0.0:* app://* file://* tauri://* vscode-webview://* vscode-file://*] OLLAMA_REMOTES:[ollama.com] OLLAMA_SCHED_SPREAD:false OLLAMA_VULKAN:false ROCR_VISIBLE_DEVICES: http_proxy: https_proxy: no_proxy:]"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.191Z level=INFO source=images.go:501 msg="total blobs: 0"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.191Z level=INFO source=images.go:508 msg="total unused blobs removed: 0"
-iadata_back_dl_dev    | Initializing Database...
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.191Z level=INFO source=routes.go:1682 msg="Listening on [::]:11434 (version 0.14.3)"
-iadata_pg_dl_dev      | The files belonging to this database system will be owned by user "postgres".
-iadata_pg_dl_dev      | This user must also own the server process.
-iadata_pg_dl_dev      | 
-iadata_front_dl_dev   |      |                 ^
-iadata_front_dl_dev   |   42 |     if (!res.ok) throw new Error("Failed to fetch role presets");
-iadata_pg_dl_dev      | The database cluster will be initialized with locale "en_US.utf8".
-iadata_pg_dl_dev      | The default database encoding has accordingly been set to "UTF8".
-iadata_pg_dl_dev      | The default text search configuration will be set to "english".
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | Data page checksums are disabled.
-iadata_pg_dl_dev      | 
-iadata_front_dl_dev   |   43 |     const data = await res.json();
-iadata_front_dl_dev   |   44 |     return data.roles; {
-iadata_front_dl_dev   |   digest: '3977470511',
-iadata_front_dl_dev   |   [cause]: Error: connect ECONNREFUSED 172.20.0.5:8000
-iadata_front_dl_dev   |       at <unknown> (Error: connect ECONNREFUSED 172.20.0.5:8000) {
-iadata_front_dl_dev   |     errno: -111,
-iadata_front_dl_dev   |     code: 'ECONNREFUSED',
-iadata_front_dl_dev   |     syscall: 'connect',
-iadata_front_dl_dev   |     address: '172.20.0.5',
-iadata_front_dl_dev   |     port: 8000
-iadata_front_dl_dev   |   }
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   |  POST /dashboard/agents 500 in 209ms (compile: 3ms, proxy.ts: 19ms, render: 187ms)
-iadata_front_dl_dev   | Error: aborted
-iadata_front_dl_dev   |     at ignore-listed frames {
-iadata_front_dl_dev   |   code: 'ECONNRESET'
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   | ⨯ uncaughtException: Error: aborted
-iadata_front_dl_dev   |     at ignore-listed frames {
-iadata_front_dl_dev   |   code: 'ECONNRESET'
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   | ⨯ uncaughtException:  Error: aborted
-iadata_front_dl_dev   |     at ignore-listed frames {
-iadata_pg_dl_dev      | fixing permissions on existing directory /var/lib/postgresql/data ... ok
-iadata_pg_dl_dev      | creating subdirectories ... ok
-iadata_front_dl_dev   |   code: 'ECONNRESET'
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   |  GET /dashboard/agents 200 in 240ms (compile: 6ms, proxy.ts: 13ms, render: 221ms)
-iadata_front_dl_dev   |  GET /api/auth/session 200 in 60ms (compile: 45ms, render: 15ms)
-iadata_front_dl_dev   | ⨯ TypeError: fetch failed
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.191Z level=INFO source=runner.go:67 msg="discovering available GPUs..."
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.193Z level=INFO source=server.go:429 msg="starting runner" cmd="/usr/bin/ollama runner --ollama-engine --port 35575"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.343Z level=INFO source=runner.go:106 msg="experimental Vulkan support disabled.  To enable, set OLLAMA_VULKAN=1"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.343Z level=INFO source=server.go:429 msg="starting runner" cmd="/usr/bin/ollama runner --ollama-engine --port 45389"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.613Z level=INFO source=server.go:429 msg="starting runner" cmd="/usr/bin/ollama runner --ollama-engine --port 43253"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.614Z level=INFO source=server.go:429 msg="starting runner" cmd="/usr/bin/ollama runner --ollama-engine --port 34069"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.778Z level=INFO source=types.go:42 msg="inference compute" id=GPU-859f9eea-5451-5196-1e1d-d0636c5bfc00 filter_id="" library=CUDA compute=12.0 name=CUDA0 description="NVIDIA GeForce RTX 5060 Ti" libdirs=ollama,cuda_v13 driver=13.0 pci_id=0000:01:00.0 type=discrete total="15.9 GiB" available="12.6 GiB"
-iadata_llm_dl_dev     | time=2026-01-25T09:25:51.778Z level=INFO source=routes.go:1723 msg="entering low vram mode" "total vram"="15.9 GiB" threshold="20.0 GiB"
-iadata_back_dl_dev    | Executing SQL script: 010-schema-changes.sql
-iadata_back_dl_dev    | Executing SQL script: 100-populate-test.sql
-iadata_back_dl_dev    | Database Initialized.
-iadata_back_dl_dev    | INFO:httpx:HTTP Request: GET http://ia-dl:6333 "HTTP/1.1 200 OK"
-iadata_back_dl_dev    | INFO:httpx:HTTP Request: GET http://ia-dl:6333/collections "HTTP/1.1 200 OK"
-iadata_back_dl_dev    | INFO:app.services.vector_service:Creating collection 'documents'
-iadata_back_dl_dev    | INFO:httpx:HTTP Request: PUT http://ia-dl:6333/collections/documents "HTTP/1.1 200 OK"
-iadata_back_dl_dev    | INFO:httpx:HTTP Request: GET http://host.docker.internal:11434/api/tags "HTTP/1.1 200 OK"
-iadata_back_dl_dev    | INFO:app.services.embedding_service:Model 'bge-m3' not found. Initiating pull... this may take time.
-iadata_back_dl_dev    | INFO:httpx:HTTP Request: POST http://host.docker.internal:11434/api/pull "HTTP/1.1 200 OK"
-iadata_back_dl_dev    | INFO:app.services.embedding_service:Successfully pulled model 'bge-m3'.
-iadata_back_dl_dev    | INFO:app.services.llm_service:Checking availability of chat model 'qwen2.5:3b'...
-iadata_back_dl_dev    | INFO:httpx:HTTP Request: GET http://host.docker.internal:11434/api/tags "HTTP/1.1 200 OK"
-iadata_back_dl_dev    | INFO:app.services.llm_service:Chat model 'qwen2.5:3b' not found. Initiating pull... this may take time.
-iadata_back_dl_dev    | INFO:httpx:HTTP Request: POST http://host.docker.internal:11434/api/pull "HTTP/1.1 200 OK"
-iadata_front_dl_dev   |     at async getAgents (src/actions/agents.ts:48:17)
-iadata_front_dl_dev   |   46 |
-iadata_front_dl_dev   |   47 | export async function getAgents(envId: string): Promise<Agent[]> {
-iadata_front_dl_dev   | > 48 |     const res = await fetch(`${API_BASE}/agents/env/${envId}`, { cache: "no-store" });
-iadata_front_dl_dev   |      |                 ^
-iadata_front_dl_dev   |   49 |     if (!res.ok) throw new Error("Failed to fetch agents");
-iadata_front_dl_dev   |   50 |     return res.json();
-iadata_front_dl_dev   |   51 | } {
-iadata_front_dl_dev   |   digest: '2563979744',
-iadata_pg_dl_dev      | selecting dynamic shared memory implementation ... posix
-iadata_pg_dl_dev      | selecting default max_connections ... 100
-iadata_pg_dl_dev      | selecting default shared_buffers ... 128MB
-iadata_pg_dl_dev      | selecting default time zone ... UTC
-iadata_pg_dl_dev      | creating configuration files ... ok
-iadata_pg_dl_dev      | running bootstrap script ... ok
-iadata_pg_dl_dev      | sh: locale: not found
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.026 UTC [35] WARNING:  no usable system locales were found
-iadata_pg_dl_dev      | performing post-bootstrap initialization ... ok
-iadata_pg_dl_dev      | syncing data to disk ... ok
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | Success. You can now start the database server using:
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      |     pg_ctl -D /var/lib/postgresql/data -l logfile start
-iadata_front_dl_dev   |   [cause]: Error: connect ECONNREFUSED 172.20.0.5:8000
-iadata_front_dl_dev   |       at <unknown> (Error: connect ECONNREFUSED 172.20.0.5:8000) {
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | initdb: warning: enabling "trust" authentication for local connections
-iadata_pg_dl_dev      | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
-iadata_pg_dl_dev      | waiting for server to start....2026-01-25 09:25:51.442 UTC [41] LOG:  starting PostgreSQL 15.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.442 UTC [41] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.445 UTC [44] LOG:  database system was shut down at 2026-01-25 09:25:51 UTC
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.448 UTC [41] LOG:  database system is ready to accept connections
-iadata_pg_dl_dev      |  done
-iadata_pg_dl_dev      | server started
-iadata_pg_dl_dev      | CREATE DATABASE
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/*
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | waiting for server to shut down....2026-01-25 09:25:51.579 UTC [41] LOG:  received fast shutdown request
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.579 UTC [41] LOG:  aborting any active transactions
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.581 UTC [41] LOG:  background worker "logical replication launcher" (PID 47) exited with exit code 1
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.581 UTC [42] LOG:  shutting down
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.581 UTC [42] LOG:  checkpoint starting: shutdown immediate
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.599 UTC [42] LOG:  checkpoint complete: wrote 921 buffers (5.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.010 s, sync=0.007 s, total=0.019 s; sync files=301, longest=0.001 s, average=0.001 s; distance=4239 kB, estimate=4239 kB
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.605 UTC [41] LOG:  database system is shut down
-iadata_pg_dl_dev      |  done
-iadata_pg_dl_dev      | server stopped
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | PostgreSQL init process complete; ready for start up.
-iadata_pg_dl_dev      | 
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.693 UTC [1] LOG:  starting PostgreSQL 15.15 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.694 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.694 UTC [1] LOG:  listening on IPv6 address "::", port 5432
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.695 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.708 UTC [57] LOG:  database system was shut down at 2026-01-25 09:25:51 UTC
-iadata_pg_dl_dev      | 2026-01-25 09:25:51.711 UTC [1] LOG:  database system is ready to accept connections
-iadata_front_dl_dev   |     errno: -111,
-iadata_front_dl_dev   |     code: 'ECONNREFUSED',
-iadata_front_dl_dev   |     syscall: 'connect',
-iadata_front_dl_dev   |     address: '172.20.0.5',
-iadata_front_dl_dev   |     port: 8000
-iadata_front_dl_dev   |   }
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   |  POST /dashboard/agents 500 in 194ms (compile: 3ms, proxy.ts: 11ms, render: 180ms)
-iadata_front_dl_dev   |  GET /api/auth/session 200 in 17ms (compile: 1673µs, render: 16ms)
-iadata_front_dl_dev   | ⨯ TypeError: fetch failed
-iadata_front_dl_dev   |     at async getRolePresets (src/actions/agents.ts:41:17)
-iadata_front_dl_dev   |   39 |
-iadata_front_dl_dev   |   40 | export async function getRolePresets(): Promise<RolePreset[]> {
-iadata_front_dl_dev   | > 41 |     const res = await fetch(`${API_BASE}/agents/presets/roles`, { cache: "no-store" });
-iadata_front_dl_dev   |      |                 ^
-iadata_front_dl_dev   |   42 |     if (!res.ok) throw new Error("Failed to fetch role presets");
-iadata_front_dl_dev   |   43 |     const data = await res.json();
-iadata_front_dl_dev   |   44 |     return data.roles; {
-iadata_front_dl_dev   |   digest: '3977470511',
-iadata_front_dl_dev   |   [cause]: Error: connect ECONNREFUSED 172.20.0.5:8000
-iadata_front_dl_dev   |       at <unknown> (Error: connect ECONNREFUSED 172.20.0.5:8000) {
-iadata_front_dl_dev   |     errno: -111,
-iadata_front_dl_dev   |     code: 'ECONNREFUSED',
-iadata_front_dl_dev   |     syscall: 'connect',
-iadata_front_dl_dev   |     address: '172.20.0.5',
-iadata_front_dl_dev   |     port: 8000
-iadata_front_dl_dev   |   }
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   |  POST /dashboard/agents 500 in 187ms (compile: 1823µs, proxy.ts: 15ms, render: 170ms)
-iadata_front_dl_dev   | ⨯ TypeError: fetch failed
-iadata_front_dl_dev   |     at async getModels (src/actions/models.ts:63:17)
-iadata_front_dl_dev   |   61 |         ? `${API_BASE}/models/env/${envId}`
-iadata_front_dl_dev   |   62 |         : `${API_BASE}/models/`;
-iadata_front_dl_dev   | > 63 |     const res = await fetch(url, { cache: "no-store" });
-iadata_front_dl_dev   |      |                 ^
-iadata_front_dl_dev   |   64 |     if (!res.ok) throw new Error("Failed to fetch models");
-iadata_front_dl_dev   |   65 |     return res.json();
-iadata_front_dl_dev   |   66 | } {
-iadata_front_dl_dev   |   digest: '1393305920',
-iadata_front_dl_dev   |   [cause]: Error: connect ECONNREFUSED 172.20.0.5:8000
-iadata_front_dl_dev   |       at <unknown> (Error: connect ECONNREFUSED 172.20.0.5:8000) {
-iadata_front_dl_dev   |     errno: -111,
-iadata_front_dl_dev   |     code: 'ECONNREFUSED',
-iadata_front_dl_dev   |     syscall: 'connect',
-iadata_front_dl_dev   |     address: '172.20.0.5',
-iadata_front_dl_dev   |     port: 8000
-iadata_front_dl_dev   |   }
-iadata_front_dl_dev   | }
-iadata_front_dl_dev   |  POST /dashboard/agents 500 in 168ms (compile: 1890µs, proxy.ts: 6ms, render: 159ms)
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:27 | 200 |      265.14µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:37100 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:32 | 200 |      20.509µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:32 | 200 |     237.598µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:37104 - "GET /health HTTP/1.1" 200 OK
+iadata_back_dl_dev      | INFO:     172.20.0.6:42272 - "GET /environments/ HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  GET /dashboard/environments 200 in 180ms (compile: 120ms, proxy.ts: 8ms, render: 52ms)
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:37 | 200 |      19.867µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:37 | 200 |     245.924µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:43790 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:42 | 200 |      20.218µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:42 | 200 |     229.583µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:53690 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:48 | 200 |      19.637µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:48 | 200 |     284.797µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:53692 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:53 | 200 |      19.296µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:53 | 200 |     231.927µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:34584 - "GET /health HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  GET /dashboard 200 in 21ms (compile: 2ms, proxy.ts: 7ms, render: 11ms)
+iadata_front_dl_dev     |  GET /dashboard/sources 200 in 175ms (compile: 157ms, proxy.ts: 6ms, render: 12ms)
+iadata_back_dl_dev      | INFO:     172.20.0.6:33816 - "GET /resources/env/11111111-1111-1111-1111-111111111111/sources HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 34ms (compile: 2ms, proxy.ts: 9ms, render: 23ms)
+iadata_back_dl_dev      | INFO:     172.20.0.6:33816 - "GET /resources/env/11111111-1111-1111-1111-111111111111/sources HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 24ms (compile: 1971µs, proxy.ts: 7ms, render: 15ms)
+iadata_back_dl_dev      | INFO:     172.20.0.6:33816 - "GET /oauth/status/1b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 26ms (compile: 3ms, proxy.ts: 7ms, render: 15ms)
+iadata_back_dl_dev      | INFO:     172.20.0.6:33816 - "GET /oauth/status/1b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 21ms (compile: 1814µs, proxy.ts: 7ms, render: 12ms)
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:58 | 200 |      29.475µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:38:58 | 200 |     279.066µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:34598 - "GET /health HTTP/1.1" 200 OK
+iadata_back_dl_dev      | INFO:     172.20.0.6:33816 - "DELETE /resources/sources/1b1b1b1b-1b1b-1b1b-1b1b-1b1b1b1b1b1b HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 53ms (compile: 2ms, proxy.ts: 6ms, render: 45ms)
+iadata_back_dl_dev      | INFO:     172.20.0.6:33816 - "GET /resources/env/11111111-1111-1111-1111-111111111111/sources HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 20ms (compile: 4ms, proxy.ts: 6ms, render: 11ms)
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:03 | 200 |       21.35µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:03 | 200 |     268.806µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:33818 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:08 | 200 |      21.611µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:08 | 200 |     263.316µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:33822 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:13 | 200 |      19.277µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:13 | 200 |     251.083µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:54898 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:18 | 200 |      20.389µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:18 | 200 |     253.698µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:54910 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:23 | 200 |      20.468µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:23 | 200 |      238.43µs |       127.0.0.1 | GET      "/api/tags"
+iadata_pg_dl_dev        | 2026-01-25 15:39:23.805 UTC [27] LOG:  checkpoint starting: time
+iadata_pg_dl_dev        | 2026-01-25 15:39:24.083 UTC [27] LOG:  checkpoint complete: wrote 5 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.202 s, sync=0.038 s, total=0.278 s; sync files=4, longest=0.037 s, average=0.010 s; distance=1 kB, estimate=1 kB
+iadata_back_dl_dev      | INFO:     127.0.0.1:33136 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:28 | 200 |      18.415µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:28 | 200 |     242.567µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:33152 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:33 | 200 |      21.801µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:33 | 200 |     245.543µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:52470 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:38 | 200 |      18.444µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:38 | 200 |     231.055µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:52474 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:43 | 200 |      20.138µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:43 | 200 |     246.495µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:58654 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:49 | 200 |      20.628µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:49 | 200 |     309.623µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:58666 - "GET /health HTTP/1.1" 200 OK
+iadata_back_dl_dev      | INFO:     172.20.0.6:34634 - "DELETE /resources/sources/1a1a1a1a-1a1a-1a1a-1a1a-1a1a1a1a1a1a HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 65ms (compile: 4ms, proxy.ts: 8ms, render: 54ms)
+iadata_back_dl_dev      | INFO:     172.20.0.6:34634 - "GET /resources/env/11111111-1111-1111-1111-111111111111/sources HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 21ms (compile: 2ms, proxy.ts: 7ms, render: 12ms)
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:54 | 200 |      22.523µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:54 | 200 |     342.134µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:45136 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:59 | 200 |       26.64µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:39:59 | 200 |     239.752µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:45150 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:04 | 200 |      21.551µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:04 | 200 |     245.823µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:43646 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:09 | 200 |      19.016µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:09 | 200 |     233.019µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:43654 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:14 | 200 |      19.216µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:14 | 200 |     233.299µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:45978 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:19 | 200 |      19.466µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:19 | 200 |     235.734µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:45986 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:24 | 200 |      22.863µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:24 | 200 |     235.273µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:41276 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:29 | 200 |      23.074µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:29 | 200 |     238.169µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:41282 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:34 | 200 |      32.782µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:34 | 200 |     271.592µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:38014 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:39 | 200 |      24.617µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:39 | 200 |     281.861µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:38016 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:44 | 200 |      22.312µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:44 | 200 |     250.132µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:55790 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:49 | 200 |       21.15µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:49 | 200 |      254.69µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:55816 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:54 | 200 |      19.698µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:54 | 200 |     229.582µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:46204 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:59 | 200 |      21.881µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:40:59 | 200 |      259.98µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:46208 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:04 | 200 |      57.408µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:04 | 200 |     237.568µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     172.20.0.6:48570 - "GET /environments/ HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  GET /dashboard/environments 200 in 112ms (compile: 2ms, proxy.ts: 6ms, render: 104ms)
+iadata_front_dl_dev     |  GET /api/auth/session 200 in 71ms (compile: 53ms, render: 18ms)
+iadata_front_dl_dev     |  GET /api/auth/session 200 in 7ms (compile: 1624µs, render: 5ms)
+iadata_back_dl_dev      | INFO:     127.0.0.1:60222 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:10 | 200 |      22.162µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:10 | 200 |      238.99µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:54304 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:15 | 200 |      20.448µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:15 | 200 |     293.283µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:54310 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:20 | 200 |      20.499µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:20 | 200 |      233.31µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:34090 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:25 | 200 |      23.034µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:25 | 200 |     257.025µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:34094 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:30 | 200 |      20.108µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:30 | 200 |     229.573µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:34620 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:35 | 200 |      19.758µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:35 | 200 |     234.051µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:34626 - "GET /health HTTP/1.1" 200 OK
+iadata_back_dl_dev      | INFO:     172.20.0.6:49564 - "POST /resources/sources HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 70ms (compile: 2ms, proxy.ts: 9ms, render: 58ms)
+iadata_back_dl_dev      | INFO:     172.20.0.6:49564 - "GET /resources/env/11111111-1111-1111-1111-111111111111/sources HTTP/1.1" 200 OK
+iadata_front_dl_dev     |  POST /dashboard/sources 200 in 23ms (compile: 2ms, proxy.ts: 9ms, render: 11ms)
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:40 | 200 |      18.144µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:40 | 200 |     235.263µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:50776 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:45 | 200 |      20.188µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:45 | 200 |     251.053µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:50790 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:50 | 200 |      19.136µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:50 | 200 |     236.856µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:36312 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:55 | 200 |      19.046µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:41:55 | 200 |     240.593µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     172.20.0.6:34718 - "POST /resources/sources/d9ac95ec-11a5-4477-86c9-ed700d67188c/ingest HTTP/1.1" 500 Internal Server Error
+iadata_back_dl_dev      | ERROR:    Exception in ASGI application
+iadata_back_dl_dev      | Traceback (most recent call last):
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+iadata_back_dl_dev      |     result = await app(  # type: ignore[func-returns-value]
+iadata_back_dl_dev      |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+iadata_back_dl_dev      |     return await self.app(scope, receive, send)
+iadata_back_dl_dev      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1135, in __call__
+iadata_back_dl_dev      |     await super().__call__(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 107, in __call__
+iadata_back_dl_dev      |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+iadata_back_dl_dev      |     raise exc
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+iadata_back_dl_dev      |     await self.app(scope, receive, _send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
+iadata_back_dl_dev      |     await self.app(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+iadata_back_dl_dev      |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev      |     raise exc
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev      |     await app(scope, receive, sender)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+iadata_back_dl_dev      |     await self.app(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+iadata_back_dl_dev      |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+iadata_back_dl_dev      |     await route.handle(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+iadata_back_dl_dev      |     await self.app(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 115, in app
+iadata_back_dl_dev      |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev      |     raise exc
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev      |     await app(scope, receive, sender)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 101, in app
+iadata_back_dl_dev      |     response = await f(request)
+iadata_back_dl_dev      |                ^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 355, in app
+iadata_back_dl_dev      |     raw_response = await run_endpoint_function(
+iadata_back_dl_dev      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+iadata_back_dl_dev      |     return await dependant.call(**values)
+iadata_back_dl_dev      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/app/app/routers/resources.py", line 205, in ingest_source
+iadata_back_dl_dev      |     from app.services.ingestion_service import process_ingestion_task
+iadata_back_dl_dev      |   File "/app/app/services/ingestion_service.py", line 13, in <module>
+iadata_back_dl_dev      |     from app.services.extraction import ExtractorRegistry
+iadata_back_dl_dev      |   File "/app/app/services/extraction/__init__.py", line 6, in <module>
+iadata_back_dl_dev      |     from .image_extractor import ImageExtractor
+iadata_back_dl_dev      |   File "/app/app/services/extraction/image_extractor.py", line 146, in <module>
+iadata_back_dl_dev      |     ExtractorRegistry.register(ImageExtractor)
+iadata_back_dl_dev      | TypeError: ExtractorRegistry.register() missing 1 required positional argument: 'extractor'
+iadata_front_dl_dev     | Fetch Backend Error: Error: Backend Error 500: Internal Server Error
+iadata_front_dl_dev     |     at fetchFromBackend (src/lib/backend.ts:28:19)
+iadata_front_dl_dev     |     at async ingestSource (src/actions/resources.ts:84:12)
+iadata_front_dl_dev     |   26 |         if (!res.ok) {
+iadata_front_dl_dev     |   27 |             const errorText = await res.text();
+iadata_front_dl_dev     | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
+iadata_front_dl_dev     |      |                   ^
+iadata_front_dl_dev     |   29 |         }
+iadata_front_dl_dev     |   30 |
+iadata_front_dl_dev     |   31 |         return await res.json();
+iadata_front_dl_dev     | ⨯ Error: Backend Error 500: Internal Server Error
+iadata_front_dl_dev     |     at fetchFromBackend (src/lib/backend.ts:28:19)
+iadata_front_dl_dev     |     at async ingestSource (src/actions/resources.ts:84:12)
+iadata_front_dl_dev     |   26 |         if (!res.ok) {
+iadata_front_dl_dev     |   27 |             const errorText = await res.text();
+iadata_front_dl_dev     | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
+iadata_front_dl_dev     |      |                   ^
+iadata_front_dl_dev     |   29 |         }
+iadata_front_dl_dev     |   30 |
+iadata_front_dl_dev     |   31 |         return await res.json(); {
+iadata_front_dl_dev     |   digest: '2088219072'
+iadata_front_dl_dev     | }
+iadata_front_dl_dev     |  POST /dashboard/sources 500 in 459ms (compile: 2ms, proxy.ts: 6ms, render: 451ms)
+iadata_back_dl_dev      | INFO:     127.0.0.1:36314 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:00 | 200 |      23.805µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:00 | 200 |     349.579µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:54782 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:05 | 200 |      18.856µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:05 | 200 |     236.185µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     172.20.0.6:60788 - "POST /resources/sources/d9ac95ec-11a5-4477-86c9-ed700d67188c/ingest HTTP/1.1" 500 Internal Server Error
+iadata_back_dl_dev      | ERROR:    Exception in ASGI application
+iadata_back_dl_dev      | Traceback (most recent call last):
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/uvicorn/protocols/http/httptools_impl.py", line 416, in run_asgi
+iadata_back_dl_dev      |     result = await app(  # type: ignore[func-returns-value]
+iadata_back_dl_dev      |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+iadata_back_dl_dev      |     return await self.app(scope, receive, send)
+iadata_back_dl_dev      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/applications.py", line 1135, in __call__
+iadata_back_dl_dev      |     await super().__call__(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/applications.py", line 107, in __call__
+iadata_back_dl_dev      |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 186, in __call__
+iadata_back_dl_dev      |     raise exc
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/errors.py", line 164, in __call__
+iadata_back_dl_dev      |     await self.app(scope, receive, _send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/cors.py", line 85, in __call__
+iadata_back_dl_dev      |     await self.app(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+iadata_back_dl_dev      |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev      |     raise exc
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev      |     await app(scope, receive, sender)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+iadata_back_dl_dev      |     await self.app(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 716, in __call__
+iadata_back_dl_dev      |     await self.middleware_stack(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 736, in app
+iadata_back_dl_dev      |     await route.handle(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/routing.py", line 290, in handle
+iadata_back_dl_dev      |     await self.app(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 115, in app
+iadata_back_dl_dev      |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+iadata_back_dl_dev      |     raise exc
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+iadata_back_dl_dev      |     await app(scope, receive, sender)
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 101, in app
+iadata_back_dl_dev      |     response = await f(request)
+iadata_back_dl_dev      |                ^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 355, in app
+iadata_back_dl_dev      |     raw_response = await run_endpoint_function(
+iadata_back_dl_dev      |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/usr/local/lib/python3.11/site-packages/fastapi/routing.py", line 243, in run_endpoint_function
+iadata_back_dl_dev      |     return await dependant.call(**values)
+iadata_back_dl_dev      |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iadata_back_dl_dev      |   File "/app/app/routers/resources.py", line 205, in ingest_source
+iadata_back_dl_dev      |     from app.services.ingestion_service import process_ingestion_task
+iadata_back_dl_dev      |   File "/app/app/services/ingestion_service.py", line 13, in <module>
+iadata_back_dl_dev      |     from app.services.extraction import ExtractorRegistry
+iadata_back_dl_dev      |   File "/app/app/services/extraction/__init__.py", line 6, in <module>
+iadata_back_dl_dev      |     from .image_extractor import ImageExtractor
+iadata_back_dl_dev      |   File "/app/app/services/extraction/image_extractor.py", line 146, in <module>
+iadata_back_dl_dev      |     ExtractorRegistry.register(ImageExtractor)
+iadata_back_dl_dev      | TypeError: ExtractorRegistry.register() missing 1 required positional argument: 'extractor'
+iadata_front_dl_dev     | Fetch Backend Error: Error: Backend Error 500: Internal Server Error
+iadata_front_dl_dev     |     at fetchFromBackend (src/lib/backend.ts:28:19)
+iadata_front_dl_dev     |     at async ingestSource (src/actions/resources.ts:84:12)
+iadata_front_dl_dev     |   26 |         if (!res.ok) {
+iadata_front_dl_dev     |   27 |             const errorText = await res.text();
+iadata_front_dl_dev     | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
+iadata_front_dl_dev     |      |                   ^
+iadata_front_dl_dev     |   29 |         }
+iadata_front_dl_dev     |   30 |
+iadata_front_dl_dev     |   31 |         return await res.json();
+iadata_front_dl_dev     | ⨯ Error: Backend Error 500: Internal Server Error
+iadata_front_dl_dev     |     at fetchFromBackend (src/lib/backend.ts:28:19)
+iadata_front_dl_dev     |     at async ingestSource (src/actions/resources.ts:84:12)
+iadata_front_dl_dev     |   26 |         if (!res.ok) {
+iadata_front_dl_dev     |   27 |             const errorText = await res.text();
+iadata_front_dl_dev     | > 28 |             throw new Error(`Backend Error ${res.status}: ${errorText}`);
+iadata_front_dl_dev     |      |                   ^
+iadata_front_dl_dev     |   29 |         }
+iadata_front_dl_dev     |   30 |
+iadata_front_dl_dev     |   31 |         return await res.json(); {
+iadata_front_dl_dev     |   digest: '2088219072'
+iadata_front_dl_dev     | }
+iadata_front_dl_dev     |  POST /dashboard/sources 500 in 365ms (compile: 3ms, proxy.ts: 10ms, render: 352ms)
+iadata_back_dl_dev      | INFO:     127.0.0.1:54790 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:11 | 200 |      19.146µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:11 | 200 |      249.53µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:59938 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:16 | 200 |      17.983µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:16 | 200 |     240.493µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:59940 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:21 | 200 |      18.705µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:21 | 200 |     231.095µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:58654 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:26 | 200 |      21.771µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:26 | 200 |     241.986µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:58668 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:31 | 200 |      26.189µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:31 | 200 |       265.4µs |       127.0.0.1 | GET      "/api/tags"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:36 | 200 |      21.791µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:36 | 200 |     362.973µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:51040 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:41 | 200 |       21.19µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:41 | 200 |     253.417µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:51050 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:46 | 200 |      18.806µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:46 | 200 |      249.41µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:44570 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:51 | 200 |      23.264µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:51 | 200 |     266.962µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:44574 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:56 | 200 |      20.899µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:42:56 | 200 |     238.129µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:58092 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:01 | 200 |        20.9µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:01 | 200 |     242.206µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:58104 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:07 | 200 |      19.276µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:07 | 200 |     262.675µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:54104 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:12 | 200 |      20.168µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:12 | 200 |     239.131µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:54108 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:17 | 200 |      22.061µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:17 | 200 |     241.054µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:53824 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:22 | 200 |      21.711µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:22 | 200 |     283.394µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:53846 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:27 | 200 |      18.775µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:27 | 200 |     247.677µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:46694 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:32 | 200 |      20.859µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:32 | 200 |     290.588µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:38860 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:37 | 200 |      22.703µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:37 | 200 |     230.484µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:38862 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:42 | 200 |      18.645µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:42 | 200 |     234.943µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:36294 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:47 | 200 |      18.835µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:47 | 200 |     262.484µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:36306 - "GET /health HTTP/1.1" 200 OK
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:52 | 200 |      20.609µs |       127.0.0.1 | HEAD     "/"
+iadata_llm_dl_dev       | [GIN] 2026/01/25 - 15:43:52 | 200 |     248.528µs |       127.0.0.1 | GET      "/api/tags"
+iadata_back_dl_dev      | INFO:     127.0.0.1:57718 - "GET /health HTTP/1.1" 200 OK
