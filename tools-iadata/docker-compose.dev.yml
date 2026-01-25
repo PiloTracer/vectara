@@ -7,7 +7,7 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - pg_data:/var/lib/postgresql/data
+      - plpg_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "${DB_USER}", "-d", "${DB_NAME}"]
       interval: 10s
@@ -98,8 +98,8 @@ services:
       - "host.docker.internal:host-gateway"
 
 volumes:
-  pg_data:
-    name: ${COMPOSE_PROJECT_NAME}_pg_data
+  plpg_data:
+    name: ${COMPOSE_PROJECT_NAME}_plpg_data
   qdrant_data:
     name: ${COMPOSE_PROJECT_NAME}_qdrant_data
   ollama_data:

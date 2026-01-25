@@ -80,7 +80,7 @@ if [ -z "$PROJ_NAME" ]; then
 fi
 
 VOL_PREFIX="${PROJ_NAME}_"
-PG_VOLUME="${VOL_PREFIX}pg_data"
+PG_VOLUME="${VOL_PREFIX}plpg_data"
 QDRANT_VOLUME="${VOL_PREFIX}qdrant_data"
 
 # Detect Docker Compose
@@ -158,7 +158,7 @@ ensure_volumes() {
 
 prune_anonymous_volumes() {
   echo "Pruning unused anonymous volumes..."
-  PROTECTED_VOLUMES="pg_data ${PG_VOLUME} qdrant_data ${QDRANT_VOLUME}"
+  PROTECTED_VOLUMES="plpg_data ${PG_VOLUME} qdrant_data ${QDRANT_VOLUME}"
   docker volume ls -q -f dangling=true | while read -r volume_name; do
     [ -z "$volume_name" ] && continue
     if echo "$PROTECTED_VOLUMES" | grep -qw "$volume_name"; then

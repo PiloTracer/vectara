@@ -53,3 +53,34 @@ class LLMService:
         except Exception as e:
             logger.error(f"Error ensuring chat model availability: {e}")
             return False
+
+    async def chat(self, messages: list, stream: bool = False):
+        """
+        Send a chat request to the local LLM.
+        """
+        try:
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                payload = {
+                    "model": self.model_name,
+                    "messages": messages,
+                    "stream": stream
+                }
+                
+                if stream:
+                    # Return the generator for streaming
+                    return self._stream_response(client, payload)
+                else:
+                    response = await client.post(f"{self.base_url}/api/chat", json=payload)
+                    response.raise_for_status()
+                    return response.json()
+                    
+        except Exception as e:
+            logger.error(f"Error during chat generation: {e}")
+            raise e
+
+    async def _stream_response(self, client, payload):
+        """Helper to stream responses"""
+        async with client.stream("POST", f"{self.base_url}/api/chat", json=payload) as response:
+            async for line in response.aiter_lines():
+                if line:
+                    yield line

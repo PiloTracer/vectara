@@ -102,7 +102,7 @@ async function detectEnv() {
     if (!path.isAbsolute(IMPORT_DIR)) IMPORT_DIR = path.resolve(PROJECT_ROOT, IMPORT_DIR);
 
     const VOL_PREFIX = `${PROJ_NAME}_`;
-    const PG_VOLUME = `${VOL_PREFIX}pg_data`;
+    const PG_VOLUME = `${VOL_PREFIX}plpg_data`;
     const QDRANT_VOLUME = `${VOL_PREFIX}qdrant_data`;
 
     // Detect Docker Compose Command
@@ -149,7 +149,7 @@ async function detectEnv() {
     const pruneAnonymous = () => {
         console.log("Pruning unused anonymous volumes...");
         try {
-            const protectedVols = [PG_VOLUME, QDRANT_VOLUME, 'pg_data', 'qdrant_data'];
+            const protectedVols = [PG_VOLUME, QDRANT_VOLUME, 'plpg_data', 'qdrant_data'];
             const dangling = execSync('docker volume ls -q -f dangling=true').toString().split('\n').filter(Boolean);
 
             dangling.forEach(vol => {
