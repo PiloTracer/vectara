@@ -56,7 +56,7 @@ async def chat_endpoint(
                     context_parts = []
                     for res in search_results:
                         text = res.payload.get('text', '') or res.payload.get('content', '')
-                        filename = res.payload.get('filename', 'Unknown')
+                        filename = res.payload.get('path', 'Unknown') # Changed from filename to path
                         if text:
                             context_parts.append(f"--- SOURCE: {filename} ---\n{text}\n")
                     
