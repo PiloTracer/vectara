@@ -27,12 +27,12 @@ pub async fn start_http_server(state: AppState) {
         .layer(cors)
         .with_state(state);
 
-    // Bind strictly to localhost
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3737));
+    // Bind to 0.0.0.0 so Docker containers can access via host.docker.internal
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3737));
     // Check if port is available or handle error? For now unwrap is fine for dev.
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     
-    println!("Bridge Server running on http://127.0.0.1:3737");
+    println!("Bridge Server running on http://0.0.0.0:3737");
     
     axum::serve(listener, app).await.unwrap();
 }

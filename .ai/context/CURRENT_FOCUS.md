@@ -1,9 +1,13 @@
 # Current Development Focus
 
-## 📅 Recent Session: 2026-01-25 04:03
-**Summary**: Defined the correct local LLMs to use, set acquisition logic on scripts and vectara, added interactivity features in backend and front-end and the chatbot logic/front-end.
+## 📅 Recent Session: 2026-01-25 12:24
+**Summary**: extensive adjustments to enable the bridge, proper access to local system, initialization status, etc.
 
 ### Git Activity
+- 2026-01-25: Modules->Dashboard menu
+- 2026-01-25: adjust data sources
+- 2026-01-25: adjustments
+- 2026-01-25: new session
 - 2026-01-25: local-llms + proper acquisition #2
 - 2026-01-25: local-llms + proper acquisition adjustments
 - 2026-01-25: local-llms + proper acquisition

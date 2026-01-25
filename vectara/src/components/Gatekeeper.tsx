@@ -105,39 +105,65 @@ export default function Gatekeeper() {
         }
     }
 
+    interface ServiceStatus {
+        service: string;
+        state: string; // running, exited
+        health: string; // healthy, starting, unhealthy, ""
+    }
+
+    interface DockerResponse {
+        status: "Running" | "Starting" | "Stopped" | "Error";
+        error: string | null;
+        services: ServiceStatus[];
+    }
+
     async function checkDocker(targetUrl: string) {
         try {
-            // Status: Running, Stopped, Starting, or { Error: string }
-            type DockerState = "Running" | "Stopped" | "Starting" | { Error: string };
-            const state = await invoke<DockerState>("check_docker_status");
-            console.log("Docker Status:", state);
+            const response = await invoke<DockerResponse>("check_docker_status");
+            console.log("Docker Response:", response);
 
-            if (state === "Running") {
+            // Update State with the backend global response
+            setDockerState(response.status);
+
+            // Handle Error
+            if (response.status === "Error" && response.error) {
+                setDockerState("Error: " + response.error);
+                setLoading(false);
+                return;
+            }
+
+            // Logic: Pass the services list to a local state to render
+            // (We might need a new state variable for services if we want to show them)
+            setServices(response.services);
+
+            if (response.status === "Running") {
+                // Backend says "Running" which means ALL CRITICAL services are HEALTHY.
                 if (!initialCheckDone.current) {
+                    // Start fresh if this was the very first check
                     console.log("Initial Check: Docker running. Restarting for fresh state...");
                     initialCheckDone.current = true;
                     restartDocker(targetUrl);
                 } else {
-                    console.log("Docker running and fresh. Waiting for service health...");
-                    initialCheckDone.current = true;
-                    setDockerState("Running");
+                    // We are good to go
                     setLoading(false);
                     waitForService(targetUrl);
                 }
-            } else if (typeof state === 'object' && 'Error' in state) {
-                // It's the Error object variant
-                setDockerState("Error: " + state.Error);
+            } else if (response.status === "Starting") {
+                // Keep polling
                 setLoading(false);
+                setTimeout(() => checkDocker(targetUrl), 2000);
             } else {
-                // Stopped, Starting, or unexpected string
-                setDockerState(state as string);
+                // Stopped
                 setLoading(false);
             }
+
         } catch (e) {
             setError("Docker Check Failed: " + String(e));
             setLoading(false);
         }
     }
+
+    const [services, setServices] = useState<ServiceStatus[]>([]);
 
     async function waitForService(url: string) {
         // Poll every 1s
@@ -160,43 +186,122 @@ export default function Gatekeeper() {
 
     async function startDocker() {
         setLoading(true);
+        setDockerState("Starting...");
         try {
             const result = await invoke("start_docker");
             console.log("Start Result:", result);
             initialCheckDone.current = true;
-            // Poll for success
-            setTimeout(() => {
-                if (status?.docker_url) checkDocker(status.docker_url);
-            }, 5000); // Wait 5s then check again
+            // Immediately start polling for status
+            if (status?.docker_url) {
+                pollDockerStatus(status.docker_url);
+            }
         } catch (e) {
             setError("Failed to start docker: " + String(e));
             setLoading(false);
         }
     }
 
+    // New polling function that runs during startup
+    async function pollDockerStatus(targetUrl: string) {
+        const poll = async () => {
+            try {
+                const response = await invoke<DockerResponse>("check_docker_status");
+                console.log("Poll Result:", response);
+                setServices(response.services);
+                setDockerState(response.status);
+
+                if (response.status === "Running") {
+                    setLoading(false);
+                    waitForService(targetUrl);
+                } else if (response.status === "Starting") {
+                    // Keep polling every 2 seconds
+                    setTimeout(poll, 2000);
+                } else if (response.status === "Stopped") {
+                    // Still stopped, keep trying for a bit
+                    setTimeout(poll, 2000);
+                } else {
+                    setLoading(false);
+                }
+            } catch (e) {
+                console.error("Poll error:", e);
+                setTimeout(poll, 2000);
+            }
+        };
+        poll();
+    }
+
     async function restartDocker(targetUrl: string) {
         setLoading(true);
+        setDockerState("Restarting...");
         try {
-            setDockerState("Restarting...");
-            const result = await invoke("restart_docker");
-            console.log("Restart Result:", result);
-
-            setTimeout(() => {
-                checkDocker(targetUrl);
-            }, 5000);
+            setServices([]); // Clear old list
+            await invoke("restart_docker");
+            // Immediately start polling
+            pollDockerStatus(targetUrl);
         } catch (e) {
             setError("Failed to restart docker: " + String(e));
             setLoading(false);
         }
     }
 
+    // Render Services Helper (moved outside renderContent for reuse)
+    const renderServices = () => {
+        if (!services || services.length === 0) return null;
+        return (
+            <div style={{ width: '100%', marginTop: 20, marginBottom: 20, textAlign: 'left' }}>
+                {services.map(s => {
+                    let color = '#555'; // default/stopped
+                    let progress = 0;
+                    let statusText = s.state;
+
+                    if (s.state === 'running') {
+                        if (s.health === 'healthy') {
+                            color = '#4CAF50'; // Green
+                            progress = 100;
+                            statusText = 'Healthy';
+                        } else if (s.health === 'starting') {
+                            color = '#FFC107'; // Yellow
+                            progress = 40;
+                            statusText = 'Starting...';
+                        } else if (s.health === 'unhealthy') {
+                            color = '#F44336'; // Red
+                            progress = 100;
+                            statusText = 'Unhealthy';
+                        } else {
+                            // Running but no health check
+                            color = '#8BC34A'; // Light Green
+                            progress = 100;
+                            statusText = 'Running';
+                        }
+                    } else if (s.state === 'exited') {
+                        color = '#9E9E9E'; // Grey
+                        statusText = 'Stopped/Exited';
+                    }
+
+                    return (
+                        <div key={s.service} style={{ marginBottom: 10 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8em', marginBottom: 3 }}>
+                                <span>{s.service}</span>
+                                <span style={{ color: color }}>{statusText}</span>
+                            </div>
+                            <div style={{ width: '100%', height: 4, backgroundColor: '#333', borderRadius: 2 }}>
+                                <div style={{ width: `${progress}%`, height: '100%', backgroundColor: color, borderRadius: 2, transition: 'width 0.5s ease' }}></div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
+
     // Render Content Helper
     const renderContent = () => {
         if (loading) {
             return (
                 <div style={styles.centerBox}>
-                    <h2>🔄 Agentic Gatekeeper</h2>
-                    <p>Verifying Environment Integrity...</p>
+                    <h2>⏳ Starting Services</h2>
+                    <p style={{ color: '#888' }}>{dockerState || "Initializing..."}</p>
+                    {renderServices()}
                     <LogTerminal logs={logs} />
                 </div>
             );
@@ -276,14 +381,26 @@ export default function Gatekeeper() {
 
         // State: Docker Check
         if (dockerState) {
+
             if (dockerState === "Running") {
                 return (
                     <div style={styles.centerBox}>
-                        <h2>⏳ Waiting for Service</h2>
-                        <p>Docker is running. Waiting for <strong>front-dl</strong> to be ready...</p>
+                        <h2>🚀 Launching Dashboard</h2>
+                        <p>All systems healthy. Redirecting...</p>
+                        {renderServices()}
                         <div style={{ marginTop: 20 }}>
                             <div className="spinner"></div>
                         </div>
+                        <LogTerminal logs={logs} />
+                    </div>
+                );
+            } else if (dockerState === "Starting") {
+                return (
+                    <div style={styles.centerBox}>
+                        <h2>⏳ Starting Services</h2>
+                        <p>Waiting for critical components...</p>
+                        {renderServices()}
+                        <button style={styles.button} onClick={() => status?.docker_url && checkDocker(status.docker_url)}>Refresh</button>
                         <LogTerminal logs={logs} />
                     </div>
                 );
@@ -292,8 +409,8 @@ export default function Gatekeeper() {
             return (
                 <div style={styles.centerBox}>
                     <h2>🚀 Docker Services</h2>
-                    <p>Status: <strong>{dockerState}</strong></p>
-                    {dockerState.startsWith("Error") ? null : (
+                    <p>Status: <strong>{String(dockerState)}</strong></p>
+                    {String(dockerState).startsWith("Error") ? null : (
                         <button style={styles.button} onClick={startDocker}>Start Services</button>
                     )}
                     <button style={styles.button} onClick={() => status?.docker_url && checkDocker(status.docker_url)}>Refresh Status</button>
@@ -324,7 +441,8 @@ function LogTerminal({ logs }: { logs: string }) {
         }
     }, [logs]);
 
-    if (!logs) return null;
+    // Always render the container so it doesn't flash/disappear
+    // if (!logs) return null; 
 
     return (
         <div style={{
@@ -348,7 +466,7 @@ function LogTerminal({ logs }: { logs: string }) {
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-all'
             }}>
-                <Ansi>{logs}</Ansi>
+                <Ansi>{logs || "> Initializing... Waiting for Docker output..."}</Ansi>
             </pre>
         </div>
     );

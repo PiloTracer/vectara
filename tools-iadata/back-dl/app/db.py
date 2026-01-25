@@ -68,6 +68,17 @@ async def init_db():
             # 1. Create Schema (Idempotent)
             await conn.run_sync(Base.metadata.create_all)
             
+            # Check if data exists
+            from sqlalchemy import text
+            try:
+                result = await conn.execute(text("SELECT count(*) FROM environments"))
+                count = result.scalar()
+                if count and count > 0:
+                    print(f"Database already contains {count} environments. Skipping seed scripts.")
+                    return
+            except Exception as e:
+                print(f"Error checking data existence: {e}. Proceeding with seed.")
+
             # 2. Run SQL Scripts (Idempotent data population)
             await run_sql_scripts(conn)
             

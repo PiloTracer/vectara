@@ -1,7 +1,8 @@
 import httpx
 import logging
-from typing import List, Dict, Optional, Generator
+from typing import List, Dict, Optional, Generator, Union
 import os
+import base64
 
 logger = logging.getLogger(__name__)
 
@@ -37,9 +38,9 @@ class FileBridgeClient:
             logger.error(f"Bridge list_directory failed: {e}")
             raise
 
-    async def read_file(self, path_id: str, relative_path: str) -> str:
+    async def read_file(self, path_id: str, relative_path: str) -> bytes:
         """
-        Read file content via the bridge.
+        Read file content via the bridge. Returns bytes (binary content).
         """
         url = f"{self.base_url}/file/read"
         payload = {
@@ -54,8 +55,16 @@ class FileBridgeClient:
             
             if not data.get("success"):
                 raise Exception(data.get("error", "Unknown error from bridge"))
-                
-            return data.get("content", "")
+            
+            content = data.get("content", "")
+            is_binary = data.get("is_binary", False)
+            
+            if is_binary:
+                # Decode base64 for binary files
+                return base64.b64decode(content)
+            else:
+                # Text files - encode to bytes
+                return content.encode("utf-8")
         except Exception as e:
             logger.error(f"Bridge read_file failed: {e}")
             raise

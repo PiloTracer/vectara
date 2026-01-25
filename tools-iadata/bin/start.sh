@@ -253,6 +253,14 @@ up() {
   pause
 }
 
+build() {
+  clear
+  echo "Building images..."
+  $DOCKER_COMPOSE -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build
+  echo "Build complete."
+  pause
+}
+
 down() {
   clear
   echo "Stopping environment..."
@@ -396,10 +404,11 @@ while true; do
   echo "========================================="
   echo " 1. Up (Build & Start)"
   echo " 2. Down (Stop)"
-  echo " 3. Restart"
-  echo " 4. View Logs"
-  echo " 5. Backup (Manual)"
-  echo " 6. RESTORE BACKUP (Overwrite!)"
+  echo " 3. Build (No Start)"
+  echo " 4. Restart"
+  echo " 5. View Logs"
+  echo " 6. Backup (Manual)"
+  echo " 7. RESTORE BACKUP (Overwrite!)"
   echo " 0. Exit"
   echo "========================================="
   echo " Backup Dir: $BACKUP_DIR"
@@ -408,10 +417,11 @@ while true; do
   case $opt in
     1) up ;;
     2) down ;;
-    3) restart ;;
-    4) view_logs ;;
-    5) backup ;;
-    6) restore_backup ;;
+    3) build ;;
+    4) restart ;;
+    5) view_logs ;;
+    6) backup ;;
+    7) restore_backup ;;
     0) exit 0 ;;
     *) ;;
   esac

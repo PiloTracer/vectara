@@ -120,7 +120,8 @@ async def process_ingestion_task(job_id: uuid.UUID, source_id: uuid.UUID):
                                 extractor = ExtractorRegistry.get_extractor(ext)
                                 if extractor:
                                     content = await client.read_file(path_id, f['relative_path'])
-                                    doc = await extractor.extract(Path(f['relative_path']), content.encode() if isinstance(content, str) else content)
+                                    file_bytes = content if isinstance(content, bytes) else content.encode()
+                                    doc = await extractor.extract(file_bytes, f['relative_path'])
                                     
                                     # Process Vectors
                                     if embed_service.enabled:

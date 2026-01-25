@@ -7,6 +7,7 @@ use std::fs;
 use std::path::PathBuf;
 use crate::server::state::AppState;
 use tauri_plugin_dialog::DialogExt;
+use base64::{Engine as _, engine::general_purpose};
 
 
 // --- Request/Response Structs ---
@@ -20,6 +21,7 @@ pub struct ReadFileRequest {
 #[derive(Serialize)]
 pub struct ReadFileResponse {
     pub content: String,
+    pub is_binary: bool, // If true, content is base64-encoded
     pub success: bool,
     pub error: Option<String>,
 }
@@ -102,21 +104,36 @@ pub async fn read_file_handler(
     let base_path = match paths.get(&payload.path_id) {
         Some(path) => path,
         None => return (StatusCode::FORBIDDEN, Json(ReadFileResponse { 
-            content: String::new(), success: false, error: Some("Path ID not authorized".into()) 
+            content: String::new(), is_binary: false, success: false, error: Some("Path ID not authorized".into()) 
         })),
     };
 
     let full_path = match resolve_path(base_path, &payload.relative_path) {
         Ok(p) => p,
         Err(e) => return (StatusCode::FORBIDDEN, Json(ReadFileResponse { 
-            content: String::new(), success: false, error: Some(e) 
+            content: String::new(), is_binary: false, success: false, error: Some(e) 
         })),
     };
 
-    match fs::read_to_string(&full_path) {
-        Ok(content) => (StatusCode::OK, Json(ReadFileResponse { content, success: true, error: None })),
+    // Read as bytes to support both text and binary files
+    match fs::read(&full_path) {
+        Ok(bytes) => {
+            // Try to interpret as UTF-8 text first
+            match String::from_utf8(bytes.clone()) {
+                Ok(content) => (StatusCode::OK, Json(ReadFileResponse { 
+                    content, is_binary: false, success: true, error: None 
+                })),
+                Err(_) => {
+                    // Binary file - encode as base64
+                    let encoded = general_purpose::STANDARD.encode(&bytes);
+                    (StatusCode::OK, Json(ReadFileResponse { 
+                        content: encoded, is_binary: true, success: true, error: None 
+                    }))
+                }
+            }
+        },
         Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, Json(ReadFileResponse { 
-            content: String::new(), success: false, error: Some(e.to_string()) 
+            content: String::new(), is_binary: false, success: false, error: Some(e.to_string()) 
         })),
     }
 }
@@ -248,6 +265,12 @@ pub async fn open_dialog_handler(
                     let mut paths = state.authorized_paths.write().await;
                     paths.insert(path_id.clone(), path_buf);
                     
+                    // Hook into persistence
+                    let state_clone = state.clone();
+                    tauri::async_runtime::spawn(async move {
+                        state_clone.persist().await;
+                    });
+
                     (StatusCode::OK, Json(OpenDialogResponse {
                         path_id: Some(path_id),
                         path: Some(path_str),

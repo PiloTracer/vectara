@@ -254,6 +254,14 @@ async function detectEnv() {
         await pause();
     };
 
+    const build = async () => {
+        clear();
+        console.log("Building images...");
+        await runCompose('build');
+        console.log("Build complete.");
+        await pause();
+    };
+
     const down = async () => {
         clear();
         console.log("Stopping environment...");
@@ -289,8 +297,9 @@ async function detectEnv() {
         console.log("=========================================");
         console.log(" 1. Up (Build & Start)");
         console.log(" 2. Down (Stop)");
-        console.log(" 3. Restart");
-        console.log(" 4. View Logs");
+        console.log(" 3. Build (No Start)");
+        console.log(" 4. Restart");
+        console.log(" 5. View Logs");
         console.log(" 0. Exit");
         console.log("=========================================");
 
@@ -298,8 +307,9 @@ async function detectEnv() {
         switch (opt) {
             case '1': await up(); break;
             case '2': await down(); break;
-            case '3': await restart(); break;
-            case '4': await logs(); break;
+            case '3': await build(); break;
+            case '4': await restart(); break;
+            case '5': await logs(); break;
             case '0': process.exit(0); break;
         }
     }

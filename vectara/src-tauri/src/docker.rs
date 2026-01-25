@@ -5,12 +5,22 @@ use std::path::PathBuf;
 
 // Status Enum
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq)]
-pub enum DockerState {
-    Running,
-    Stopped,
-    Starting,
-    Error(String),
+pub struct ContainerInfo {
+    pub service: String,
+    pub state: String, // "running", "exited"
+    pub health: String, // "healthy", "starting", "unhealthy", ""
 }
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq)]
+pub struct DetailedDockerState {
+    pub status: String, // "Running", "Starting", "Stopped", "Error"
+    pub error: Option<String>,
+    pub services: Vec<ContainerInfo>,
+}
+
+// Compatibility alias for other functions if needed, though we will update them to just return strings or simple logic
+// Actually, start/restart/stop return the same type, so we must update them or make them return Generic/Detailed.
+// Let's make them return DetailedDockerState as well for consistency.
 
 // Reuse config logic to find paths
 fn resolve_paths(mode: &str) -> Option<(PathBuf, PathBuf)> {
@@ -56,7 +66,7 @@ fn resolve_paths(mode: &str) -> Option<(PathBuf, PathBuf)> {
 }
 
 #[tauri::command]
-pub async fn check_docker_status(app: tauri::AppHandle) -> Result<DockerState, String> {
+pub async fn check_docker_status(app: tauri::AppHandle) -> Result<DetailedDockerState, String> {
     let mode = get_app_mode(app).map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
@@ -81,44 +91,89 @@ pub async fn check_docker_status(app: tauri::AppHandle) -> Result<DockerState, S
     .map_err(|e| format!("Failed to run docker: {}", e))?;
 
     if !output.status.success() {
-         return Ok(DockerState::Stopped);
+         return Ok(DetailedDockerState {
+             status: "Stopped".into(),
+             error: None,
+             services: vec![]
+         });
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     if stdout.trim().is_empty() || stdout.contains("[]") {
-        return Ok(DockerState::Stopped);
+        return Ok(DetailedDockerState {
+             status: "Stopped".into(),
+             error: None,
+             services: vec![]
+         });
     }
 
     // Parse JSON lines to check service states
     let lines: Vec<&str> = stdout.lines().collect();
-    let mut is_llm_init_running = false;
+    let mut services_info = Vec::new();
+    let mut all_critical_healthy = true;
+    let mut any_running = false;
 
     for line in lines {
         if let Ok(container) = serde_json::from_str::<serde_json::Value>(line) {
-            // Check for llm-init in running state
-            if let Some(service) = container.get("Service").and_then(|s| s.as_str()) {
-                let state = container.get("State").and_then(|s| s.as_str()).unwrap_or("");
-                
-                if service == "llm-init" && state == "running" {
-                    is_llm_init_running = true;
-                }
+            let service_name = container.get("Service").and_then(|s| s.as_str()).unwrap_or("unknown").to_string();
+            let state = container.get("State").and_then(|s| s.as_str()).unwrap_or("unknown").to_string();
+            let status_str = container.get("Status").and_then(|s| s.as_str()).unwrap_or("").to_string();
+            
+            // Extract health from status string e.g. "Up 2 minutes (healthy)"
+            let health = if status_str.contains("(healthy)") {
+                "healthy".to_string()
+            } else if status_str.contains("(starting)") {
+                "starting".to_string()
+            } else if status_str.contains("(unhealthy)") {
+                "unhealthy".to_string()
+            } else {
+                "".to_string()
+            };
+
+            if state == "running" {
+                any_running = true;
             }
+
+            // Check Critical Services
+            // back-dl, pg-dl, front-dl must be healthy (or running if no health check)
+            // But pg-dl and back-dl HAVE healthchecks.
+            if (service_name == "back-dl" || service_name == "pg-dl") && health != "healthy" {
+                all_critical_healthy = false;
+            }
+            
+            // llm-init is special, it runs then exits. 
+            // If it's running, we are definitely "Starting".
+            if service_name == "llm-init" && state == "running" {
+                all_critical_healthy = false; 
+            }
+
+            services_info.push(ContainerInfo {
+                service: service_name,
+                state,
+                health
+            });
         }
     }
 
-    if is_llm_init_running {
-        return Ok(DockerState::Starting);
-    }
-    
-    // If backend isn't running yet but we have output, we might be starting or partially up.
-    // However, the main goal here is to block "Running" if llm-init is busy.
-    // If llm-init is DONE (exited 0), it won't be "running", so we proceed.
-    
-    Ok(DockerState::Running)
+    let global_status = if services_info.is_empty() {
+        "Stopped"
+    } else if all_critical_healthy {
+        "Running"
+    } else if any_running {
+        "Starting"
+    } else {
+        "Stopped"
+    };
+
+    Ok(DetailedDockerState {
+        status: global_status.into(),
+        error: None,
+        services: services_info
+    })
 }
 
 #[tauri::command]
-pub async fn start_docker(app: tauri::AppHandle) -> Result<DockerState, String> {
+pub async fn start_docker(app: tauri::AppHandle) -> Result<DetailedDockerState, String> {
     let mode = get_app_mode(app).map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
@@ -189,7 +244,7 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DockerState, String> 
                     .arg("exec").arg(&container1)
                     .arg("ollama").arg("pull").arg(&model1)
                     .output()
-            }).await;
+                }).await;
             
             let container2 = llm_container.clone();
             let model2 = chat_model.clone();
@@ -222,10 +277,18 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DockerState, String> 
     .map_err(|e| format!("Failed to spawn docker: {}", e))?;
 
     if output.status.success() {
-        Ok(DockerState::Starting)
+        Ok(DetailedDockerState {
+            status: "Starting".into(),
+            error: None,
+            services: vec![]
+        })
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        Ok(DockerState::Error(stderr.to_string()))
+        Ok(DetailedDockerState {
+            status: "Error".into(),
+            error: Some(stderr.to_string()),
+            services: vec![]
+        })
     }
 }
 
@@ -255,7 +318,7 @@ pub async fn stop_docker(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub async fn restart_docker(app: tauri::AppHandle) -> Result<DockerState, String> {
+pub async fn restart_docker(app: tauri::AppHandle) -> Result<DetailedDockerState, String> {
     let mode = get_app_mode(app).map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
@@ -292,10 +355,18 @@ pub async fn restart_docker(app: tauri::AppHandle) -> Result<DockerState, String
     .map_err(|e| format!("Failed to spawn docker: {}", e))?;
 
     if output.status.success() {
-        Ok(DockerState::Starting)
+        Ok(DetailedDockerState {
+            status: "Starting".into(),
+            error: None,
+            services: vec![]
+        })
     } else {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        Ok(DockerState::Error(stderr.to_string()))
+        Ok(DetailedDockerState {
+            status: "Error".into(),
+            error: Some(stderr.to_string()),
+            services: vec![]
+        })
     }
 }
 
