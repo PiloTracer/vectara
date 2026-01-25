@@ -43,6 +43,12 @@ pub fn run() {
             
             menu.append(&file_menu)?;
             
+            // Module Menu
+            let module_menu = tauri::menu::Submenu::new(handle, "Module", true)?;
+            let dashboard_item = MenuItem::new(handle, "Dashboard", true, Some("module_dashboard"))?;
+            module_menu.append(&dashboard_item)?;
+            menu.append(&module_menu)?;
+
             app.set_menu(menu)?;
 
             app.on_menu_event(move |app_handle, event| {
@@ -77,6 +83,14 @@ pub fn run() {
                         
                         #[cfg(not(debug_assertions))]
                         let _ = window.eval("window.location.href = 'tauri://localhost/index.html#/settings';");
+                    }
+                } else if event.id() == dashboard_item.id() {
+                    println!("Navigating to Dashboard...");
+                    // Do NOT stop Docker. Do NOT delete config. Just redirect.
+                    if let Some(window) = app_handle.get_webview_window("main") {
+                        // Redirect to the tools-iadata dashboard
+                        // In dev this is typically port 13000
+                        let _ = window.eval("window.location.href = 'http://localhost:13000/';");
                     }
                 } else if event.id() == quit_item.id() {
                     let app_clone = app_handle.clone();

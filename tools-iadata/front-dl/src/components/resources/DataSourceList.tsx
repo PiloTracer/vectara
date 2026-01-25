@@ -276,7 +276,7 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
                             ">
                                 {!isLocal && <ExternalLink className="w-3.5 h-3.5 flex-shrink-0 text-slate-500" />}
                                 <span className="truncate">
-                                    {isLocal ? source.config?.path : (source.config?.url || source.config?.site_url || source.config?.folder_id)}
+                                    {isLocal ? (source.config?.path || source.config?.display_path) : (source.config?.url || source.config?.site_url || source.config?.folder_id)}
                                 </span>
                             </div>
 
