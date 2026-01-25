@@ -43,6 +43,35 @@ services:
       - ollama_data:/root/.ollama
     ports:
       - "${OLLAMA_HOST_PORT:-21434}:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 24
+      start_period: 15s
+    networks:
+      - iadata_net
+
+  llm-init:
+    image: ollama/ollama:latest
+    container_name: iadata_llm_init_${DEPLOY_SUFFIX}
+    profiles: ["local-llm"]
+    depends_on:
+      llm-dl:
+        condition: service_healthy
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=http://llm-dl:11434
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "=== LLM Pre-Acquisition ==="
+        echo "Pulling embedding model: ${LOCAL_EMBEDDING_MODEL_NAME:-bge-m3}..."
+        ollama pull ${LOCAL_EMBEDDING_MODEL_NAME:-bge-m3}
+        echo "Pulling chat model: ${LOCAL_MODEL_NAME:-qwen2.5:3b}..."
+        ollama pull ${LOCAL_MODEL_NAME:-qwen2.5:3b}
+        echo "=== All models ready ==="
     networks:
       - iadata_net
 

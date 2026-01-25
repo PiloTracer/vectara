@@ -186,12 +186,66 @@ async function detectEnv() {
         });
     };
 
+    // Pre-acquire LLM models before starting app stack
+    const ensureLlmModels = async () => {
+        if (!USE_LOCAL_EMBEDDING) return;
+
+        console.log(`\n${colors.cyan}🤖 Pre-acquiring LLM models...${colors.reset}`);
+
+        const EMBED_MODEL = getVar('LOCAL_EMBEDDING_MODEL_NAME') || 'bge-m3';
+        const CHAT_MODEL = getVar('LOCAL_MODEL_NAME') || 'qwen2.5:3b';
+        const LLM_CONTAINER = `iadata_llm_${DEPLOY_SUFFIX}`;
+
+        // Step 1: Start only llm-dl
+        console.log('Starting Ollama container...');
+        await runCompose('up', ['-d', 'llm-dl']);
+
+        // Step 2: Wait for Ollama to be healthy
+        console.log('Waiting for Ollama to become ready...');
+        const maxWait = 120;
+        let waited = 0;
+        while (waited < maxWait) {
+            try {
+                execSync(`docker exec ${LLM_CONTAINER} curl -sf http://localhost:11434/api/tags`, { stdio: 'ignore' });
+                console.log(`${colors.green}✓ Ollama is ready.${colors.reset}`);
+                break;
+            } catch {
+                await new Promise(r => setTimeout(r, 2000));
+                waited += 2;
+                console.log(`  ... waiting (${waited}/${maxWait} seconds)`);
+            }
+        }
+
+        if (waited >= maxWait) {
+            console.log(`${colors.yellow}⚠️  Warning: Ollama did not become ready in time. Continuing anyway...${colors.reset}`);
+            return;
+        }
+
+        // Step 3: Pull models
+        console.log(`Pulling embedding model: ${EMBED_MODEL}...`);
+        try {
+            execSync(`docker exec ${LLM_CONTAINER} ollama pull ${EMBED_MODEL}`, { stdio: 'inherit' });
+        } catch {
+            console.log(`${colors.yellow}⚠️  Failed to pull ${EMBED_MODEL}${colors.reset}`);
+        }
+
+        console.log(`Pulling chat model: ${CHAT_MODEL}...`);
+        try {
+            execSync(`docker exec ${LLM_CONTAINER} ollama pull ${CHAT_MODEL}`, { stdio: 'inherit' });
+        } catch {
+            console.log(`${colors.yellow}⚠️  Failed to pull ${CHAT_MODEL}${colors.reset}`);
+        }
+
+        console.log(`${colors.green}✅ LLM models pre-acquired.${colors.reset}\n`);
+    };
+
     // --- Menus ---
 
     const up = async () => {
         clear();
         ensureDirectories();
         ensureVolumes();
+        await ensureLlmModels();
         console.log(`Bringing up environment (${targetEnv})...`);
         await runCompose('up', ['-d', '--build']);
         pruneAnonymous();

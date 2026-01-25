@@ -105,18 +105,89 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DockerState, String> 
         .unwrap_or(false);
 
     let profiles = if use_local_llm { "local-llm" } else { "" };
+    
+    // Clone paths for async closures
+    let compose_path_clone = compose_path.clone();
+    let env_path_clone = env_path.clone();
+    let profiles_str = profiles.to_string();
 
-    // Attempt UP in background
+    // Phase 1: Pre-acquire LLM models if enabled
+    if use_local_llm {
+        let embed_model = crate::config::get_env_var(&env_path, "LOCAL_EMBEDDING_MODEL_NAME")
+            .unwrap_or_else(|| "bge-m3".to_string());
+        let chat_model = crate::config::get_env_var(&env_path, "LOCAL_MODEL_NAME")
+            .unwrap_or_else(|| "qwen2.5:3b".to_string());
+        
+        let deploy_suffix = crate::config::get_env_var(&env_path, "DEPLOY_SUFFIX")
+            .unwrap_or_else(|| "dev".to_string());
+        let llm_container = format!("iadata_llm_{}", deploy_suffix);
+        
+        let cp = compose_path.clone();
+        let ep = env_path.clone();
+        let ps = profiles_str.clone();
+        
+        // Step 1: Start only llm-dl
+        let _ = tauri::async_runtime::spawn_blocking(move || {
+            Command::new("docker")
+                .arg("compose")
+                .arg("-f").arg(&cp)
+                .arg("--env-file").arg(&ep)
+                .env("COMPOSE_PROFILES", &ps)
+                .arg("up").arg("-d").arg("llm-dl")
+                .output()
+        }).await;
+        
+        // Step 2: Wait for Ollama to be ready (up to 120s)
+        let container = llm_container.clone();
+        let ready = tauri::async_runtime::spawn_blocking(move || {
+            for _ in 0..60 {
+                let result = Command::new("docker")
+                    .arg("exec").arg(&container)
+                    .arg("curl").arg("-sf").arg("http://localhost:11434/api/tags")
+                    .output();
+                if let Ok(output) = result {
+                    if output.status.success() {
+                        return true;
+                    }
+                }
+                std::thread::sleep(std::time::Duration::from_secs(2));
+            }
+            false
+        }).await.unwrap_or(false);
+        
+        if ready {
+            // Step 3: Pull models
+            let container1 = llm_container.clone();
+            let model1 = embed_model.clone();
+            let _ = tauri::async_runtime::spawn_blocking(move || {
+                Command::new("docker")
+                    .arg("exec").arg(&container1)
+                    .arg("ollama").arg("pull").arg(&model1)
+                    .output()
+            }).await;
+            
+            let container2 = llm_container.clone();
+            let model2 = chat_model.clone();
+            let _ = tauri::async_runtime::spawn_blocking(move || {
+                Command::new("docker")
+                    .arg("exec").arg(&container2)
+                    .arg("ollama").arg("pull").arg(&model2)
+                    .output()
+            }).await;
+        }
+    }
+
+    // Phase 2: Start full stack
     let output = tauri::async_runtime::spawn_blocking(move || {
         let mut cmd = Command::new("docker");
         cmd.arg("compose")
             .arg("--ansi")
             .arg("always")
             .arg("-f")
-            .arg(&compose_path)
+            .arg(&compose_path_clone)
             .arg("--env-file")
-            .arg(&env_path)
-            .env("COMPOSE_PROFILES", profiles) // Inject Profile
+            .arg(&env_path_clone)
+            .env("COMPOSE_PROFILES", profiles_str)
             .arg("up")
             .arg("-d");
         

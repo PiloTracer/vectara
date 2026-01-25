@@ -184,9 +184,61 @@ ensure_directories_and_volumes() {
     ensure_volumes
 }
 
+# Pre-acquire LLM models before starting app stack
+ensure_llm_models() {
+  if [ "$USE_LOCAL" != "true" ]; then
+    return 0
+  fi
+  
+  echo ""
+  echo "🤖 Pre-acquiring LLM models..."
+  
+  # Extract model names from env file
+  EMBED_MODEL=$(grep "^LOCAL_EMBEDDING_MODEL_NAME=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r')
+  CHAT_MODEL=$(grep "^LOCAL_MODEL_NAME=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r')
+  EMBED_MODEL=${EMBED_MODEL:-bge-m3}
+  CHAT_MODEL=${CHAT_MODEL:-qwen2.5:3b}
+  
+  LLM_CONTAINER="iadata_llm_${DEPLOY_SUFFIX}"
+  
+  # Step 1: Start only llm-dl
+  echo "Starting Ollama container..."
+  $DOCKER_COMPOSE -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d llm-dl
+  
+  # Step 2: Wait for Ollama to be healthy
+  echo "Waiting for Ollama to become ready..."
+  MAX_WAIT=120
+  WAITED=0
+  while [ $WAITED -lt $MAX_WAIT ]; do
+    if docker exec "$LLM_CONTAINER" curl -sf http://localhost:11434/api/tags >/dev/null 2>&1; then
+      echo "✓ Ollama is ready."
+      break
+    fi
+    sleep 2
+    WAITED=$((WAITED + 2))
+    echo "  ... waiting ($WAITED/$MAX_WAIT seconds)"
+  done
+  
+  if [ $WAITED -ge $MAX_WAIT ]; then
+    echo "⚠️  Warning: Ollama did not become ready in time. Continuing anyway..."
+    return 0
+  fi
+  
+  # Step 3: Pull models
+  echo "Pulling embedding model: $EMBED_MODEL..."
+  docker exec "$LLM_CONTAINER" ollama pull "$EMBED_MODEL" || echo "⚠️  Failed to pull $EMBED_MODEL"
+  
+  echo "Pulling chat model: $CHAT_MODEL..."
+  docker exec "$LLM_CONTAINER" ollama pull "$CHAT_MODEL" || echo "⚠️  Failed to pull $CHAT_MODEL"
+  
+  echo "✅ LLM models pre-acquired."
+  echo ""
+}
+
 up() {
   clear
   ensure_directories_and_volumes
+  ensure_llm_models
   echo "Bringing up environment ($TARGET_ENV)..."
   if ! $DOCKER_COMPOSE -f "$COMPOSE_FILE" --env-file "$ENV_FILE" up -d --build; then
      echo "❌ Startup failed."
