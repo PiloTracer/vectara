@@ -94,6 +94,12 @@ services:
       - ${BACKUP_DIR:-./backups}:/backups
     ports:
       - "${BACK_PORT:-18080}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 10s
+      retries: 24
+      start_period: 30s
     depends_on:
       pg-dl:
         condition: service_healthy
@@ -120,7 +126,8 @@ services:
     ports:
       - "${FRONT_PORT:-13000}:3000"
     depends_on:
-      - back-dl
+      back-dl:
+        condition: service_healthy
     networks:
       - iadata_net
     extra_hosts:
