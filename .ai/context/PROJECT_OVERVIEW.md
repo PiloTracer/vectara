@@ -21,7 +21,7 @@ This is a multi-component AI ecosystem.
 - **Tauri Development**: `.ai/skills/tauri-development.md` (Best practices for Shell/Security)
 
 ## Current Phase
-[Setup/Development/Testing/Production]
+Development (Ingestion Pipeline Verified)
 
 ## Last Updated
-2026-01-22
+2026-01-25
