@@ -466,7 +466,7 @@ function LogTerminal({ logs }: { logs: string }) {
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-all'
             }}>
-                <Ansi>{logs || "> Initializing... Waiting for Docker output..."}</Ansi>
+                <Ansi>{logs || "> Connecting to Docker Daemon...\n> Waiting for startup logs..."}</Ansi>
             </pre>
         </div>
     );

@@ -31,6 +31,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
                 const roles = profile.realm_access?.roles || []
                 token.roles = roles
                 token.accessToken = account.access_token
+                token.idToken = account.id_token
             }
             return token
         },
@@ -38,6 +39,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             if (session.user) {
                 session.user.roles = token.roles || []
                 session.user.accessToken = token.accessToken
+                // Pass ID Token to client for federated logout
+                session.idToken = token.idToken
             }
             return session
         },

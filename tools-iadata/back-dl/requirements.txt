@@ -23,6 +23,7 @@ lxml>=5.1.0
 # OCR Model (HuggingFace LightOnOCR)
 transformers>=4.40.0
 torch>=2.2.0
+torchvision>=0.17.0
 
 # Google Drive Integration
 google-api-python-client>=2.100.0

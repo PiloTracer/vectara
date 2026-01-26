@@ -39,6 +39,8 @@ pub fn run() {
             
             file_menu.append(&home_item)?;
             file_menu.append(&settings_item)?;
+            let logout_item = MenuItem::new(handle, "Logout", true, Some("logout"))?; // New
+            file_menu.append(&logout_item)?;
             file_menu.append(&quit_item)?;
             
             menu.append(&file_menu)?;
@@ -91,6 +93,20 @@ pub fn run() {
                         // Redirect to the tools-iadata dashboard
                         // In dev this is typically port 13000
                         let _ = window.eval("window.location.href = 'http://localhost:13000/';");
+                    }
+                } else if event.id() == logout_item.id() {
+                    println!("Logging out...");
+                    if let Some(window) = app_handle.get_webview_window("main") {
+                        // If we are on the dashboard (port 13000), go to /logout to trigger NextAuth signout + Keycloak redirect
+                        // If we are on internal Gatekeeper (localhost:1420), just reload to reset state
+                         let js = "
+                            if (window.location.host.includes('13000')) { 
+                                window.location.href = '/logout'; 
+                            } else { 
+                                window.location.reload(); 
+                            }
+                        ";
+                        let _ = window.eval(js);
                     }
                 } else if event.id() == quit_item.id() {
                     let app_clone = app_handle.clone();

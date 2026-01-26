@@ -60,10 +60,24 @@ services:
     command:
       - |
         echo "=== LLM Pre-Acquisition ==="
-        echo "Pulling embedding model: ${LOCAL_EMBEDDING_MODEL_NAME:-bge-m3}..."
-        ollama pull ${LOCAL_EMBEDDING_MODEL_NAME:-bge-m3}
-        echo "Pulling chat model: ${LOCAL_MODEL_NAME:-qwen2.5:3b}..."
-        ollama pull ${LOCAL_MODEL_NAME:-qwen2.5:3b}
+        EMBED_MODEL=${LOCAL_EMBEDDING_MODEL_NAME:-bge-m3}
+        CHAT_MODEL=${LOCAL_MODEL_NAME:-qwen2.5:3b}
+
+        # Check Embedding Model
+        if ollama list | grep -q "$$EMBED_MODEL"; then
+            echo "Embedding model $$EMBED_MODEL already exists. Skipping."
+        else
+            echo "Pulling embedding model: $$EMBED_MODEL..."
+            ollama pull $$EMBED_MODEL
+        fi
+
+        # Check Chat Model
+        if ollama list | grep -q "$$CHAT_MODEL"; then
+            echo "Chat model $$CHAT_MODEL already exists. Skipping."
+        else
+            echo "Pulling chat model: $$CHAT_MODEL..."
+            ollama pull $$CHAT_MODEL
+        fi
         echo "=== All models ready ==="
     networks:
       - iadata_net

@@ -45,13 +45,13 @@ class OCRService:
         OCRService._load_attempted = True
         
         try:
-            from transformers import AutoProcessor, AutoModelForVision2Seq
+            from transformers import AutoProcessor, AutoModelForImageTextToText
             
             logger.info(f"Loading OCR model '{self.model_name}' from HuggingFace...")
             logger.info("This may take several minutes on first run (downloading ~1GB model)...")
             
             OCRService._processor = AutoProcessor.from_pretrained(self.model_name)
-            OCRService._model = AutoModelForVision2Seq.from_pretrained(self.model_name)
+            OCRService._model = AutoModelForImageTextToText.from_pretrained(self.model_name)
             
             logger.info(f"OCR model '{self.model_name}' loaded successfully.")
             return True

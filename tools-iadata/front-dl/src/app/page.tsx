@@ -1,6 +1,7 @@
 
 import { auth, signIn, signOut } from "../auth"
 import Link from "next/link"
+import LoginButton from "../components/LoginButton"
 
 export default async function Home() {
   const session = await auth()
@@ -76,30 +77,7 @@ export default async function Home() {
         </p>
 
         {!session ? (
-          <form
-            action={async () => {
-              "use server"
-              await signIn("keycloak", { redirectTo: "/dashboard" })
-            }}
-          >
-            <button
-              type="submit"
-              style={{
-                padding: '1rem 2rem',
-                fontSize: '1.1rem',
-                fontWeight: '600',
-                color: '#fff',
-                background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
-              }}
-            >
-              Sign In with SSO
-            </button>
-          </form>
+          <LoginButton />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{
@@ -139,7 +117,27 @@ export default async function Home() {
               <form
                 action={async () => {
                   "use server"
-                  await signOut()
+                  const { redirect } = await import("next/navigation")
+                  const { auth, signOut } = await import("../auth")
+
+                  const session = await auth()
+                  const idToken = (session as any)?.idToken
+
+                  // 1. Clear Local Session
+                  await signOut({ redirect: false })
+
+                  // 2. Redirect to Keycloak Logout
+                  if (idToken && process.env.AUTH_ISSUER_BASE) {
+                    const issuer = `${process.env.AUTH_ISSUER_BASE}/realms/${process.env.AUTH_REALM}`
+                    // Use localhost for browser redirect
+                    const browserIssuer = issuer.replace("host.docker.internal", "localhost");
+
+                    const logoutUrl = `${browserIssuer}/protocol/openid-connect/logout?post_logout_redirect_uri=${encodeURIComponent("http://localhost:13000")}&id_token_hint=${idToken}`
+
+                    redirect(logoutUrl)
+                  } else {
+                    redirect("/")
+                  }
                 }}
               >
                 <button type="submit" style={{
