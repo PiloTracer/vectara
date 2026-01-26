@@ -174,7 +174,12 @@ pub async fn check_docker_status(app: tauri::AppHandle) -> Result<DetailedDocker
 
 #[tauri::command]
 pub async fn start_docker(app: tauri::AppHandle) -> Result<DetailedDockerState, String> {
-    let mode = get_app_mode(app).map_err(|e| e)?
+    use std::io::{BufRead, BufReader};
+    use std::process::Stdio;
+    use tauri::Emitter;
+
+
+    let mode = get_app_mode(app.clone()).map_err(|e| e)?
         .ok_or("Mode not set".to_string())?;
 
     let (compose_path, env_path) = resolve_paths(&mode).ok_or("Could not find tools-iadata".to_string())?;
@@ -186,28 +191,22 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DetailedDockerState, 
 
     let profiles = if use_local_llm { "local-llm" } else { "" };
     
-    // Clone paths for async closures
-    let compose_path_clone = compose_path.clone();
-    let env_path_clone = env_path.clone();
-    let profiles_str = profiles.to_string();
-
-        
-
-        
-    // Phase 1 removed.
-        
-
-
     // Check for GPU setting
     let use_gpu = crate::config::get_env_var(&env_path, "USE_GPU")
         .map(|v| v.to_lowercase() == "true")
         .unwrap_or(false);
 
     let gpu_compose_path = compose_path.with_file_name("docker-compose.gpu.yml");
+    
+    // Clone for thread
+    let compose_path_clone = compose_path.clone();
+    let env_path_clone = env_path.clone();
+    let profiles_str = profiles.to_string();
     let gpu_path_clone = gpu_compose_path.clone();
+    let app_handle = app.clone();
 
-    // Phase 2: Start full stack
-    let output = tauri::async_runtime::spawn_blocking(move || {
+    // Spawn blocking task to run docker compose up with streaming
+    let result = tauri::async_runtime::spawn_blocking(move || {
         let mut cmd = Command::new("docker");
         cmd.arg("compose")
             .arg("--ansi")
@@ -223,27 +222,56 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DetailedDockerState, 
             .arg(&env_path_clone)
             .env("COMPOSE_PROFILES", profiles_str)
             .arg("up")
-            .arg("-d");
-        
-        cmd.output()
-    }).await
-    .map_err(|e| format!("Task join error: {}", e))?
-    .map_err(|e| format!("Failed to spawn docker: {}", e))?;
+            .arg("-d")
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped());
 
-    if output.status.success() {
-        Ok(DetailedDockerState {
-            status: "Starting".into(),
-            error: None,
-            services: vec![]
-        })
-    } else {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        Ok(DetailedDockerState {
-            status: "Error".into(),
-            error: Some(stderr.to_string()),
-            services: vec![]
-        })
-    }
+        let mut child = cmd.spawn()
+            .map_err(|e| format!("Failed to spawn docker: {}", e))?;
+
+        // Stream stdout
+        if let Some(stdout) = child.stdout.take() {
+            let app_h = app_handle.clone();
+            std::thread::spawn(move || {
+                let reader = BufReader::new(stdout);
+                for line in reader.lines() {
+                    if let Ok(l) = line {
+                        let _ = app_h.emit("docker-event-log", l);
+                    }
+                }
+            });
+        }
+
+        // Stream stderr
+        if let Some(stderr) = child.stderr.take() {
+            let app_h = app_handle.clone();
+            std::thread::spawn(move || {
+                let reader = BufReader::new(stderr);
+                for line in reader.lines() {
+                    if let Ok(l) = line {
+                        let _ = app_h.emit("docker-event-log", l);
+                    }
+                }
+            });
+        }
+
+        // Wait for completion
+        let status = child.wait()
+            .map_err(|e| format!("Failed to wait/run docker: {}", e))?;
+            
+        if status.success() {
+            Ok(DetailedDockerState {
+                status: "Starting".into(),
+                error: None,
+                services: vec![]
+            })
+        } else {
+            Err("Docker command returned error code".to_string())
+        }
+    }).await
+    .map_err(|e| format!("Task join error: {}", e))??;
+
+    Ok(result)
 }
 
 #[tauri::command]

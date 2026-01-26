@@ -75,13 +75,15 @@ async def process_ingestion_task(job_id: uuid.UUID, source_id: uuid.UUID):
                                 if embed_service.enabled:
                                     chunks = chunker.split_text(doc.content)
                                     if chunks:
-                                        embeddings = await embed_service.generate_embeddings(chunks)
+                                        hybrid_embeddings = await embed_service.generate_embeddings(chunks)
                                         
                                         points = []
-                                        for i, (chunk, vector) in enumerate(zip(chunks, embeddings)):
+                                        for i, (chunk, hybrid_emb) in enumerate(zip(chunks, hybrid_embeddings)):
                                             points.append({
                                                 "id": uuid.uuid4(),
-                                                "vector": vector,
+                                                "dense_vector": hybrid_emb.dense,
+                                                "sparse_indices": hybrid_emb.sparse_indices,
+                                                "sparse_values": hybrid_emb.sparse_values,
                                                 "payload": {
                                                     "source_id": str(source.id),
                                                     "job_id": str(job.id),
@@ -135,13 +137,15 @@ async def process_ingestion_task(job_id: uuid.UUID, source_id: uuid.UUID):
                                             
                                             # Add metadata chunk first, then regular chunks
                                             all_chunks = [metadata_text] + chunks
-                                            embeddings = await embed_service.generate_embeddings(all_chunks)
+                                            hybrid_embeddings = await embed_service.generate_embeddings(all_chunks)
                                             
                                             points = []
-                                            for i, (chunk, vector) in enumerate(zip(all_chunks, embeddings)):
+                                            for i, (chunk, hybrid_emb) in enumerate(zip(all_chunks, hybrid_embeddings)):
                                                 points.append({
                                                     "id": uuid.uuid4(),
-                                                    "vector": vector,
+                                                    "dense_vector": hybrid_emb.dense,
+                                                    "sparse_indices": hybrid_emb.sparse_indices,
+                                                    "sparse_values": hybrid_emb.sparse_values,
                                                     "payload": {
                                                         "source_id": str(source.id),
                                                         "job_id": str(job.id),
@@ -207,12 +211,14 @@ async def process_ingestion_task(job_id: uuid.UUID, source_id: uuid.UUID):
                                     if embed_service.enabled:
                                         chunks = chunker.split_text(doc.content)
                                         if chunks:
-                                            embeddings = await embed_service.generate_embeddings(chunks)
+                                            hybrid_embeddings = await embed_service.generate_embeddings(chunks)
                                             points = []
-                                            for i, (chunk, vector) in enumerate(zip(chunks, embeddings)):
+                                            for i, (chunk, hybrid_emb) in enumerate(zip(chunks, hybrid_embeddings)):
                                                 points.append({
                                                     "id": uuid.uuid4(),
-                                                    "vector": vector,
+                                                    "dense_vector": hybrid_emb.dense,
+                                                    "sparse_indices": hybrid_emb.sparse_indices,
+                                                    "sparse_values": hybrid_emb.sparse_values,
                                                     "payload": {
                                                         "source_id": str(source.id),
                                                         "job_id": str(job.id),
@@ -261,12 +267,14 @@ async def process_ingestion_task(job_id: uuid.UUID, source_id: uuid.UUID):
                                     if embed_service.enabled:
                                         chunks = chunker.split_text(doc.content)
                                         if chunks:
-                                            embeddings = await embed_service.generate_embeddings(chunks)
+                                            hybrid_embeddings = await embed_service.generate_embeddings(chunks)
                                             points = []
-                                            for i, (chunk, vector) in enumerate(zip(chunks, embeddings)):
+                                            for i, (chunk, hybrid_emb) in enumerate(zip(chunks, hybrid_embeddings)):
                                                 points.append({
                                                     "id": uuid.uuid4(),
-                                                    "vector": vector,
+                                                    "dense_vector": hybrid_emb.dense,
+                                                    "sparse_indices": hybrid_emb.sparse_indices,
+                                                    "sparse_values": hybrid_emb.sparse_values,
                                                     "payload": {
                                                         "source_id": str(source.id),
                                                         "job_id": str(job.id),

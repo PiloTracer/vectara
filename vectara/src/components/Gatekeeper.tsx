@@ -25,22 +25,41 @@ export default function Gatekeeper() {
         checkMode();
     }, []);
 
-    // Poll logs
+    // Poll logs & Listen for events
     useEffect(() => {
         let interval: any = null;
-        // Poll logs when waiting, starting, or running
+        let unlisten: (() => void) | null = null;
+
+        // 1. Listen for streaming events (Pulling/Startup logs)
+        import("@tauri-apps/api/event").then(async ({ listen }) => {
+            unlisten = await listen<string>("docker-event-log", (event) => {
+                setLogs((prev) => prev + event.payload + "\n");
+            });
+        });
+
+        // 2. Poll container logs once running (for existing logs)
         if (loading || dockerState === "Running" || dockerState?.startsWith("Starting")) {
             interval = setInterval(async () => {
                 try {
+                    // Only poll if we aren't receiving many events? 
+                    // Actually, let's append polled logs only if we want history.
+                    // For now, keep polling as fallback/history fetcher.
                     const output = await invoke<string>("get_docker_logs");
-                    setLogs(output);
+                    // We only replace if output is significantly different or if we want to sync state
+                    // But 'output' from backend is 'tail 50'. 
+                    // Let's rely on polling for the 'steady state' and events for 'startup stream'
+                    if (output.length > logs.length || !logs) {
+                        setLogs(output);
+                    }
                 } catch (e) {
                     // ignore
                 }
             }, 2000);
         }
+
         return () => {
             if (interval) clearInterval(interval);
+            if (unlisten) unlisten();
         }
     }, [loading, dockerState]);
 

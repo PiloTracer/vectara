@@ -37,6 +37,22 @@ class Settings(BaseSettings):
     def OLLAMA_BASE_URL(self) -> str:
         return f"http://{self.OLLAMA_HOST}:{self.OLLAMA_PORT}"
 
+    # Enterprise RAG: Infinity Embedding Server
+    INFINITY_HOST: str = os.getenv("INFINITY_HOST", "infinity")
+    INFINITY_PORT: int = int(os.getenv("INFINITY_PORT", 7997))
+    
+    @property
+    def INFINITY_URL(self) -> str:
+        return f"http://{self.INFINITY_HOST}:{self.INFINITY_PORT}"
+    
+    # Enterprise RAG: Cross-Encoder Reranker
+    RERANKER_HOST: str = os.getenv("RERANKER_HOST", "reranker")
+    RERANKER_PORT: int = int(os.getenv("RERANKER_PORT", 7997))
+    
+    @property
+    def RERANKER_URL(self) -> str:
+        return f"http://{self.RERANKER_HOST}:{self.RERANKER_PORT}"
+
     # OAuth
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.getenv("GOOGLE_CLIENT_SECRET", "")

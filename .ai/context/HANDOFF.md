@@ -1,5 +1,5 @@
 # AI Session Handoff
-**Last Session**: 2026-01-26 01:35
+**Last Session**: 2026-01-26 08:28
 
 ---
 
@@ -20,10 +20,12 @@
 ┌────────────────────────────▼────────────────────────────────────┐
 │ DOCKER STACK (tools-iadata/)                                    │
 │  back-dl   - FastAPI backend (port 18080)                       │
-│  front-dl  - Next.js dashboard (port 13737)                     │
-│  qdrant    - Vector database (port 16333)                       │
+│  front-dl  - Next.js dashboard (port 13000)                     │
+│  qdrant    - Vector database (port 16333) [HYBRID VECTORS]      │
 │  postgres  - Metadata/config DB                                 │
-│  ollama    - Local LLM (bge-m3, qwen2.5:7b)                     │
+│  ollama    - Local LLM (qwen2.5:7b) - Chat only                 │
+│  infinity  - Embedding server (bge-m3) [NEW]                    │
+│  reranker  - Cross-encoder (bge-reranker-v2-m3) [NEW]           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -31,33 +33,29 @@
 
 ## ✅ Session Summary (2026-01-26)
 
-### Critical Bugs Fixed
+### Enterprise RAG Implementation (COMPLETE)
 
-| Issue | Fix | File |
-|-------|-----|------|
-| **PDF "document closed" error** | Store `page_count` before `doc.close()` | `pdf_extractor.py` |
-| **Wrong OCR API** | Rewrite to use `LightOnOcrForConditionalGeneration` | `ocr_service.py` |
-| **LLM ignoring context** | Improved system prompt with explicit rules | `chat.py` |
-| **Limited search results** | Diverse search: fetch 100, group by doc | `chat.py` |
-| **Chat filter not working** | Added source_id filter to ChatInterface | `ChatInterface.tsx` |
+| Phase | Description | Status |
+|-------|-------------|--------|
+| **Infrastructure** | Added `infinity` + `reranker` containers to docker-compose | ✅ |
+| **Embedding Service** | Rewritten for Infinity API, batch processing, HybridEmbedding | ✅ |
+| **Reranker Service** | NEW service for cross-encoder scoring | ✅ |
+| **Vector Storage** | Hybrid collection (dense+sparse), RRF fusion search | ✅ |
+| **Ingestion Pipeline** | All 4 source types updated for hybrid vectors | ✅ |
+| **Chat Endpoint** | Hybrid search + re-ranking pipeline | ✅ |
 
-### New Features Implemented
+### Key Files Changed
 
-| Feature | Description | File |
-|---------|-------------|------|
-| **Diverse Search** | Fetch 100 results, group by doc, max 2 chunks each | `chat.py` |
-| **Metadata Chunks** | Add doc title/author chunk for discovery queries | `ingestion_service.py` |
-| **LLM Parameter Tuning** | temperature=0.3, top_p=0.7, num_ctx=8192 | `llm_service.py` |
-| **Context Window 8192** | Increased Ollama context window | `docker-compose.dev.yml` |
-
-### Model Upgrade
-- Upgraded from `qwen2.5:3b` to `qwen2.5:7b` for better responses
-
-### Test Status
-- ✅ PDF extraction working (5 Mark Twain books: 7,146 chunks)
-- ✅ Chat retrieves and cites sources correctly
-- ✅ Diverse search covers all documents
-- ⚠️ LightOnOCR requires transformers from source (falls back to Tesseract)
+| File | Change |
+|------|--------|
+| `docker-compose.dev.yml` | Added infinity (17997), reranker (17998) containers |
+| `.env.dev` | Added INFINITY_*, RERANKER_* vars |
+| `config.py` | Added INFINITY_URL, RERANKER_URL |
+| `embedding_service.py` | Complete rewrite: batch, HybridEmbedding |
+| `reranker_service.py` | NEW: cross-encoder service |
+| `vector_service.py` | Complete rewrite: hybrid search, RRF |
+| `ingestion_service.py` | Updated 4 source types |
+| `chat.py` | Complete rewrite: hybrid + rerank |
 
 ---
 
@@ -67,12 +65,12 @@
 |------|------|---------|
 | Bridge Server | `vectara/src-tauri/src/server/` | HTTP API for file access from Docker |
 | Bridge Client | `back-dl/app/services/bridge.py` | Python client calling Bridge |
-| **PDF Extractor** | `back-dl/app/services/extraction/pdf_extractor.py` | PDF text + OCR fallback |
-| **OCR Service** | `back-dl/app/services/ocr_service.py` | LightOnOCR wrapper |
-| **Chat/RAG** | `back-dl/app/routers/chat.py` | Diverse search + LLM response |
-| **LLM Service** | `back-dl/app/services/llm_service.py` | Ollama client with tuned params |
-| **Ingestion** | `back-dl/app/services/ingestion_service.py` | Now adds metadata chunks |
-| Docker Compose | `docker-compose.dev.yml` | Updated with context window |
+| **Embedding** | `back-dl/app/services/embedding_service.py` | Infinity client, HybridEmbedding |
+| **Reranker** | `back-dl/app/services/reranker_service.py` | Cross-encoder re-ranking |
+| **Vector DB** | `back-dl/app/services/vector_service.py` | Hybrid search with RRF |
+| **Chat/RAG** | `back-dl/app/routers/chat.py` | Hybrid search + rerank pipeline |
+| **Ingestion** | `back-dl/app/services/ingestion_service.py` | Hybrid vector storage |
+| Docker Compose | `docker-compose.dev.yml` | Infinity + Reranker containers |
 
 ---
 
@@ -82,22 +80,28 @@
 cd vectara && pnpm tauri dev
 ```
 
+Or for Docker stack only:
+```bash
+cd tools-iadata
+docker compose --profile local-llm up -d
+```
+
 ---
 
 ## ⚠️ Known Issues / Gaps
 
-1. **LightOnOCR Not Loading**: Requires `pip install git+https://github.com/huggingface/transformers`
-2. **Need Re-sync**: After metadata chunks feature, re-sync documents to generate discovery chunks
+1. **Collection Recreation Needed**: Existing Qdrant collection uses legacy format. Delete and re-ingest for full hybrid search.
+2. **LightOnOCR Not Loading**: Requires `pip install git+https://github.com/huggingface/transformers`
 3. **Path Authorization Lost on Restart**: Bridge paths are in-memory only
 
 ---
 
 ## ➡️ Suggested Next Steps
 
-1. **Re-sync Mark Twain books** to generate metadata chunks
-2. **Fix LightOnOCR** in Dockerfile for proper OCR
-3. **Hybrid Search** - Add BM25 keyword search alongside vector search
-4. **Try qwen2.5:14b** if 7b responses are still not good enough
+1. **Recreate Qdrant collection** and re-ingest documents for hybrid vectors
+2. **Verify container health**: `curl http://localhost:17997/health`
+3. **Test keyword search**: Query for specific terms/IDs to validate sparse search
+4. **GPU memory tuning**: Adjust batch sizes if OOM errors occur
 
 ---
 
@@ -106,8 +110,9 @@ cd vectara && pnpm tauri dev
 Read these files for full context:
 - Current Focus: `.ai/context/CURRENT_FOCUS.md`
 - Decisions: `.ai/context/DECISIONS.md`
+- Enterprise RAG Plan: `.ai/features/0525-rag-enterprise-260126.md`
 
 **Key commands:**
 - Start dev: `cd vectara && pnpm tauri dev`
 - Check logs: `docker logs iadata_back_dl_dev 2>&1 | tail -50`
-- Test chat API: `curl -s -X POST "http://localhost:18080/chat/" -H "Content-Type: application/json" -d '{"message": "...", "use_rag": true, "filter": {"source_ids": ["..."]}}' | jq`
+- Test chat API: `curl -s -X POST "http://localhost:18080/chat/" -H "Content-Type: application/json" -d '{"message": "...", "use_rag": true}' | jq`

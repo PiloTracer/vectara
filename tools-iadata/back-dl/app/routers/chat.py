@@ -1,11 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, Body
+"""
+Enterprise RAG Chat Endpoint.
+Implements hybrid search (dense + sparse) with cross-encoder re-ranking.
+"""
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict, Any
 import logging
 from app.services.llm_service import LLMService
 from app.services.embedding_service import EmbeddingService
 from app.services.vector_service import VectorService
-from app.config import settings
+from app.services.reranker_service import RerankerService
 
 router = APIRouter(
     prefix="/chat",
@@ -14,25 +18,36 @@ router = APIRouter(
 
 logger = logging.getLogger(__name__)
 
+
 class ChatRequest(BaseModel):
     message: str
-    history: Optional[List[Dict[str, str]]] = [] # [{"role": "user", "content": "..."}, ...]
+    history: Optional[List[Dict[str, str]]] = []  # [{"role": "user", "content": "..."}]
     use_rag: Optional[bool] = True
-    filter: Optional[Dict[str, Any]] = None # e.g. {"source_ids": ["uuid-1", "uuid-2"]}
+    filter: Optional[Dict[str, Any]] = None  # e.g. {"source_ids": ["uuid-1"]}
     
+
 class ChatResponse(BaseModel):
     response: str
     sources: Optional[List[Dict[str, Any]]] = []
+
 
 @router.post("/", response_model=ChatResponse)
 async def chat_endpoint(
     request: ChatRequest,
     llm_service: LLMService = Depends(LLMService),
     embedding_service: EmbeddingService = Depends(EmbeddingService),
-    vector_service: VectorService = Depends(VectorService)
+    vector_service: VectorService = Depends(VectorService),
+    reranker_service: RerankerService = Depends(RerankerService)
 ):
     """
-    Generic Chat Endpoint with RAG capabilities.
+    Enterprise Chat Endpoint with RAG capabilities.
+    
+    Pipeline:
+    1. Generate hybrid embedding (dense + sparse) for query
+    2. Perform hybrid search in Qdrant (semantic + lexical)
+    3. Re-rank results with cross-encoder for precision
+    4. Augment prompt with top results
+    5. Generate response via LLM
     """
     try:
         context_text = ""
@@ -40,61 +55,73 @@ async def chat_endpoint(
         
         # 1. Retrieve Context (RAG)
         if request.use_rag and embedding_service.enabled and vector_service.enabled:
-            logger.info(f"Generating embedding for query: {request.message}")
-            embeddings = await embedding_service.generate_embeddings([request.message])
+            logger.info(f"Generating hybrid embedding for query: {request.message}")
             
-            if embeddings:
-                logger.info(f"Searching vector database... Filters: {request.filter}")
+            # Generate hybrid embedding (dense + sparse)
+            query_embedding = await embedding_service.generate_query_embedding(request.message)
+            
+            if query_embedding and query_embedding.dense:
+                logger.info(f"Performing hybrid search... Filters: {request.filter}")
                 
-                # Fetch more results for diversity
-                raw_results = vector_service.search(
-                    embeddings[0], 
-                    limit=100,  # Fetch many to ensure all documents are represented
+                # Hybrid search with dense + sparse vectors
+                raw_results = vector_service.hybrid_search(
+                    dense_vector=query_embedding.dense,
+                    sparse_indices=query_embedding.sparse_indices if query_embedding.sparse_indices else None,
+                    sparse_values=query_embedding.sparse_values if query_embedding.sparse_values else None,
+                    limit=50,  # Fetch many for re-ranking
                     filters=request.filter
                 )
                 
                 if raw_results:
-                    # Diversify results: ensure representation from all unique documents
-                    # Take up to 2 best chunks per document, max 10 total
-                    doc_chunks = {}  # path -> list of results
-                    for res in raw_results:
-                        doc_path = res.payload.get('path', 'Unknown')
-                        if doc_path not in doc_chunks:
-                            doc_chunks[doc_path] = []
-                        if len(doc_chunks[doc_path]) < 2:  # Max 2 chunks per doc
-                            doc_chunks[doc_path].append(res)
+                    logger.info(f"Retrieved {len(raw_results)} results, applying re-ranking...")
                     
-                    # Flatten and take best overall (interleave from each doc)
-                    diverse_results = []
-                    max_rounds = 2
-                    for round_idx in range(max_rounds):
-                        for doc_path in sorted(doc_chunks.keys()):
-                            if round_idx < len(doc_chunks[doc_path]):
-                                diverse_results.append(doc_chunks[doc_path][round_idx])
-                            if len(diverse_results) >= 12:
-                                break
-                        if len(diverse_results) >= 12:
-                            break
-                    
-                    # Build sources list from diverse results
-                    sources = [
-                        {"id": p.id, "score": p.score, "metadata": p.payload} 
-                        for p in diverse_results
+                    # Prepare documents for re-ranking
+                    docs_for_rerank = [
+                        {
+                            "id": res.id,
+                            "score": res.score,
+                            "text": res.payload.get('text', '') or res.payload.get('content', ''),
+                            "path": res.payload.get('path', 'Unknown'),
+                            "payload": res.payload
+                        }
+                        for res in raw_results
                     ]
                     
-                    # Construct context string
+                    # Re-rank with cross-encoder for precision
+                    reranked = await reranker_service.rerank(
+                        query=request.message,
+                        documents=docs_for_rerank,
+                        text_key="text",
+                        top_k=10  # Keep top 10 after re-ranking
+                    )
+                    
+                    logger.info(f"Re-ranked to {len(reranked)} top results")
+                    
+                    # Build sources list from re-ranked results
+                    sources = [
+                        {
+                            "id": r.payload.get("id"),
+                            "score": r.score,
+                            "metadata": r.payload.get("payload", r.payload)
+                        } 
+                        for r in reranked
+                    ]
+                    
+                    # Construct context string from re-ranked results
                     context_parts = []
                     unique_sources = set()
-                    for res in diverse_results:
-                        text = res.payload.get('text', '') or res.payload.get('content', '')
-                        filename = res.payload.get('path', 'Unknown')
-                        unique_sources.add(filename)
+                    
+                    for ranked_result in reranked:
+                        text = ranked_result.payload.get('text', '')
+                        path = ranked_result.payload.get('path', 'Unknown')
+                        unique_sources.add(path)
+                        
                         if text:
-                            context_parts.append(f"--- SOURCE: {filename} ---\n{text}\n")
+                            context_parts.append(f"--- SOURCE: {path} (relevance: {ranked_result.score:.3f}) ---\n{text}\n")
                     
                     context_text = "\n".join(context_parts)
                     sources_list = "\n".join(f"- {s}" for s in sorted(unique_sources))
-                    logger.info(f"Found {len(diverse_results)} diverse results from {len(unique_sources)} documents.")
+                    logger.info(f"Context built from {len(unique_sources)} unique documents")
         
         # 2. Construct System Prompt
         system_prompt = (

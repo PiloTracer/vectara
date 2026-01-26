@@ -85,6 +85,53 @@ services:
     networks:
       - iadata_net
 
+  # Enterprise RAG: High-performance embedding server (bge-m3 with dense+sparse)
+  infinity:
+    image: michaelf34/infinity:0.0.67
+    container_name: iadata_infinity_${DEPLOY_SUFFIX}
+    profiles: ["local-llm"]
+    # Removed --device cpu as it's not a valid flag for v2, just removing GPU reservation forces CPU
+    command: v2 --model-id BAAI/bge-m3 --batch-size 32 --port 7997
+    volumes:
+      - infinity_models:/app/.cache
+    ports:
+      - "${INFINITY_PORT:-17997}:7997"
+    environment:
+      - HF_HOME=/app/.cache
+      # Force PyTorch to use CPU
+      - CUDA_VISIBLE_DEVICES=""
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7997/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    networks:
+      - iadata_net
+
+  # Enterprise RAG: Cross-encoder re-ranker for precision
+  reranker:
+    image: michaelf34/infinity:0.0.67
+    container_name: iadata_reranker_${DEPLOY_SUFFIX}
+    profiles: ["local-llm"]
+    # Removed --dtype float16 as it requires GPU usually, let it auto-detect or default to float32 on CPU
+    command: v2 --model-id BAAI/bge-reranker-v2-m3 --batch-size 32 --port 7997
+    volumes:
+      - reranker_models:/app/.cache
+    ports:
+      - "${RERANKER_PORT:-17998}:7997"
+    environment:
+      - HF_HOME=/app/.cache
+      - CUDA_VISIBLE_DEVICES=""
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7997/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    networks:
+      - iadata_net
+
   back-dl:
     build: 
       context: ./back-dl
@@ -150,6 +197,10 @@ volumes:
     name: ${COMPOSE_PROJECT_NAME}_qdrant_data
   ollama_data:
     name: ${COMPOSE_PROJECT_NAME}_ollama_data
+  infinity_models:
+    name: ${COMPOSE_PROJECT_NAME}_infinity_models
+  reranker_models:
+    name: ${COMPOSE_PROJECT_NAME}_reranker_models
 
 networks:
   iadata_net:

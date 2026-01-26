@@ -98,6 +98,31 @@ inference-server:
 ```
 *Note: Infinity is CPU optimized too if no GPU.*
 
+### GPU/CPU Configuration Strategy
+
+The Enterprise RAG services (`infinity`, `reranker`) are configured using a **Docker Compose override pattern**:
+
+| File                      | Purpose                                              |
+|---------------------------|------------------------------------------------------|
+| `docker-compose.dev.yml`  | **Base file** - CPU mode (default, safe for all HW) |
+| `docker-compose.gpu.yml`  | **Override file** - Adds GPU acceleration           |
+
+**CPU Mode (Default)** - `docker-compose.dev.yml`:
+- Sets `CUDA_VISIBLE_DEVICES=""` to force PyTorch CPU
+- No `deploy.resources.reservations.devices` block
+- Uses default `--dtype` (float32 for CPU compatibility)
+
+**GPU Mode (Optional)** - Apply overlay `docker-compose.gpu.yml`:
+```bash
+docker compose -f docker-compose.dev.yml -f docker-compose.gpu.yml --profile local-llm up
+```
+- Adds `--dtype float16 --device cuda` to command
+- Sets `CUDA_VISIBLE_DEVICES=0`
+- Adds NVIDIA GPU reservation
+
+> [!IMPORTANT]
+> The `docker-compose.gpu.yml` file is an **override-only** file. It does NOT contain full service definitions—only the properties that differ from the base file. This keeps it minimal and maintainable.
+
 ### Python Dependency
 Add `sentence-transformers` or `httpx` (for calling Infinity API) to `back-dl`.
 
