@@ -18,6 +18,7 @@ class ChatRequest(BaseModel):
     message: str
     history: Optional[List[Dict[str, str]]] = [] # [{"role": "user", "content": "..."}, ...]
     use_rag: Optional[bool] = True
+    filter: Optional[Dict[str, Any]] = None # e.g. {"source_ids": ["uuid-1", "uuid-2"]}
     
 class ChatResponse(BaseModel):
     response: str
@@ -43,8 +44,12 @@ async def chat_endpoint(
             embeddings = await embedding_service.generate_embeddings([request.message])
             
             if embeddings:
-                logger.info("Searching vector database...")
-                search_results = vector_service.search(embeddings[0], limit=5)
+                logger.info(f"Searching vector database... Filters: {request.filter}")
+                search_results = vector_service.search(
+                    embeddings[0], 
+                    limit=5,
+                    filters=request.filter
+                )
                 
                 if search_results:
                     sources = [

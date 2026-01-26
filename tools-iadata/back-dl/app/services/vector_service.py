@@ -77,16 +77,33 @@ class VectorService:
         except Exception as e:
             logger.error(f"Failed to upsert vectors: {e}")
             
-    def search(self, query_vector: List[float], limit: int = 5):
-        """Search for similar vectors."""
+    def search(self, query_vector: List[float], limit: int = 5, filters: Optional[Dict[str, Any]] = None):
+        """
+        Search for similar vectors.
+        filters: dict containing filtering criteria (e.g., {'source_ids': ['id1', 'id2']})
+        """
         if not self.enabled or not self.client:
             return []
 
         try:
+            query_filter = None
+            if filters and "source_ids" in filters:
+                # Construct Qdrant Filter
+                # We use MatchAny to allow any of the provided source_ids
+                query_filter = models.Filter(
+                    must=[
+                        models.FieldCondition(
+                            key="source_id",
+                            match=models.MatchAny(any=filters["source_ids"])
+                        )
+                    ]
+                )
+
             # v1.10+ uses query_points
             result = self.client.query_points(
                 collection_name=self.COLLECTION_NAME,
                 query=query_vector,
+                query_filter=query_filter,
                 limit=limit,
                 with_payload=True
             )

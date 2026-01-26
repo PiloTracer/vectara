@@ -22,6 +22,7 @@ The core philosophy is **Hybrid Resilience**: Do as much as possible locally (em
 3.  **Tokenization & Chunking**:
     *   Content is split into semantic chunks (e.g., 512-1024 tokens).
     *   *Optimization*: We use overlap (e.g., 128 tokens) to preserve context boundaries.
+    *   **Hierarchy Preservation**: Every chunk is tagged with `source_id` and `chunk_index`. This ensures that even though a file is split into 100 parts, every part knows it belongs to "Finance Source" (ID A1).
 
 4.  **Embedding (Local)**:
     *   **Model**: `bge-m3` (running in Ollama).
@@ -35,6 +36,7 @@ The core philosophy is **Hybrid Resilience**: Do as much as possible locally (em
     *   User question is embedded using the *same* model (`bge-m3`) to ensure vector space alignment.
 2.  **Vector Search (Qdrant)**:
     *   Perform cosine similarity search in Qdrant.
+    *   **Source Filtering**: We can optionally pass a `filter` (e.g., `source_ids=['A1']`). Qdrant will completely ignore chunks from other sources, effectively creating isolated "Environments" for the AI.
     *   Retrieve top $K$ chunks (typically 5-10) with metadata (source credentials).
 3.  **Context Assembly**:
     *   Construct a prompt: `Context: {retrieved_chunks} \n\n Question: {query}`.
