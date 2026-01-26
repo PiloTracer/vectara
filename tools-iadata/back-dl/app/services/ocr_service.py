@@ -7,6 +7,10 @@ Falls back to Tesseract if the model is unavailable or disabled.
 Configuration:
     USE_LOCAL_OCR: Enable/disable LLM-based OCR (default: false)
     LOCAL_OCR_MODEL_NAME: HuggingFace model ID (e.g., "lightonai/LightOnOCR-2-1B")
+    
+Requirements:
+    pip install git+https://github.com/huggingface/transformers
+    pip install pillow
 """
 import logging
 from typing import Optional
@@ -24,6 +28,8 @@ class OCRService:
     
     _model = None
     _processor = None
+    _device = None
+    _dtype = None
     _load_attempted = False
     
     def __init__(self):
@@ -45,19 +51,36 @@ class OCRService:
         OCRService._load_attempted = True
         
         try:
-            from transformers import AutoProcessor, AutoModelForImageTextToText
+            import torch
+            from transformers import LightOnOcrForConditionalGeneration, LightOnOcrProcessor
+            
+            # Determine device and dtype
+            if torch.cuda.is_available():
+                OCRService._device = "cuda"
+                OCRService._dtype = torch.bfloat16
+            elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+                OCRService._device = "mps"
+                OCRService._dtype = torch.float32
+            else:
+                OCRService._device = "cpu"
+                OCRService._dtype = torch.float32
             
             logger.info(f"Loading OCR model '{self.model_name}' from HuggingFace...")
-            logger.info("This may take several minutes on first run (downloading ~1GB model)...")
+            logger.info(f"Using device: {OCRService._device}, dtype: {OCRService._dtype}")
+            logger.info("This may take several minutes on first run (downloading model)...")
             
-            OCRService._processor = AutoProcessor.from_pretrained(self.model_name)
-            OCRService._model = AutoModelForImageTextToText.from_pretrained(self.model_name)
+            OCRService._model = LightOnOcrForConditionalGeneration.from_pretrained(
+                self.model_name,
+                torch_dtype=OCRService._dtype
+            ).to(OCRService._device)
+            
+            OCRService._processor = LightOnOcrProcessor.from_pretrained(self.model_name)
             
             logger.info(f"OCR model '{self.model_name}' loaded successfully.")
             return True
             
-        except ImportError:
-            logger.error("transformers library not installed. Run: pip install transformers")
+        except ImportError as e:
+            logger.error(f"LightOnOCR requires transformers from source. Run: pip install git+https://github.com/huggingface/transformers - Error: {e}")
             return False
         except Exception as e:
             logger.error(f"Failed to load OCR model: {e}")
@@ -84,6 +107,7 @@ class OCRService:
                 return None
         
         try:
+            import torch
             from PIL import Image
             import io
             
@@ -92,12 +116,35 @@ class OCRService:
             if image.mode != 'RGB':
                 image = image.convert('RGB')
             
-            # Process image
-            inputs = OCRService._processor(images=image, return_tensors="pt")
+            # Create conversation format as required by LightOnOCR
+            conversation = [{
+                "role": "user",
+                "content": [{"type": "image", "image": image}]
+            }]
+            
+            # Process with apply_chat_template
+            inputs = OCRService._processor.apply_chat_template(
+                conversation,
+                add_generation_prompt=True,
+                tokenize=True,
+                return_dict=True,
+                return_tensors="pt",
+            )
+            
+            # Move to device with proper dtype
+            inputs = {
+                k: v.to(device=OCRService._device, dtype=OCRService._dtype) 
+                   if v.is_floating_point() else v.to(OCRService._device) 
+                for k, v in inputs.items()
+            }
             
             # Generate text
-            generated_ids = OCRService._model.generate(**inputs, max_new_tokens=2048)
-            text = OCRService._processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
+            with torch.no_grad():
+                output_ids = OCRService._model.generate(**inputs, max_new_tokens=2048)
+            
+            # Extract only the generated part (exclude input tokens)
+            generated_ids = output_ids[0, inputs["input_ids"].shape[1]:]
+            text = OCRService._processor.decode(generated_ids, skip_special_tokens=True)
             
             result = text.strip()
             if result:

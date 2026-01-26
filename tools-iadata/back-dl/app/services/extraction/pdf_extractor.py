@@ -42,7 +42,7 @@ class PDFExtractor(BaseExtractor):
             
             # If page has very little text and OCR is enabled, try OCR
             if self.use_ocr and len(text.strip()) < self.ocr_threshold:
-                ocr_text = self._ocr_page(page)
+                ocr_text = await self._ocr_page(page)
                 if ocr_text and len(ocr_text.strip()) > len(text.strip()):
                     text = ocr_text
                     ocr_used = True
@@ -70,33 +70,52 @@ class PDFExtractor(BaseExtractor):
         except Exception:
             pass
         
+        page_count = len(doc)
         doc.close()
         
         return ExtractedDocument(
             content=content.strip(),
             metadata=metadata,
-            pages=len(doc)
+            pages=page_count
         )
     
-    def _ocr_page(self, page) -> str:
-        """Perform OCR on a PDF page."""
+    async def _ocr_page(self, page) -> str:
+        """Perform OCR on a PDF page using LightOnOCR (primary) or Tesseract (fallback)."""
         try:
-            import pytesseract
             from PIL import Image
             import io
             
             # Render page to image at 150 DPI (balance quality/speed)
             pix = page.get_pixmap(dpi=150)
             img_bytes = pix.tobytes("png")
-            img = Image.open(io.BytesIO(img_bytes))
             
-            # Run OCR
-            text = pytesseract.image_to_string(img)
-            return text
+            # Try LightOnOCR first
+            try:
+                from app.services.ocr_service import OCRService
+                ocr_service = OCRService()
+                
+                if ocr_service.enabled:
+                    text = await ocr_service.extract_text(img_bytes)
+                    if text:
+                        logger.debug("Used LightOnOCR for page extraction")
+                        return text
+            except Exception as e:
+                logger.warning(f"LightOnOCR failed, trying Tesseract: {e}")
             
-        except ImportError:
-            logger.warning("pytesseract or PIL not available for OCR")
-            return ""
+            # Fallback to Tesseract
+            try:
+                import pytesseract
+                img = Image.open(io.BytesIO(img_bytes))
+                text = pytesseract.image_to_string(img)
+                logger.debug("Used Tesseract fallback for page extraction")
+                return text
+            except ImportError:
+                logger.warning("pytesseract not available for OCR fallback")
+                return ""
+            except Exception as e:
+                logger.warning(f"Tesseract OCR failed: {e}")
+                return ""
+                
         except Exception as e:
             logger.warning(f"OCR failed: {e}")
             return ""

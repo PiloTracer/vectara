@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, FileText, Loader2, StopCircle } from 'lucide-react';
+import { Send, Bot, User, FileText, Loader2, StopCircle, AlertCircle } from 'lucide-react';
+import { useEnvironment } from '../../context/EnvironmentContext';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -26,7 +27,32 @@ export function ChatInterface() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [sourceIds, setSourceIds] = useState<string[]>([]);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    const { activeEnvironmentId, activeEnvironment } = useEnvironment();
+
+    // Fetch source IDs for the active environment
+    useEffect(() => {
+        if (!activeEnvironmentId) {
+            setSourceIds([]);
+            return;
+        }
+
+        fetch(`${API_BASE}/resources/env/${activeEnvironmentId}/sources`)
+            .then(res => res.json())
+            .then(data => {
+                // Handle both array response and wrapped response
+                const sources = Array.isArray(data) ? data : [];
+                const ids = sources.map((src: any) => src.id);
+                setSourceIds(ids);
+                console.log(`Loaded ${ids.length} source IDs for environment ${activeEnvironmentId}`);
+            })
+            .catch(err => {
+                console.error("Failed to load sources for environment", err);
+                setSourceIds([]);
+            });
+    }, [activeEnvironmentId]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -55,7 +81,8 @@ export function ChatInterface() {
                 body: JSON.stringify({
                     message: userMsg.content,
                     history: history,
-                    use_rag: true
+                    use_rag: true,
+                    filter: sourceIds.length > 0 ? { source_ids: sourceIds } : null
                 })
             });
 
@@ -116,8 +143,8 @@ export function ChatInterface() {
                         )}
 
                         <div className={`max-w-[80%] rounded-2xl p-4 ${msg.role === 'user'
-                                ? 'bg-blue-600 text-white rounded-br-sm'
-                                : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-sm'
+                            ? 'bg-blue-600 text-white rounded-br-sm'
+                            : 'bg-slate-800 text-slate-200 border border-slate-700 rounded-bl-sm'
                             }`}>
                             <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
 
