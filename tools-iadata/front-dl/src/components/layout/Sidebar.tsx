@@ -51,7 +51,7 @@ export default function Sidebar() {
             {/* System Footer */}
             <div style={{ padding: "16px 12px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
                 <SidebarItem href="/dashboard/settings" label="Settings" icon="🔧" />
-                <SidebarItem href="/docs" label="Documentation" icon="📄" />
+                <SidebarItem href="/dashboard/docs" label="Documentation" icon="📄" />
             </div>
         </aside>
     );

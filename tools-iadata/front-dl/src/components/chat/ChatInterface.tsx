@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, FileText, Loader2, StopCircle, AlertCircle } from 'lucide-react';
 import { useEnvironment } from '../../context/EnvironmentContext';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface Message {
     role: 'user' | 'assistant';
@@ -28,9 +29,41 @@ export function ChatInterface() {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [sourceIds, setSourceIds] = useState<string[]>([]);
+    const [sessionId, setSessionId] = useState<string | null>(null);
+
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const urlSessionId = searchParams.get('session_id');
 
     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
+
+    // 1. Initialize Session from URL
+    useEffect(() => {
+        if (urlSessionId && urlSessionId !== sessionId) {
+            setSessionId(urlSessionId);
+            loadSession(urlSessionId);
+        }
+    }, [urlSessionId]);
+
+    const loadSession = async (id: string) => {
+        try {
+            const res = await fetch(`${API_BASE}/sessions/${id}`);
+            if (!res.ok) throw new Error("Failed to load session");
+            const data = await res.json();
+
+            if (data.messages) {
+                const loadedMessages = data.messages.map((m: any) => ({
+                    role: m.role,
+                    content: m.content,
+                    sources: m.meta?.sources || [] // Assuming meta stores sources if we implemented that
+                }));
+                setMessages(loadedMessages);
+            }
+        } catch (error) {
+            console.error("Error loading session:", error);
+        }
+    };
 
     // Fetch source IDs for the active environment
     useEffect(() => {
@@ -77,7 +110,7 @@ export function ChatInterface() {
 
             // Debug: Log what filter is being sent
             const filterPayload = sourceIds.length > 0 ? { source_ids: sourceIds } : null;
-            console.log("Sending chat request with filter:", filterPayload, "sourceIds:", sourceIds);
+            // console.log("Sending chat request with filter:", filterPayload, "sourceIds:", sourceIds);
 
             const res = await fetch(`${API_BASE}/chat/`, {
                 method: "POST",
@@ -86,13 +119,21 @@ export function ChatInterface() {
                     message: userMsg.content,
                     history: history,
                     use_rag: true,
-                    filter: filterPayload
+                    filter: filterPayload,
+                    session_id: sessionId
                 })
             });
 
             if (!res.ok) throw new Error("Failed to send message");
 
             const data = await res.json();
+
+            // Update session ID if newly created
+            if (data.session_id && data.session_id !== sessionId) {
+                setSessionId(data.session_id);
+                // Update URL without reload
+                router.push(`/dashboard?session_id=${data.session_id}`, { scroll: false });
+            }
 
             const assistantMsg: Message = {
                 role: 'assistant',
@@ -127,6 +168,11 @@ export function ChatInterface() {
                     <h3 className="text-sm font-bold text-white uppercase tracking-wide">Data Lake Assistant</h3>
                     <p className="text-xs text-slate-400">Powered by Local LLM (Qwen2.5)</p>
                 </div>
+                {sessionId && (
+                    <div className="ml-auto text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">
+                        Session: {sessionId.slice(0, 8)}...
+                    </div>
+                )}
             </div>
 
             {/* Messages Area */}

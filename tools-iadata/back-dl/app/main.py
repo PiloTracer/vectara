@@ -33,13 +33,15 @@ app.add_middleware(
 )
 
 # --- Routers ---
-from app.routers import environments, resources, models, agents, oauth, chat
+from app.routers import environments, resources, models, agents, oauth, chat, sessions, knowledge
 app.include_router(environments.router)
 app.include_router(resources.router)
 app.include_router(models.router)
 app.include_router(agents.router)
 app.include_router(oauth.router)
 app.include_router(chat.router)
+app.include_router(sessions.router)
+app.include_router(knowledge.router)
 
 @app.get("/")
 async def root():

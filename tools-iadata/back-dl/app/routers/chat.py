@@ -10,6 +10,12 @@ from app.services.llm_service import LLMService
 from app.services.embedding_service import EmbeddingService
 from app.services.vector_service import VectorService
 from app.services.reranker_service import RerankerService
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db import get_db
+from app.models.chat import ChatSession, ChatMessage
+import uuid
+from sqlalchemy import select
+from datetime import datetime
 
 router = APIRouter(
     prefix="/chat",
@@ -24,11 +30,13 @@ class ChatRequest(BaseModel):
     history: Optional[List[Dict[str, str]]] = []  # [{"role": "user", "content": "..."}]
     use_rag: Optional[bool] = True
     filter: Optional[Dict[str, Any]] = None  # e.g. {"source_ids": ["uuid-1"]}
-    
+    session_id: Optional[uuid.UUID] = None
+
 
 class ChatResponse(BaseModel):
     response: str
     sources: Optional[List[Dict[str, Any]]] = []
+    session_id: Optional[uuid.UUID] = None
 
 
 @router.post("/", response_model=ChatResponse)
@@ -37,30 +45,42 @@ async def chat_endpoint(
     llm_service: LLMService = Depends(LLMService),
     embedding_service: EmbeddingService = Depends(EmbeddingService),
     vector_service: VectorService = Depends(VectorService),
-    reranker_service: RerankerService = Depends(RerankerService)
+    reranker_service: RerankerService = Depends(RerankerService),
+    db: AsyncSession = Depends(get_db)
 ):
     """
-    Enterprise Chat Endpoint with RAG capabilities.
-    
-    Pipeline:
-    1. Generate hybrid embedding (dense + sparse) for query
-    2. Perform hybrid search in Qdrant (semantic + lexical)
-    3. Re-rank results with cross-encoder for precision
-    4. Augment prompt with top results
-    5. Generate response via LLM
+    Enterprise Chat Endpoint with RAG capabilities and Session History.
     """
     try:
+        # 0. Session Management
+        session = None
+        if request.session_id:
+            stmt = select(ChatSession).where(ChatSession.id == request.session_id)
+            result = await db.execute(stmt)
+            session = result.scalar_one_or_none()
+        
+        if not session:
+            # Create new session
+            session = ChatSession(
+                user_id="default_user", # TODO: Auth
+                title=request.message[:50]
+            )
+            db.add(session)
+            await db.commit()
+            await db.refresh(session)
+        
         context_text = ""
         sources = []
         
         # 1. Retrieve Context (RAG)
         if request.use_rag and embedding_service.enabled and vector_service.enabled:
-            logger.info(f"Generating hybrid embedding for query: {request.message}")
+            # ... (RAG logic remains same) ...
+             logger.info(f"Generating hybrid embedding for query: {request.message}")
             
-            # Generate hybrid embedding (dense + sparse)
-            query_embedding = await embedding_service.generate_query_embedding(request.message)
+             # Generate hybrid embedding (dense + sparse)
+             query_embedding = await embedding_service.generate_query_embedding(request.message)
             
-            if query_embedding and query_embedding.dense:
+             if query_embedding and query_embedding.dense:
                 logger.info(f"Performing hybrid search... Filters: {request.filter}")
                 
                 # Hybrid search with dense + sparse vectors
@@ -130,7 +150,7 @@ async def chat_endpoint(
                         sources_list = "\n".join(f"- {s}" for s in sorted(unique_sources))
                     
                     logger.info(f"Context built from {len(unique_sources)} unique documents, {len(all_docs or [])} total docs available")
-        
+
         # 2. Construct System Prompt
         system_prompt = (
             "You are a document assistant. Answer questions based ONLY on the context provided below.\n"
@@ -161,10 +181,34 @@ async def chat_endpoint(
         
         # 4. Extract Response
         assistant_message = llm_response.get("message", {}).get("content", "")
+
+        # 5. Persist Chat
+        if session:
+            # Save User Message
+            user_msg = ChatMessage(
+                session_id=session.id,
+                role="user",
+                content=request.message
+            )
+            db.add(user_msg)
+            
+            # Save Assistant Message
+            meta = {"rag_used": bool(context_text), "sources_count": len(sources)}
+            assistant_msg = ChatMessage(
+                session_id=session.id,
+                role="assistant",
+                content=assistant_message,
+                meta=meta
+            )
+            db.add(assistant_msg)
+            
+            session.updated_at = datetime.utcnow()
+            await db.commit()
         
         return ChatResponse(
             response=assistant_message,
-            sources=sources
+            sources=sources,
+            session_id=session.id
         )
 
     except Exception as e:

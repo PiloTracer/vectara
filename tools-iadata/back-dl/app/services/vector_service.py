@@ -281,7 +281,7 @@ class VectorService:
             info = self.client.get_collection(self.COLLECTION_NAME)
             return {
                 "points_count": info.points_count,
-                "vectors_count": info.vectors_count,
+                "vectors_count": info.points_count, # vectors_count is deprecated/removed in v1.x client models, points_count is sufficient
                 "status": info.status
             }
         except Exception as e:
@@ -324,3 +324,68 @@ class VectorService:
         except Exception as e:
             logger.error(f"Failed to get unique documents: {e}")
             return None
+
+    def get_document_stats(self) -> List[Dict[str, Any]]:
+        """
+        Get detailed stats for all documents.
+        Returns: [ { "path": str, "chunk_count": int }, ... ]
+        """
+        if not self.enabled or not self.client:
+            return []
+
+        try:
+            # Scroll through all points
+            doc_counts = {}
+            offset = None
+            
+            while True:
+                results, offset = self.client.scroll(
+                    collection_name=self.COLLECTION_NAME,
+                    limit=500,
+                    offset=offset,
+                    with_payload=["path"],
+                    with_vectors=False
+                )
+                
+                for point in results:
+                    path = point.payload.get("path")
+                    if path:
+                        doc_counts[path] = doc_counts.get(path, 0) + 1
+                
+                if offset is None:
+                    break
+            
+            # Format as list
+            return [
+                {"path": path, "chunk_count": count}
+                for path, count in sorted(doc_counts.items(), key=lambda x: x[1], reverse=True)
+            ]
+            
+        except Exception as e:
+            logger.error(f"Failed to get document stats: {e}")
+            return []
+
+    def delete_by_path(self, path: str) -> bool:
+        """Delete all vectors for a specific document path."""
+        if not self.enabled or not self.client:
+            return False
+
+        try:
+            self.client.delete(
+                collection_name=self.COLLECTION_NAME,
+                points_selector=models.FilterSelector(
+                    filter=models.Filter(
+                        must=[
+                            models.FieldCondition(
+                                key="path",
+                                match=models.MatchValue(value=path)
+                            )
+                        ]
+                    )
+                )
+            )
+            logger.info(f"Deleted vectors for document: {path}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete document {path}: {e}")
+            return False
