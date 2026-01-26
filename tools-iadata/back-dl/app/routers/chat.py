@@ -45,22 +45,47 @@ async def chat_endpoint(
             
             if embeddings:
                 logger.info(f"Searching vector database... Filters: {request.filter}")
-                search_results = vector_service.search(
+                
+                # Fetch more results for diversity
+                raw_results = vector_service.search(
                     embeddings[0], 
-                    limit=10,
+                    limit=30,  # Fetch more to allow for diversification
                     filters=request.filter
                 )
                 
-                if search_results:
+                if raw_results:
+                    # Diversify results: ensure representation from all unique documents
+                    # Take up to 2 best chunks per document, max 10 total
+                    doc_chunks = {}  # path -> list of results
+                    for res in raw_results:
+                        doc_path = res.payload.get('path', 'Unknown')
+                        if doc_path not in doc_chunks:
+                            doc_chunks[doc_path] = []
+                        if len(doc_chunks[doc_path]) < 2:  # Max 2 chunks per doc
+                            doc_chunks[doc_path].append(res)
+                    
+                    # Flatten and take best overall (interleave from each doc)
+                    diverse_results = []
+                    max_rounds = 2
+                    for round_idx in range(max_rounds):
+                        for doc_path in sorted(doc_chunks.keys()):
+                            if round_idx < len(doc_chunks[doc_path]):
+                                diverse_results.append(doc_chunks[doc_path][round_idx])
+                            if len(diverse_results) >= 12:
+                                break
+                        if len(diverse_results) >= 12:
+                            break
+                    
+                    # Build sources list from diverse results
                     sources = [
                         {"id": p.id, "score": p.score, "metadata": p.payload} 
-                        for p in search_results
+                        for p in diverse_results
                     ]
                     
                     # Construct context string
                     context_parts = []
                     unique_sources = set()
-                    for res in search_results:
+                    for res in diverse_results:
                         text = res.payload.get('text', '') or res.payload.get('content', '')
                         filename = res.payload.get('path', 'Unknown')
                         unique_sources.add(filename)
@@ -69,15 +94,17 @@ async def chat_endpoint(
                     
                     context_text = "\n".join(context_parts)
                     sources_list = "\n".join(f"- {s}" for s in sorted(unique_sources))
-                    logger.info(f"Found {len(search_results)} relevant documents.")
+                    logger.info(f"Found {len(diverse_results)} diverse results from {len(unique_sources)} documents.")
         
         # 2. Construct System Prompt
         system_prompt = (
-            "You are a helpful AI assistant that answers questions based on the user's documents. "
-            "IMPORTANT: Base your answers ONLY on the provided context. "
-            "The context comes from documents the user has uploaded. "
-            "If the user asks about available books/documents, list the SOURCE FILENAMES from the context. "
-            "Always cite the source filename when using information from the context.\n\n"
+            "You are a document assistant. Answer questions based ONLY on the context provided below.\n"
+            "RULES:\n"
+            "1. Each PDF filename in AVAILABLE DOCUMENTS is a REAL, VALID book or document.\n"
+            "2. When listing available books, list ALL filenames from AVAILABLE DOCUMENTS.\n"
+            "3. Use ONLY information from the CONTEXT section to answer questions.\n"
+            "4. Cite the source filename when providing information.\n"
+            "5. If information is not in the context, say 'I don't have that information in the provided context.'\n\n"
         )
         
         if context_text:
