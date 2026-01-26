@@ -75,6 +75,10 @@ export function ChatInterface() {
             // Prepare history (excluding sources to keep payload small)
             const history = messages.map(m => ({ role: m.role, content: m.content }));
 
+            // Debug: Log what filter is being sent
+            const filterPayload = sourceIds.length > 0 ? { source_ids: sourceIds } : null;
+            console.log("Sending chat request with filter:", filterPayload, "sourceIds:", sourceIds);
+
             const res = await fetch(`${API_BASE}/chat/`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -82,7 +86,7 @@ export function ChatInterface() {
                     message: userMsg.content,
                     history: history,
                     use_rag: true,
-                    filter: sourceIds.length > 0 ? { source_ids: sourceIds } : null
+                    filter: filterPayload
                 })
             });
 

@@ -47,7 +47,7 @@ async def chat_endpoint(
                 logger.info(f"Searching vector database... Filters: {request.filter}")
                 search_results = vector_service.search(
                     embeddings[0], 
-                    limit=5,
+                    limit=10,
                     filters=request.filter
                 )
                 
@@ -59,25 +59,30 @@ async def chat_endpoint(
                     
                     # Construct context string
                     context_parts = []
+                    unique_sources = set()
                     for res in search_results:
                         text = res.payload.get('text', '') or res.payload.get('content', '')
-                        filename = res.payload.get('path', 'Unknown') # Changed from filename to path
+                        filename = res.payload.get('path', 'Unknown')
+                        unique_sources.add(filename)
                         if text:
                             context_parts.append(f"--- SOURCE: {filename} ---\n{text}\n")
                     
                     context_text = "\n".join(context_parts)
+                    sources_list = "\n".join(f"- {s}" for s in sorted(unique_sources))
                     logger.info(f"Found {len(search_results)} relevant documents.")
         
         # 2. Construct System Prompt
         system_prompt = (
-            "You are a helpful AI assistant. "
-            "Use the following context to answer the user's question. "
-            "If the answer is not in the context, say so, but you can still try to help based on your general knowledge. "
-            "Always cite the source filename if you use information from the context.\n\n"
+            "You are a helpful AI assistant that answers questions based on the user's documents. "
+            "IMPORTANT: Base your answers ONLY on the provided context. "
+            "The context comes from documents the user has uploaded. "
+            "If the user asks about available books/documents, list the SOURCE FILENAMES from the context. "
+            "Always cite the source filename when using information from the context.\n\n"
         )
         
         if context_text:
-            system_prompt += f"CONTEXT:\n{context_text}\n\n"
+            system_prompt += f"AVAILABLE DOCUMENTS:\n{sources_list}\n\n"
+            system_prompt += f"CONTEXT FROM DOCUMENTS:\n{context_text}\n\n"
             
         messages = [{"role": "system", "content": system_prompt}]
         
