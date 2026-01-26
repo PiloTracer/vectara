@@ -63,7 +63,13 @@ class LLMService:
                 payload = {
                     "model": self.model_name,
                     "messages": messages,
-                    "stream": stream
+                    "stream": stream,
+                    "options": {
+                        "temperature": 0.3,      # More deterministic responses
+                        "top_p": 0.7,            # Focused token selection
+                        "repeat_penalty": 1.2,   # Avoid repetitions
+                        "num_ctx": 8192          # Larger context window for RAG
+                    }
                 }
                 
                 if stream:
