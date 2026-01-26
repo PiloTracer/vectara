@@ -1,9 +1,18 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, FileText, Loader2, StopCircle, AlertCircle } from 'lucide-react';
+import { Send, Bot, User, FileText, Loader2, StopCircle, AlertCircle, ChevronDown, Star } from 'lucide-react';
 import { useEnvironment } from '../../context/EnvironmentContext';
 import { useSearchParams, useRouter } from 'next/navigation';
+
+interface LLMModel {
+    id: string;
+    name: string;
+    provider: string;
+    model_id: string;
+    is_default: boolean;
+    enabled: boolean;
+}
 
 interface Message {
     role: 'user' | 'assistant';
@@ -30,6 +39,9 @@ export function ChatInterface() {
     const [isLoading, setIsLoading] = useState(false);
     const [sourceIds, setSourceIds] = useState<string[]>([]);
     const [sessionId, setSessionId] = useState<string | null>(null);
+    const [models, setModels] = useState<LLMModel[]>([]);
+    const [selectedModelId, setSelectedModelId] = useState<string | null>(null);
+    const [showModelDropdown, setShowModelDropdown] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const searchParams = useSearchParams();
@@ -84,6 +96,31 @@ export function ChatInterface() {
             .catch(err => {
                 console.error("Failed to load sources for environment", err);
                 setSourceIds([]);
+            });
+    }, [activeEnvironmentId]);
+
+    // Fetch models for the active environment
+    useEffect(() => {
+        if (!activeEnvironmentId) {
+            setModels([]);
+            setSelectedModelId(null);
+            return;
+        }
+
+        fetch(`${API_BASE}/models/env/${activeEnvironmentId}`)
+            .then(res => res.json())
+            .then((data: LLMModel[]) => {
+                const enabledModels = data.filter(m => m.enabled);
+                setModels(enabledModels);
+                // Auto-select default model
+                const defaultModel = enabledModels.find(m => m.is_default) || enabledModels[0];
+                if (defaultModel && !selectedModelId) {
+                    setSelectedModelId(defaultModel.id);
+                }
+            })
+            .catch(err => {
+                console.error("Failed to load models for environment", err);
+                setModels([]);
             });
     }, [activeEnvironmentId]);
 
@@ -166,7 +203,41 @@ export function ChatInterface() {
                 </div>
                 <div>
                     <h3 className="text-sm font-bold text-white uppercase tracking-wide">Data Lake Assistant</h3>
-                    <p className="text-xs text-slate-400">Powered by Local LLM (Qwen2.5)</p>
+                    {/* Model Selector Dropdown */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setShowModelDropdown(!showModelDropdown)}
+                            className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-200 transition-colors"
+                        >
+                            {models.length > 0 ? (
+                                <>
+                                    <span>Model: {models.find(m => m.id === selectedModelId)?.name || 'Select Model'}</span>
+                                    <ChevronDown className="w-3 h-3" />
+                                </>
+                            ) : (
+                                <span className="text-slate-500">No models configured</span>
+                            )}
+                        </button>
+                        {showModelDropdown && models.length > 0 && (
+                            <div className="absolute top-full left-0 mt-1 bg-slate-800 border border-slate-700 rounded-lg shadow-xl z-50 min-w-[200px] py-1">
+                                {models.map(model => (
+                                    <button
+                                        key={model.id}
+                                        onClick={() => {
+                                            setSelectedModelId(model.id);
+                                            setShowModelDropdown(false);
+                                        }}
+                                        className={`w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-slate-700 transition-colors ${selectedModelId === model.id ? 'bg-slate-700/50 text-indigo-400' : 'text-slate-300'
+                                            }`}
+                                    >
+                                        {model.is_default && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
+                                        <span className="flex-1">{model.name}</span>
+                                        <span className="text-slate-500">{model.provider}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
                 {sessionId && (
                     <div className="ml-auto text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">

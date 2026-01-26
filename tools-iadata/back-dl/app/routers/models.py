@@ -155,6 +155,42 @@ async def delete_model(model_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
 
 # --- Special Endpoints ---
 
+@router.get("/env/{env_id}/default", response_model=Optional[LLMModelRead])
+async def get_default_model(env_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Get the default model for an environment (or global default)."""
+    # First try env-specific default
+    result = await db.execute(
+        select(LLMModel).where(
+            LLMModel.env_id == env_id,
+            LLMModel.is_default == True,
+            LLMModel.enabled == True
+        )
+    )
+    model = result.scalars().first()
+    
+    # Fallback to global default
+    if not model:
+        result = await db.execute(
+            select(LLMModel).where(
+                LLMModel.env_id == None,
+                LLMModel.is_default == True,
+                LLMModel.enabled == True
+            )
+        )
+        model = result.scalars().first()
+    
+    # Fallback to any enabled model for env
+    if not model:
+        result = await db.execute(
+            select(LLMModel).where(
+                (LLMModel.env_id == env_id) | (LLMModel.env_id == None),
+                LLMModel.enabled == True
+            ).limit(1)
+        )
+        model = result.scalars().first()
+    
+    return model
+
 @router.get("/providers")
 async def get_providers():
     """Get list of supported LLM providers with their configurations."""
