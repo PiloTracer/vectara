@@ -287,3 +287,40 @@ class VectorService:
         except Exception as e:
             logger.error(f"Failed to get collection info: {e}")
             return None
+
+    def get_all_unique_documents(self) -> Optional[List[str]]:
+        """
+        Get all unique document paths in the collection.
+        Used for inventory queries like 'what documents do you have?'.
+        """
+        if not self.enabled or not self.client:
+            return None
+        
+        try:
+            # Scroll through all points and collect unique paths
+            unique_paths = set()
+            offset = None
+            
+            while True:
+                results, offset = self.client.scroll(
+                    collection_name=self.COLLECTION_NAME,
+                    limit=500,
+                    offset=offset,
+                    with_payload=["path"],
+                    with_vectors=False
+                )
+                
+                for point in results:
+                    path = point.payload.get("path")
+                    if path:
+                        unique_paths.add(path)
+                
+                if offset is None:
+                    break
+            
+            logger.info(f"Found {len(unique_paths)} unique documents in collection")
+            return list(unique_paths)
+            
+        except Exception as e:
+            logger.error(f"Failed to get unique documents: {e}")
+            return None

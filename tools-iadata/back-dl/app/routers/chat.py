@@ -120,8 +120,16 @@ async def chat_endpoint(
                             context_parts.append(f"--- SOURCE: {path} (relevance: {ranked_result.score:.3f}) ---\n{text}\n")
                     
                     context_text = "\n".join(context_parts)
-                    sources_list = "\n".join(f"- {s}" for s in sorted(unique_sources))
-                    logger.info(f"Context built from {len(unique_sources)} unique documents")
+                    
+                    # For inventory queries: also get all unique document paths
+                    # This ensures "what books do you have?" always shows all documents
+                    all_docs = vector_service.get_all_unique_documents()
+                    if all_docs:
+                        sources_list = "\n".join(f"- {s}" for s in sorted(all_docs))
+                    else:
+                        sources_list = "\n".join(f"- {s}" for s in sorted(unique_sources))
+                    
+                    logger.info(f"Context built from {len(unique_sources)} unique documents, {len(all_docs or [])} total docs available")
         
         # 2. Construct System Prompt
         system_prompt = (
