@@ -32,13 +32,6 @@ services:
     image: ollama/ollama:latest
     container_name: iadata_llm_${DEPLOY_SUFFIX}
     profiles: ["local-llm"]
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
     volumes:
       - ollama_data:/root/.ollama
     ports:

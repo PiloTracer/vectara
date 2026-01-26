@@ -257,6 +257,14 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DetailedDockerState, 
         }
     }
 
+    // Check for GPU setting
+    let use_gpu = crate::config::get_env_var(&env_path, "USE_GPU")
+        .map(|v| v.to_lowercase() == "true")
+        .unwrap_or(false);
+
+    let gpu_compose_path = compose_path.with_file_name("docker-compose.gpu.yml");
+    let gpu_path_clone = gpu_compose_path.clone();
+
     // Phase 2: Start full stack
     let output = tauri::async_runtime::spawn_blocking(move || {
         let mut cmd = Command::new("docker");
@@ -264,8 +272,13 @@ pub async fn start_docker(app: tauri::AppHandle) -> Result<DetailedDockerState, 
             .arg("--ansi")
             .arg("always")
             .arg("-f")
-            .arg(&compose_path_clone)
-            .arg("--env-file")
+            .arg(&compose_path_clone);
+            
+        if use_gpu {
+            cmd.arg("-f").arg(&gpu_path_clone);
+        }
+            
+        cmd.arg("--env-file")
             .arg(&env_path_clone)
             .env("COMPOSE_PROFILES", profiles_str)
             .arg("up")

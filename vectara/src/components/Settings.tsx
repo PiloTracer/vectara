@@ -14,7 +14,7 @@ const SECTIONS = {
     QDRANT: ["QDRANT_HOST", "QDRANT_PORT"],
     DATA: ["DATA_SOURCES_DIR", "BACKUP_DIR", "IMPORT_DIR"],
     AUTH: ["AUTH_ISSUER_BASE", "AUTH_REALM", "AUTH_CLIENT_ID", "AUTH_CLIENT_SECRET"],
-    LLM: ["USE_LOCAL_EMBEDDING", "LOCAL_MODEL_NAME"],
+    LLM: ["USE_LOCAL_EMBEDDING", "LOCAL_MODEL_NAME", "USE_GPU"],
 };
 
 interface GpuInfo {
@@ -200,6 +200,16 @@ export default function Settings() {
                                                 onChange={(e) => setEnvMap(prev => ({ ...prev, "USE_LOCAL_EMBEDDING": e.target.checked ? "true" : "false" }))}
                                             />
                                             <span>Enable Docker Service (Ollama)</span>
+                                        </label>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5 }}>
+                                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', gap: 10 }}>
+                                            <input
+                                                type="checkbox"
+                                                checked={envMap["USE_GPU"] === "true"}
+                                                onChange={(e) => setEnvMap(prev => ({ ...prev, "USE_GPU": e.target.checked ? "true" : "false" }))}
+                                            />
+                                            <span>Use GPU Acceleration (Requires NVIDIA GPU)</span>
                                         </label>
                                     </div>
                                 </div>
