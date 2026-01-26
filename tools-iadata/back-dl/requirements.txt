@@ -20,8 +20,8 @@ Pillow>=10.2.0
 beautifulsoup4>=4.12.0
 lxml>=5.1.0
 
-# OCR Model (HuggingFace LightOnOCR)
-transformers>=4.40.0
+# OCR Model (HuggingFace LightOnOCR - requires transformers from source)
+git+https://github.com/huggingface/transformers
 torch>=2.2.0
 torchvision>=0.17.0
 
