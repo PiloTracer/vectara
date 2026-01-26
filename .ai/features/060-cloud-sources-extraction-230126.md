@@ -61,6 +61,7 @@ This plan covers the implementation of:
                     │  - DOCX (python-docx)       │
                     │  - XLSX (openpyxl)          │
                     │  - PPTX (python-pptx)       │
+                    │  - RTF (striprtf)           │
                     │  - Images (Tesseract OCR)   │
                     │  - HTML (BeautifulSoup)     │
                     │  - Plain Text               │
@@ -100,20 +101,22 @@ back-dl/app/services/extraction/
 ├── base.py           # Abstract Extractor interface
 ├── pdf_extractor.py  # PDF with optional OCR
 ├── office_extractor.py  # DOCX, XLSX, PPTX
-├── text_extractor.py # Plain text, Markdown
+├── rtf_extractor.py  # RTF files (striprtf)
+├── text_extractor.py # Plain text, Markdown, HTML
 └── image_extractor.py  # OCR for images
 ```
 
 **Dependencies to add:**
 ```
 # back-dl/requirements.txt
-pymupdf==1.24.0        # PDF extraction
-python-docx==1.1.0     # DOCX
-openpyxl==3.1.0        # XLSX
-python-pptx==0.6.23    # PPTX
-pytesseract==0.3.10    # OCR
-pillow==10.0.0         # Image processing
-beautifulsoup4==4.12.0 # HTML parsing
+pymupdf>=1.24.0        # PDF extraction
+python-docx>=1.1.0     # DOCX
+openpyxl>=3.1.0        # XLSX
+python-pptx>=0.6.23    # PPTX
+striprtf>=0.0.26       # RTF
+pytesseract>=0.3.10    # OCR
+pillow>=10.0.0         # Image processing
+beautifulsoup4>=4.12.0 # HTML parsing
 ```
 
 ### Phase 3: Google Drive Integration

@@ -25,9 +25,8 @@ class ImageExtractor(BaseExtractor):
         self.lang = lang
         self._tesseract_available: Optional[bool] = None
     
-    @property
-    def supported_extensions(self) -> set:
-        return self.SUPPORTED_EXTENSIONS
+    def supported_extensions(self) -> list:
+        return list(self.SUPPORTED_EXTENSIONS)
     
     def _check_tesseract(self) -> bool:
         """Check if Tesseract is available."""
