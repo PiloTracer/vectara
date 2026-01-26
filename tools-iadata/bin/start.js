@@ -193,7 +193,7 @@ async function detectEnv() {
         console.log(`\n${colors.cyan}🤖 Pre-acquiring LLM models...${colors.reset}`);
 
         const EMBED_MODEL = getVar('LOCAL_EMBEDDING_MODEL_NAME') || 'bge-m3';
-        const CHAT_MODEL = getVar('LOCAL_MODEL_NAME') || 'qwen2.5:3b';
+        const CHAT_MODEL = getVar('LOCAL_MODEL_NAME') || 'qwen2.5:7b';
         const LLM_CONTAINER = `iadata_llm_${DEPLOY_SUFFIX}`;
 
         // Step 1: Start only llm-dl

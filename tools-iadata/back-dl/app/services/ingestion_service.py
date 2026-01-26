@@ -127,9 +127,18 @@ async def process_ingestion_task(job_id: uuid.UUID, source_id: uuid.UUID):
                                     if embed_service.enabled:
                                         chunks = chunker.split_text(doc.content)
                                         if chunks:
-                                            embeddings = await embed_service.generate_embeddings(chunks)
+                                            # Create metadata chunk for document discovery
+                                            title = doc.metadata.get('title', '') or Path(f['relative_path']).stem
+                                            author = doc.metadata.get('author', '')
+                                            doc_type = doc.metadata.get('type', 'document')
+                                            metadata_text = f"Document: {f['relative_path']}. Title: {title}. Author: {author}. Type: {doc_type}. This is an available book/document in the collection."
+                                            
+                                            # Add metadata chunk first, then regular chunks
+                                            all_chunks = [metadata_text] + chunks
+                                            embeddings = await embed_service.generate_embeddings(all_chunks)
+                                            
                                             points = []
-                                            for i, (chunk, vector) in enumerate(zip(chunks, embeddings)):
+                                            for i, (chunk, vector) in enumerate(zip(all_chunks, embeddings)):
                                                 points.append({
                                                     "id": uuid.uuid4(),
                                                     "vector": vector,
@@ -138,7 +147,8 @@ async def process_ingestion_task(job_id: uuid.UUID, source_id: uuid.UUID):
                                                         "job_id": str(job.id),
                                                         "path": f['relative_path'],
                                                         "text": chunk,
-                                                        "chunk_index": i,
+                                                        "chunk_index": i - 1 if i > 0 else -1,  # -1 for metadata chunk
+                                                        "is_metadata_chunk": i == 0,
                                                         "metadata": doc.metadata
                                                     }
                                                 })

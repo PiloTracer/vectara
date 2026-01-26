@@ -197,7 +197,7 @@ ensure_llm_models() {
   EMBED_MODEL=$(grep "^LOCAL_EMBEDDING_MODEL_NAME=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r')
   CHAT_MODEL=$(grep "^LOCAL_MODEL_NAME=" "$ENV_FILE" | tail -n 1 | cut -d= -f2 | tr -d '"' | tr -d "'" | tr -d '\r')
   EMBED_MODEL=${EMBED_MODEL:-bge-m3}
-  CHAT_MODEL=${CHAT_MODEL:-qwen2.5:3b}
+  CHAT_MODEL=${CHAT_MODEL:-qwen2.5:7b}
   
   LLM_CONTAINER="iadata_llm_${DEPLOY_SUFFIX}"
   

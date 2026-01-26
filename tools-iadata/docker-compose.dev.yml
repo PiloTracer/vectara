@@ -61,7 +61,7 @@ services:
       - |
         echo "=== LLM Pre-Acquisition ==="
         EMBED_MODEL=${LOCAL_EMBEDDING_MODEL_NAME:-bge-m3}
-        CHAT_MODEL=${LOCAL_MODEL_NAME:-qwen2.5:3b}
+        CHAT_MODEL=${LOCAL_MODEL_NAME:-qwen2.5:7b}
 
         # Check Embedding Model
         if ollama list | grep -q "$$EMBED_MODEL"; then

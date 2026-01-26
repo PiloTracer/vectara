@@ -28,7 +28,7 @@
 
 | Role | Env Variable | Value | Source |
 |------|--------------|-------|--------|
-| Chat | `LOCAL_MODEL_NAME` | `qwen2.5:3b` | Ollama |
+| Chat | `LOCAL_MODEL_NAME` | `qwen2.5:7b` | Ollama |
 | Embedding | `LOCAL_EMBEDDING_MODEL_NAME` | `bge-m3` | Ollama |
 | OCR | `LOCAL_OCR_MODEL_NAME` | `lightonai/LightOnOCR-2-1B` | HuggingFace |
 
@@ -46,7 +46,7 @@ The system supports **three distinct model roles**, each serving a specific purp
 
 | Role | Purpose | Default Model | Required? | Controlled By |
 |------|---------|---------------|-----------|---------------|
-| **Chat/LLM** | Agent descriptions, Q&A, RAG responses | `qwen2.5:3b` | Optional | `LOCAL_MODEL_NAME` |
+| **Chat/LLM** | Agent descriptions, Q&A, RAG responses | `qwen2.5:7b` | Optional | `LOCAL_MODEL_NAME` |
 | **Embedding** | Text → Vector conversion for Qdrant | `bge-m3:latest` | If `USE_LOCAL_EMBEDDING=true` | `LOCAL_EMBEDDING_MODEL_NAME` |
 | **OCR** | Vision-based text extraction from images | `lightonai/LightOnOCR-2-1B` | Optional | `LOCAL_OCR_MODEL_NAME` |
 
@@ -82,8 +82,8 @@ The system supports **three distinct model roles**, each serving a specific purp
 
 | Property | Value |
 |----------|-------|
-| **Ollama Name** | `qwen2.5:3b` (recommended for CPU) |
-| **Recommended Variant** | `qwen2.5:3b` for low-memory systems |
+| **Ollama Name** | `qwen2.5:7b` (recommended for CPU) |
+| **Recommended Variant** | `qwen2.5:7b` for low-memory systems |
 | **Parameters** | 3B - 7B |
 | **RAM Required** | 4GB (3B) / 8GB (7B) |
 | **Languages** | Multilingual (English, Spanish, Chinese, etc.) |
@@ -129,7 +129,7 @@ The system supports **three distinct model roles**, each serving a specific purp
 USE_LOCAL_EMBEDDING=false
 OLLAMA_HOST=host.docker.internal
 OLLAMA_PORT=11434
-LOCAL_MODEL_NAME=qwen2.5:3b
+LOCAL_MODEL_NAME=qwen2.5:7b
 LOCAL_EMBEDDING_MODEL_NAME=bge-m3
 USE_LOCAL_OCR=false
 LOCAL_OCR_MODEL_NAME=lightonai/LightOnOCR-2-1B

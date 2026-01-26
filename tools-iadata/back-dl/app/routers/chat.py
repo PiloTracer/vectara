@@ -49,7 +49,7 @@ async def chat_endpoint(
                 # Fetch more results for diversity
                 raw_results = vector_service.search(
                     embeddings[0], 
-                    limit=30,  # Fetch more to allow for diversification
+                    limit=100,  # Fetch many to ensure all documents are represented
                     filters=request.filter
                 )
                 
