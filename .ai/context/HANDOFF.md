@@ -1,5 +1,5 @@
 # AI Session Handoff
-**Last Session**: 2026-01-26 08:28
+**Last Session**: 2026-01-26 10:10
 
 ---
 
@@ -15,6 +15,7 @@
 │  • Authorizes local folders via native dialog                   │
 │  • Serves files to Docker via HTTP API                          │
 │  • Manages Docker lifecycle (start/stop)                        │
+│  • Real-time Docker log streaming via Tauri events              │
 └────────────────────────────┬────────────────────────────────────┘
                              │ host.docker.internal:3737
 ┌────────────────────────────▼────────────────────────────────────┐
@@ -23,9 +24,9 @@
 │  front-dl  - Next.js dashboard (port 13000)                     │
 │  qdrant    - Vector database (port 16333) [HYBRID VECTORS]      │
 │  postgres  - Metadata/config DB                                 │
-│  ollama    - Local LLM (qwen2.5:7b) - Chat only                 │
-│  infinity  - Embedding server (bge-m3) [NEW]                    │
-│  reranker  - Cross-encoder (bge-reranker-v2-m3) [NEW]           │
+│  ollama    - Local LLM (qwen2.5:7b) - Chat + fallback embed     │
+│  infinity  - Embedding server (bge-m3) - GPU/CPU auto           │
+│  reranker  - Cross-encoder (bge-reranker-v2-m3) - GPU/CPU auto  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -33,29 +34,33 @@
 
 ## ✅ Session Summary (2026-01-26)
 
-### Enterprise RAG Implementation (COMPLETE)
+### Morning Session - Enterprise RAG + Fixes
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| **Infrastructure** | Added `infinity` + `reranker` containers to docker-compose | ✅ |
-| **Embedding Service** | Rewritten for Infinity API, batch processing, HybridEmbedding | ✅ |
-| **Reranker Service** | NEW service for cross-encoder scoring | ✅ |
-| **Vector Storage** | Hybrid collection (dense+sparse), RRF fusion search | ✅ |
-| **Ingestion Pipeline** | All 4 source types updated for hybrid vectors | ✅ |
-| **Chat Endpoint** | Hybrid search + re-ranking pipeline | ✅ |
+| Item | Description | Status |
+|------|-------------|--------|
+| **Enterprise RAG** | Infinity + Reranker containers, hybrid search, RRF fusion | ✅ |
+| **docker-compose.gpu.yml** | Fixed to proper override-only format (was full copy) | ✅ |
+| **Tauri emit API** | Fixed `emit_all` → `emit` + `use tauri::Emitter` | ✅ |
+| **Infinity Port Fix** | Changed from external (17997) to internal Docker port (7997) | ✅ |
+| **Progress Feedback** | Real-time Docker log streaming during startup | ✅ |
+| **LightOnOCR Fix** | Installed transformers from GitHub source | ✅ |
+| **Document Inventory** | Added `get_all_unique_documents()` for listing queries | ✅ |
 
 ### Key Files Changed
 
 | File | Change |
 |------|--------|
-| `docker-compose.dev.yml` | Added infinity (17997), reranker (17998) containers |
-| `.env.dev` | Added INFINITY_*, RERANKER_* vars |
-| `config.py` | Added INFINITY_URL, RERANKER_URL |
-| `embedding_service.py` | Complete rewrite: batch, HybridEmbedding |
+| `docker-compose.dev.yml` | Added infinity (7997), reranker (7997) containers |
+| `docker-compose.gpu.yml` | Restored to override-only format |
+| `.env.dev` | Fixed INFINITY_PORT=7997, RERANKER_PORT=7997 |
+| `back-dl/Dockerfile` | Added `git` to apt-get for pip source installs |
+| `back-dl/requirements.txt` | Changed `transformers>=4.40.0` → `git+https://github.com/huggingface/transformers` |
+| `embedding_service.py` | Infinity client, batch processing, HybridEmbedding |
 | `reranker_service.py` | NEW: cross-encoder service |
-| `vector_service.py` | Complete rewrite: hybrid search, RRF |
-| `ingestion_service.py` | Updated 4 source types |
-| `chat.py` | Complete rewrite: hybrid + rerank |
+| `vector_service.py` | Hybrid search, RRF, `get_all_unique_documents()` |
+| `chat.py` | Hybrid search + rerank + document inventory |
+| `docker.rs` | Streaming stdout/stderr via `emit("docker-event-log")` |
+| `Gatekeeper.tsx` | Tauri event listener for real-time logs |
 
 ---
 
@@ -64,13 +69,12 @@
 | Area | Path | Purpose |
 |------|------|---------|
 | Bridge Server | `vectara/src-tauri/src/server/` | HTTP API for file access from Docker |
-| Bridge Client | `back-dl/app/services/bridge.py` | Python client calling Bridge |
 | **Embedding** | `back-dl/app/services/embedding_service.py` | Infinity client, HybridEmbedding |
 | **Reranker** | `back-dl/app/services/reranker_service.py` | Cross-encoder re-ranking |
-| **Vector DB** | `back-dl/app/services/vector_service.py` | Hybrid search with RRF |
+| **Vector DB** | `back-dl/app/services/vector_service.py` | Hybrid search + document inventory |
 | **Chat/RAG** | `back-dl/app/routers/chat.py` | Hybrid search + rerank pipeline |
-| **Ingestion** | `back-dl/app/services/ingestion_service.py` | Hybrid vector storage |
-| Docker Compose | `docker-compose.dev.yml` | Infinity + Reranker containers |
+| Docker Compose | `docker-compose.dev.yml` | CPU mode (base) |
+| GPU Override | `docker-compose.gpu.yml` | GPU overlay (adds CUDA) |
 
 ---
 
@@ -83,25 +87,24 @@ cd vectara && pnpm tauri dev
 Or for Docker stack only:
 ```bash
 cd tools-iadata
-docker compose --profile local-llm up -d
+docker compose -f docker-compose.dev.yml --profile local-llm up -d
+```
+
+For GPU mode:
+```bash
+docker compose -f docker-compose.dev.yml -f docker-compose.gpu.yml --profile local-llm up -d
 ```
 
 ---
 
-## ⚠️ Known Issues / Gaps
+## ✅ Verified Working
 
-1. **Collection Recreation Needed**: Existing Qdrant collection uses legacy format. Delete and re-ingest for full hybrid search.
-2. **LightOnOCR Not Loading**: Requires `pip install git+https://github.com/huggingface/transformers`
-3. **Path Authorization Lost on Restart**: Bridge paths are in-memory only
-
----
-
-## ➡️ Suggested Next Steps
-
-1. **Recreate Qdrant collection** and re-ingest documents for hybrid vectors
-2. **Verify container health**: `curl http://localhost:17997/health`
-3. **Test keyword search**: Query for specific terms/IDs to validate sparse search
-4. **GPU memory tuning**: Adjust batch sizes if OOM errors occur
+- ✅ Infinity embedding server at `http://infinity:7997`
+- ✅ Reranker at `http://reranker:7997`
+- ✅ LightOnOCR model loading (transformers 5.0.1.dev0)
+- ✅ Real-time Docker log streaming to UI
+- ✅ 5 books in Qdrant with hybrid vectors (3578 chunks)
+- ✅ Document inventory queries return all documents
 
 ---
 
@@ -115,4 +118,5 @@ Read these files for full context:
 **Key commands:**
 - Start dev: `cd vectara && pnpm tauri dev`
 - Check logs: `docker logs iadata_back_dl_dev 2>&1 | tail -50`
-- Test chat API: `curl -s -X POST "http://localhost:18080/chat/" -H "Content-Type: application/json" -d '{"message": "...", "use_rag": true}' | jq`
+- Test chat: `curl -X POST "http://localhost:18080/chat/" -H "Content-Type: application/json" -d '{"message": "what books do you have?", "use_rag": true}'`
+- Verify Infinity: `curl http://localhost:17997/health`
