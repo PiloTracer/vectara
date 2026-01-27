@@ -490,8 +490,12 @@ NO inventes, NO supongas, NO completes con conocimiento general.
 
 ## 9. Archivos a Crear/Modificar
 
+> [!IMPORTANT]
+> **Sin cambios de esquema DB** - Usamos `LLMModel.capabilities` (JSONB) existente para guardar `{"role": "gatherer"}`.
+
 | Archivo | Acción | Descripción |
 |---------|--------|-------------|
+| `app/models/llm.py` | ✅ YA EXISTE | Modelo con `capabilities` JSONB |
 | `app/services/llm/__init__.py` | 🆕 | Export principal |
 | `app/services/llm/router.py` | 🆕 | Router que lee de DB |
 | `app/services/llm/providers/__init__.py` | 🆕 | Provider factory |
@@ -501,7 +505,6 @@ NO inventes, NO supongas, NO completes con conocimiento general.
 | `app/services/llm/providers/ollama.py` | 🆕 | Migrar de llm_service.py |
 | `app/prompts/base.py` | 🆕 | Prompts para stages |
 | `app/routers/chat.py` | ✏️ | Two-stage pipeline |
-| `app/models/llm.py` | ✏️ | Agregar campo `role` |
 
 ---
 
