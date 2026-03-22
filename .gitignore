@@ -105,3 +105,4 @@ test_results/
 # Other:
 secrets.*
 access.txt
+*access.txt
