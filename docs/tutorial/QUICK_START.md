@@ -377,8 +377,12 @@ Vectara usa **las credenciales del usuario del sistema operativo**. No hay usuar
 
 El dashboard web usa **Keycloak** (OIDC) a través de NextAuth.
 
-- **Con Keycloak configurado**: El admin debe crear el usuario en Keycloak (realm configurado en `AUTH_REALM`)
-- **Sin Keycloak**: En modo dev, el dashboard funciona sin autenticación forzada. Los endpoints del API están abiertos.
+- **Con Keycloak configurado**: 
+  1. Entra a Keycloak (`http://localhost:18090`) con el usuario administrador por defecto: **`admin` / `admin`**.
+  2. Crea un usuario nuevo en el realm `master` (o el que esté en `AUTH_REALM`).
+  3. Asígnale al usuario el rol **`app-admin`** o **`app-user`** (el backend usa estos roles para dar acceso a las APIs).
+  4. Usa este nuevo usuario para entrar al dashboard.
+- **Sin Keycloak**: En modo dev, el dashboard del frontend funciona sin autenticación forzada. Los endpoints del API están abiertos y no verificarán roles.
 
 ---
 
