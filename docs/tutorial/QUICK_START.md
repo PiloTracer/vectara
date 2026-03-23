@@ -123,18 +123,31 @@ DATA_SOURCES_DIR=./data/sources
 >
 > **Ubicación actual de datos de prueba** (máquina del propietario): `/mnt/data/tmp/datos`
 
-### 2.3 Configuración de Keycloak (Autenticación — Opcional en dev)
+### 2.3 Conectar con Keycloak (Tools-IAM)
 
-Si el equipo tiene un servidor Keycloak existente:
+La autenticación corporativa es gestionada por un proyecto **completamente independiente** llamado `tools-iam` (basado en Keycloak).
 
+Si necesitas probar el sistema con la seguridad real habilitada, primero debes tener corriendo `tools-iam`.
+
+**A. Levantar Tools-IAM (en otra terminal):**
+```bash
+# Asumiendo que clonaste / tienes el repo de IAM
+cd /mnt/work/Projects/usera/tools-iam
+cp .env.example .env.dev
+./bin/start.sh dev  # o usar docker compose directamente
+```
+*Esto levantará Keycloak en el puerto `18090`.*
+
+**B. Conectar Tools-IADATA a Tools-IAM:**
+En el archivo `tools-iadata/.env.dev`, asegúrate de tener:
 ```ini
 AUTH_ISSUER_BASE=http://localhost:18090
 AUTH_REALM=master
 AUTH_CLIENT_ID=vectara
-AUTH_CLIENT_SECRET=<pedir al admin>
+AUTH_CLIENT_SECRET=<pedir al admin o revisar la consola de Keycloak>
 ```
 
-Si **no** tienen Keycloak, el sistema funciona sin él en modo desarrollo.
+> **Nota sobre el modo de desarrollo**: Si **no** tienes `tools-iam` corriendo, en modo `dev` el dashboard (front-dl) funciona sin forzar la autenticación, con los endpoints abiertos.
 
 ### 2.4 Google Drive / SharePoint (Opcional)
 
