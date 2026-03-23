@@ -106,3 +106,5 @@ test_results/
 secrets.*
 access.txt
 *access.txt
+credentials
+/credentials/*
