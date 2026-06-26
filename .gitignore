@@ -88,7 +88,8 @@ secrets.md
 *.key
 
 # --- AI & Tools ---
-.cursor/
+.cursor/*
+!.cursor/rules/
 .ai/sessions/*.md
 # Keep session templates/logs if desired, but typically we might ignore dense logs
 # .ai/sessions/

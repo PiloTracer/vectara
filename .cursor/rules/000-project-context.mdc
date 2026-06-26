@@ -1,0 +1,38 @@
+---
+description: ALWAYS Read Project Context first
+globs: *
+---
+# Project Context Rule
+
+**CRITICAL INSTRUCTION**:
+At the start of EVERY session or when switching tasks, you MUST read the following files to understand the current state:
+
+1. `FRAMEWORKS.md` — Framework discovery (where skills, directors, and working docs live)
+2. `.work/context/HANDOFF.md` — Agent OS session state
+3. `.work.ui/context/HANDOFF_UI.md` — UI Design OS session state
+4. `.work.biz/context/HANDOFF.md` — Business OS session state
+5. `.work.ai/context/HANDOFF_AI.md` — AI-specific session state
+
+## Framework Locations
+
+| Framework | Path | Director |
+|-----------|------|----------|
+| Agent OS (engineering) | `/mnt/work/Projects/.ai/` | `@ai-director` |
+| UI Design OS | `/mnt/work/Projects/.ai.ui/` | `@ui-director` |
+| Business OS | `/mnt/work/Projects/.ai.biz/` | `@biz-director` |
+| Cross-framework | — | `@x-director` |
+
+**Fallback paths:** `/Data/Projects/.ai/`, `/Data/Projects/.ai.ui/`, `/Data/Projects/.ai.biz/`
+
+## Working Documentation
+
+- `.work/` — Agent OS (engineering: plans, SPECs, ADRs, HANDOFF, NEXT)
+- `.work.ui/` — UI Design OS (screens, design system, HANDOFF_UI, NEXT_UI)
+- `.work.biz/` — Business OS (strategy, pipeline, HANDOFF, NEXT)
+- `.work.ai/` — AI-specific work (experiments, evaluations, model configs)
+
+## CRITICAL
+
+**DO NOT** hallucinate project state. Trust the HANDOFF files as the source of truth for the session's "Mental Model". If HANDOFF files are in bootstrap state, route through the appropriate director.
+
+**All three framework directories are pre-installed at the paths above.** Skills, directors, and process routers are fully discoverable.
