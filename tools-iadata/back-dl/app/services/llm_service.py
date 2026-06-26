@@ -65,8 +65,8 @@ class LLMService:
                     "messages": messages,
                     "stream": stream,
                     "options": {
-                        "temperature": 0.3,      # More deterministic responses
-                        "top_p": 0.7,            # Focused token selection
+                        "temperature": 0.1,      # Near-deterministic: reduces creative fabrication
+                        "top_p": 0.5,            # Stricter token selection for factual grounding
                         "repeat_penalty": 1.2,   # Avoid repetitions
                         "num_ctx": 8192          # Larger context window for RAG
                     }

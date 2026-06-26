@@ -1,6 +1,7 @@
 """
 Enterprise RAG Chat Endpoint.
 Implements hybrid search (dense + sparse) with cross-encoder re-ranking.
+System prompts are assembled via app.prompts.composer — never inline.
 """
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -10,9 +11,11 @@ from app.services.llm_service import LLMService
 from app.services.embedding_service import EmbeddingService
 from app.services.vector_service import VectorService
 from app.services.reranker_service import RerankerService
+from app.prompts.composer import compose_system_prompt
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import get_db
 from app.models.chat import ChatSession, ChatMessage
+from app.models.intelligence import Agent
 import uuid
 from sqlalchemy import select
 from datetime import datetime
@@ -31,6 +34,7 @@ class ChatRequest(BaseModel):
     use_rag: Optional[bool] = True
     filter: Optional[Dict[str, Any]] = None  # e.g. {"source_ids": ["uuid-1"]}
     session_id: Optional[uuid.UUID] = None
+    agent_id: Optional[uuid.UUID] = None  # Optional: inject Agent persona into system prompt
 
 
 class ChatResponse(BaseModel):
@@ -70,6 +74,7 @@ async def chat_endpoint(
             await db.refresh(session)
         
         context_text = ""
+        sources_list = ""
         sources = []
         
         # 1. Retrieve Context (RAG)
@@ -151,21 +156,25 @@ async def chat_endpoint(
                     
                     logger.info(f"Context built from {len(unique_sources)} unique documents, {len(all_docs or [])} total docs available")
 
-        # 2. Construct System Prompt
-        system_prompt = (
-            "You are a document assistant. Answer questions based ONLY on the context provided below.\n"
-            "RULES:\n"
-            "1. Each PDF filename in AVAILABLE DOCUMENTS is a REAL, VALID book or document.\n"
-            "2. When listing available books, list ALL filenames from AVAILABLE DOCUMENTS.\n"
-            "3. Use ONLY information from the CONTEXT section to answer questions.\n"
-            "4. Cite the source filename when providing information.\n"
-            "5. If information is not in the context, say 'I don't have that information in the provided context.'\n\n"
+        # 2. Load Agent Persona (if requested)
+        agent_persona: Optional[str] = None
+        if request.agent_id:
+            agent_stmt = select(Agent).where(Agent.id == request.agent_id)
+            agent_result = await db.execute(agent_stmt)
+            agent_obj = agent_result.scalar_one_or_none()
+            if agent_obj and agent_obj.system_prompt:
+                agent_persona = agent_obj.system_prompt
+                logger.info(f"Agent persona loaded: {agent_obj.role}")
+
+        # 3. Compose System Prompt via centralized Rule Engine
+        #    Layers: Agent Persona → Task Role → Context → Active Rules (highest priority last)
+        system_prompt = compose_system_prompt(
+            agent_persona=agent_persona,
+            context_text=context_text if context_text else None,
+            sources_list=sources_list if context_text else None,
+            env_config=None,  # TODO: load Environment.config when env_id is available
         )
-        
-        if context_text:
-            system_prompt += f"AVAILABLE DOCUMENTS:\n{sources_list}\n\n"
-            system_prompt += f"CONTEXT FROM DOCUMENTS:\n{context_text}\n\n"
-            
+
         messages = [{"role": "system", "content": system_prompt}]
         
         # Add history
@@ -211,6 +220,8 @@ async def chat_endpoint(
             session_id=session.id
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Chat failed: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Chat failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error interno del chat. Revisa los logs del servidor.")
