@@ -152,22 +152,31 @@ pub fn update_env_var(app: AppHandle, key: String, value: String) -> Result<(), 
     }
 
     // Join with newlines
-    let new_content = new_lines.join("\n");
-    fs::write(&target_file, new_content).map_err(|e| e.to_string())?;
-    
+    let new_content = new_lines.join("\n") + "\n";
+    let tmp_file = target_file.with_extension("env.tmp");
+    fs::write(&tmp_file, &new_content).map_err(|e| e.to_string())?;
+    fs::rename(&tmp_file, &target_file).map_err(|e| e.to_string())?;
+
     Ok(())
 }
 
 fn resolve_env_paths(mode: &str) -> Result<(PathBuf, PathBuf, PathBuf), String> {
-     // Attempt to find project root by looking for 'tools-iadata'
-    let root_candidates = vec![
-        "../tools-iadata",       // sibling of vectara
-        "../../tools-iadata",    // sibling of vectara/src-tauri
+    let mut root_candidates = vec![
+        PathBuf::from("../tools-iadata"),
+        PathBuf::from("../../tools-iadata"),
     ];
+
+    // Also try resolving relative to the executable's location
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            root_candidates.push(exe_dir.join("../tools-iadata"));
+            root_candidates.push(exe_dir.join("../../tools-iadata"));
+        }
+    }
 
     let mut services_path = PathBuf::new();
     let mut found = false;
-    for rel in root_candidates {
+    for rel in &root_candidates {
         if let Ok(p) = fs::canonicalize(rel) {
             if p.exists() {
                 services_path = p;
@@ -178,7 +187,7 @@ fn resolve_env_paths(mode: &str) -> Result<(PathBuf, PathBuf, PathBuf), String> 
     }
     
     if !found {
-        return Err("Could not locate 'tools-iadata' directory.".to_string());
+        return Err("Could not locate 'tools-iadata' directory. Searched multiple paths relative to CWD and executable.".to_string());
     }
 
     let schema_file = services_path.join(".env.example");

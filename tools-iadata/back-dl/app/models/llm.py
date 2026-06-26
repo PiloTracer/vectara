@@ -29,5 +29,4 @@ class LLMModel(Base):
     is_default = Column(Boolean, default=False)  # Is this the default model for the environment?
     enabled = Column(Boolean, default=True)
     
-    # Relationship back to environment (optional)
-    environment = relationship("Environment", backref="llm_models")
+    environment = relationship("Environment", back_populates="llm_models")

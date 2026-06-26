@@ -1,17 +1,14 @@
-FROM node:20.10-alpine
+FROM node:20.10-alpine AS deps
 WORKDIR /app
-
-# Copy package files first for caching
 COPY package*.json ./
+RUN npm ci --only=production
 
-# Install dependencies
-RUN npm install
-
-# Copy source
+FROM node:20.10-alpine AS runner
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Expose port
+ENV NEXT_TELEMETRY_DISABLED=1
 EXPOSE 3000
 
-# Start command (can be overridden by docker-compose)
 CMD ["npm", "run", "dev"]

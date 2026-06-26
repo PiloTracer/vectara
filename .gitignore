@@ -105,7 +105,11 @@ test_results/
 
 # Other:
 secrets.*
-access.txt
-*access.txt
+*access*
+*access.txt.*
 credentials
 /credentials/*
+tools-iadata/secrets.md
+*access.txt
+*token*
+*pat*

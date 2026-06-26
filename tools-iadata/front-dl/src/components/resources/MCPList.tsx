@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { MCPServer, deleteMCP } from "../../actions/resources";
 import { Trash2, Loader2, Server, Terminal, Globe } from "lucide-react";
+import { useToast } from "../ui/Toast";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 
 interface MCPListProps {
     mcps: MCPServer[];
@@ -10,18 +12,20 @@ interface MCPListProps {
 }
 
 export function MCPList({ mcps, onRefresh }: MCPListProps) {
+    const { addToast } = useToast();
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [hoveredId, setHoveredId] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to remove this MCP server?")) return;
         setDeletingId(id);
         try {
             await deleteMCP(id);
             onRefresh();
+            addToast("success", "MCP server deleted");
         } catch (err) {
             console.error("Failed to delete MCP:", err);
-            alert("Failed to delete MCP");
+            addToast("error", "Failed to delete MCP");
         } finally {
             setDeletingId(null);
         }
@@ -190,7 +194,7 @@ export function MCPList({ mcps, onRefresh }: MCPListProps) {
                             </div>
 
                             <button
-                                onClick={() => handleDelete(mcp.id)}
+                                onClick={() => setDeleteTarget(mcp.id)}
                                 disabled={!!deletingId}
                                 style={{
                                     padding: 10,
@@ -203,6 +207,7 @@ export function MCPList({ mcps, onRefresh }: MCPListProps) {
                                     alignItems: "center",
                                     justifyContent: "center",
                                 }}
+                                aria-label="Delete MCP server"
                                 title="Delete Server"
                             >
                                 {deletingId === mcp.id
@@ -215,5 +220,17 @@ export function MCPList({ mcps, onRefresh }: MCPListProps) {
                 );
             })}
         </div>
+        <ConfirmDialog
+            open={deleteTarget !== null}
+            title="Delete MCP Server"
+            message="Are you sure you want to remove this MCP server?"
+            variant="danger"
+            confirmLabel="Delete"
+            onConfirm={() => {
+                if (deleteTarget) handleDelete(deleteTarget);
+                setDeleteTarget(null);
+            }}
+            onCancel={() => setDeleteTarget(null)}
+        />
     );
 }

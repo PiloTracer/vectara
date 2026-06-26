@@ -8,7 +8,7 @@ globs: *
 At the start of EVERY session or when switching tasks, you MUST read the following files to understand the current state:
 
 1. `FRAMEWORKS.md` — Framework discovery (where skills, directors, and working docs live)
-2. `.work/context/HANDOFF.md` — Agent OS session state
+2. `.work/context/HANDOFF.md` — Agent OS session state + project ADRs + feature history
 3. `.work.ui/context/HANDOFF_UI.md` — UI Design OS session state
 4. `.work.biz/context/HANDOFF.md` — Business OS session state
 5. `.work.ai/context/HANDOFF_AI.md` — AI-specific session state
@@ -31,8 +31,18 @@ At the start of EVERY session or when switching tasks, you MUST read the followi
 - `.work.biz/` — Business OS (strategy, pipeline, HANDOFF, NEXT)
 - `.work.ai/` — AI-specific work (experiments, evaluations, model configs)
 
+## Additional Context Files
+
+| Purpose | File |
+|---------|------|
+| Historical session logs (pre-framework) | `.ai.original/context/HANDOFF.md` |
+| Architectural Decision Records | `.work/context/HANDOFF.md` (ADRs section) |
+| AI system architecture & MCP integration | `.ai.original/context/AI_WORKFLOW.md` |
+| Feature specs (historical) | `.ai.original/features/` |
+| Tutorial / Quick Start | `docs/tutorial/QUICK_START.md` |
+
 ## CRITICAL
 
-**DO NOT** hallucinate project state. Trust the HANDOFF files as the source of truth for the session's "Mental Model". If HANDOFF files are in bootstrap state, route through the appropriate director.
+**DO NOT** hallucinate project state. Trust the HANDOFF files as the source of truth for the session's "Mental Model". If HANDOFF files are in bootstrap state, read `.ai.original/context/HANDOFF.md` for historical context.
 
-**All three framework directories are pre-installed at the paths above.** Skills, directors, and process routers are fully discoverable.
+**All three framework directories are pre-installed at the paths above.** Skills, directors, and process routers are fully discoverable. Use `@x-director` for cross-framework orchestration.

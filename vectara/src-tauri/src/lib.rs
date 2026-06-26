@@ -26,7 +26,9 @@ pub fn run() {
             
             // Start HTTP Server
             tauri::async_runtime::spawn(async move {
-                server::start_http_server(state).await;
+                if let Err(e) = server::start_http_server(state).await {
+                    eprintln!("Bridge server error: {}", e);
+                }
             });
 
             let menu = Menu::new(handle)?;

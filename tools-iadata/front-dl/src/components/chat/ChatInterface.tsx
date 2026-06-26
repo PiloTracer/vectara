@@ -31,7 +31,7 @@ interface Source {
     };
 }
 
-const API_BASE = "http://localhost:18080"; // BFF or Direct
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:18080";
 
 export function ChatInterface() {
     const [messages, setMessages] = useState<Message[]>([]);

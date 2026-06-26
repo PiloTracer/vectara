@@ -1,5 +1,5 @@
 
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use axum::{routing::{get, post}, Router};
 use std::net::SocketAddr;
 use tauri_plugin_dialog::DialogExt;
@@ -10,13 +10,8 @@ pub mod handlers;
 use state::AppState;
 use handlers::{read_file_handler, write_file_handler, list_directory_handler, get_authorized_paths, open_dialog_handler};
 
-// --- HTTP Server Startup ---
-
-pub async fn start_http_server(state: AppState) {
-    let cors = CorsLayer::new()
-        .allow_origin(Any)
-        .allow_methods(Any)
-        .allow_headers(Any);
+pub async fn start_http_server(state: AppState) -> Result<(), String> {
+    let cors = CorsLayer::permissive();
 
     let app = Router::new()
         .route("/api/file/read", post(read_file_handler))
@@ -27,14 +22,18 @@ pub async fn start_http_server(state: AppState) {
         .layer(cors)
         .with_state(state);
 
-    // Bind to 0.0.0.0 so Docker containers can access via host.docker.internal
     let addr = SocketAddr::from(([0, 0, 0, 0], 3737));
-    // Check if port is available or handle error? For now unwrap is fine for dev.
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    
+    let listener = tokio::net::TcpListener::bind(addr)
+        .await
+        .map_err(|e| format!("Failed to bind bridge server: {}", e))?;
+
     println!("Bridge Server running on http://0.0.0.0:3737");
-    
-    axum::serve(listener, app).await.unwrap();
+
+    axum::serve(listener, app)
+        .await
+        .map_err(|e| format!("Bridge server error: {}", e))?;
+
+    Ok(())
 }
 
 

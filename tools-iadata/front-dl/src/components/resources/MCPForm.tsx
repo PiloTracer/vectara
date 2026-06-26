@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { createMCP } from "../../actions/resources";
 import { Loader2, Terminal, Globe, Save, Plus, X } from "lucide-react";
+import { useToast } from "../ui/Toast";
 
 interface MCPFormProps {
     envId: string;
@@ -11,6 +12,7 @@ interface MCPFormProps {
 }
 
 export function MCPForm({ envId, onSuccess, onCancel }: MCPFormProps) {
+    const { addToast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
     const [type, setType] = useState("STDIO");
     const [name, setName] = useState("");
@@ -51,7 +53,7 @@ export function MCPForm({ envId, onSuccess, onCancel }: MCPFormProps) {
             onSuccess();
         } catch (err) {
             console.error("Failed to create MCP:", err);
-            alert("Failed to create MCP");
+            addToast("error", "Failed to create MCP server");
         } finally {
             setIsLoading(false);
         }

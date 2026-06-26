@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
-import { DataSource, deleteSource, ingestSource, initGoogleOAuth, initMicrosoftOAuth, getOAuthStatus, disconnectOAuth, OAuthStatus } from "../../actions/resources";
+import React, { useState, useCallback } from "react";
+import { DataSource, deleteSource, ingestSource, initGoogleOAuth, initMicrosoftOAuth, getOAuthStatus, disconnectOAuth } from "../../actions/resources";
 import { Trash2, Loader2, Database, Folder, Globe, ExternalLink, RefreshCw, CheckCircle, XCircle, Cloud, Building2, Link2, Unplug } from "lucide-react";
 import { useJobStatus } from "../../hooks/useJobStatus";
+import { useToast } from "../ui/Toast";
+import { ConfirmDialog } from "../ui/ConfirmDialog";
 
 // --- Sub-Components ---
 
@@ -25,20 +27,34 @@ function JobStatusIndicator({ sourceId, jobId, onComplete }: JobStatusIndicatorP
     }
 
     const status = job?.status || "PENDING";
-    const statusConfig: Record<string, { color: string; label: string; icon: React.ReactNode }> = {
-        PENDING: { color: "yellow", label: "Queued", icon: <Loader2 className="w-3 h-3 animate-spin" /> },
-        RUNNING: { color: "blue", label: "Syncing", icon: <RefreshCw className="w-3 h-3 animate-spin" /> },
-        COMPLETED: { color: "emerald", label: "Done", icon: <CheckCircle className="w-3 h-3" /> },
-        FAILED: { color: "red", label: "Failed", icon: <XCircle className="w-3 h-3" /> },
+    const statusStyles: Record<string, string> = {
+        PENDING: "text-yellow-400 border-yellow-500/20",
+        RUNNING: "text-blue-400 border-blue-500/20",
+        COMPLETED: "text-emerald-400 border-emerald-500/20",
+        FAILED: "text-red-400 border-red-500/20",
+    };
+    const statusIcons: Record<string, React.ReactNode> = {
+        PENDING: <Loader2 className="w-3 h-3 animate-spin" />,
+        RUNNING: <RefreshCw className="w-3 h-3 animate-spin" />,
+        COMPLETED: <CheckCircle className="w-3 h-3" />,
+        FAILED: <XCircle className="w-3 h-3" />,
+    };
+    const statusLabels: Record<string, string> = {
+        PENDING: "Queued",
+        RUNNING: "Syncing",
+        COMPLETED: "Done",
+        FAILED: "Failed",
     };
 
-    const config = statusConfig[status] || statusConfig.PENDING;
+    const style = statusStyles[status] || statusStyles.PENDING;
+    const icon = statusIcons[status] || statusIcons.PENDING;
+    const label = statusLabels[status] || statusLabels.PENDING;
 
     return (
-        <div className={`flex items-center gap-2 text-${config.color}-400 bg-slate-950/50 px-2 py-1 rounded-lg border border-${config.color}-500/20`}>
-            {config.icon}
+        <div className={`flex items-center gap-2 bg-slate-950/50 px-2 py-1 rounded-lg border ${style}`}>
+            {icon}
             <span className="text-[10px] font-bold uppercase tracking-widest">
-                {config.label}
+                {label}
             </span>
         </div>
     );
@@ -111,19 +127,27 @@ interface DataSourceListProps {
 }
 
 export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
+    const { addToast } = useToast();
     const [deletingId, setDeletingId] = useState<string | null>(null);
-    const [activeJobs, setActiveJobs] = useState<Record<string, string>>({}); // sourceId -> jobId
-    const [connectionStates, setConnectionStates] = useState<Record<string, boolean>>({}); // sourceId -> connected
+    const [activeJobs, setActiveJobs] = useState<Record<string, string>>({});
+    const [connectionStates, setConnectionStates] = useState<Record<string, boolean>>({});
+    const [confirmState, setConfirmState] = useState<{
+        open: boolean;
+        title: string;
+        message: string;
+        onConfirm: () => void;
+        variant?: "danger" | "default";
+    }>({ open: false, title: "", message: "", onConfirm: () => {} });
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Are you sure you want to remove this source?")) return;
         setDeletingId(id);
         try {
             await deleteSource(id);
             onRefresh();
+            addToast("success", "Source deleted");
         } catch (err) {
             console.error("Failed to delete source:", err);
-            alert("Failed to delete source");
+            addToast("error", "Failed to delete source");
         } finally {
             setDeletingId(null);
         }
@@ -135,7 +159,7 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
             setActiveJobs(prev => ({ ...prev, [sourceId]: result.job_id }));
         } catch (err) {
             console.error("Failed to start ingestion:", err);
-            alert("Failed to start ingestion");
+            addToast("error", "Failed to start ingestion");
         }
     };
 
@@ -153,16 +177,12 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
             }
         } catch (err) {
             console.error("Failed to init OAuth:", err);
-            alert("Failed to initialize connection");
+            addToast("error", "Failed to initialize connection");
         }
     };
 
     const handleDisconnect = async (sourceId: string) => {
-        if (!confirm("Revoke connection?")) return;
         await disconnectOAuth(sourceId);
-        // Force refresh via a key change or parent refresh?
-        // Ideally we just toggle state, but we rely on sub-component fetching.
-        // Simple hack: window reload or parent refresh.
         window.location.reload();
     };
 
@@ -298,11 +318,11 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
                                                 hover:bg-blue-500/20 hover:border-blue-400
                                                 transition-all
                                             "
+                                            aria-label="Connect source"
                                         >
                                             Connect
                                         </button>
                                     ) : (
-                                        /* Only show Sync button if connected or not a cloud source */
                                         <button
                                             onClick={() => handleSync(source.id)}
                                             disabled={!!activeJobs[source.id] || !!deletingId}
@@ -312,6 +332,7 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
                                                 transition-colors duration-200
                                                 disabled:opacity-50 disabled:cursor-not-allowed
                                             "
+                                            aria-label="Sync now"
                                             title="Sync Now"
                                         >
                                             <RefreshCw className={`w-4 h-4 ${activeJobs[source.id] ? 'animate-spin' : ''}`} />
@@ -319,21 +340,28 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
                                     )}
 
                                     {isConnected && (
-                                        <button
-                                            onClick={() => handleDisconnect(source.id)}
-                                            className="
-                                                p-2 rounded-lg 
-                                                text-slate-600 hover:text-amber-400 hover:bg-amber-500/10 
-                                                transition-colors duration-200
-                                            "
-                                            title="Disconnect Account"
-                                        >
-                                            <Unplug className="w-4 h-4" />
-                                        </button>
-                                    )}
+                                    <button
+                                        onClick={() => handleDisconnect(source.id)}
+                                        className="
+                                            p-2 rounded-lg 
+                                            text-slate-600 hover:text-amber-400 hover:bg-amber-500/10 
+                                            transition-colors duration-200
+                                        "
+                                        aria-label="Disconnect account"
+                                        title="Disconnect Account"
+                                    >
+                                        <Unplug className="w-4 h-4" />
+                                    </button>
+                                )}
 
                                     <button
-                                        onClick={() => handleDelete(source.id)}
+                                        onClick={() => setConfirmState({
+                                            open: true,
+                                            title: "Delete Source",
+                                            message: "Are you sure you want to remove this source?",
+                                            onConfirm: () => handleDelete(source.id),
+                                            variant: "danger",
+                                        })}
                                         disabled={!!deletingId || !!activeJobs[source.id]}
                                         className="
                                             p-2 rounded-lg 
@@ -341,6 +369,7 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
                                             transition-colors duration-200
                                             disabled:opacity-50 disabled:cursor-not-allowed
                                         "
+                                        aria-label="Delete source"
                                         title="Delete Source"
                                     >
                                         {deletingId === source.id
@@ -355,5 +384,17 @@ export function DataSourceList({ sources, onRefresh }: DataSourceListProps) {
                 );
             })}
         </div>
+        <ConfirmDialog
+            open={confirmState.open}
+            title={confirmState.title}
+            message={confirmState.message}
+            variant={confirmState.variant}
+            confirmLabel="Delete"
+            onConfirm={() => {
+                confirmState.onConfirm();
+                setConfirmState(prev => ({ ...prev, open: false }));
+            }}
+            onCancel={() => setConfirmState(prev => ({ ...prev, open: false }))}
+        />
     );
 }

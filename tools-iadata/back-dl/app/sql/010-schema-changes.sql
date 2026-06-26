@@ -1,0 +1,4 @@
+-- Schema-level SQL scripts (idempotent DDL/DML)
+-- Place numbered migration scripts here, e.g.:
+-- 020-add-column.sql, 030-create-index.sql
+-- Executed by init_db() in app/db.py during startup (sorted by filename).

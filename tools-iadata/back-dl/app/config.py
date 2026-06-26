@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # Database
     DB_USER: str = os.getenv("DB_USER", "postgres")
     DB_PASSWORD: str = os.getenv("DB_PASSWORD", "password")
-    DB_HOST: str = "pg-dl"
+    DB_HOST: str = os.getenv("DB_HOST", "pg-dl")
     DB_PORT: str = "5432"
     DB_NAME: str = os.getenv("DB_NAME", "tools_iadata")
     
@@ -20,7 +20,10 @@ class Settings(BaseSettings):
     # Qdrant (Vector DB)
     QDRANT_HOST: str = os.getenv("QDRANT_HOST", "ia-dl")
     QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", 6333))
-    QDRANT_URL: str = f"http://{QDRANT_HOST}:{QDRANT_PORT}"
+
+    @property
+    def QDRANT_URL(self) -> str:
+        return f"http://{self.QDRANT_HOST}:{self.QDRANT_PORT}"
     
     # LLM & Embeddings
     USE_LOCAL_EMBEDDING: bool = os.getenv("USE_LOCAL_EMBEDDING", "false").lower() == "true"
@@ -66,7 +69,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
 
-@lru_cache()
+@lru_cache(maxsize=1)
 def get_settings():
     return Settings()
 

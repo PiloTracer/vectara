@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { fetchFromBackend } from "../../../lib/backend";
-import { FileText, Trash2, Search, Database } from "lucide-react";
+import { FileText, Trash2, Search, Database, Loader2 } from "lucide-react";
+import { useToast } from "../../../components/ui/Toast";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
+
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:18080";
 
 interface DocumentInfo {
     path: string;
@@ -11,10 +15,12 @@ interface DocumentInfo {
 }
 
 export default function KnowledgePage() {
+    const { addToast } = useToast();
     const [documents, setDocuments] = useState<DocumentInfo[]>([]);
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<{ points_count: number; vectors_count: number } | null>(null);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
     const loadData = async () => {
         setLoading(true);
@@ -37,32 +43,25 @@ export default function KnowledgePage() {
     }, []);
 
     const handleDelete = async (path: string) => {
-        if (!confirm(`Are you sure you want to delete "${path}"? This will remove all its vectors.`)) return;
-
         try {
-            // path in URL needs encoding
             const encodedPath = encodeURIComponent(path);
-            const res = await fetch(`http://localhost:18080/knowledge/${encodedPath}`, { method: "DELETE" });
+            const res = await fetch(`${API_BASE}/knowledge/${encodedPath}`, { method: "DELETE" });
 
             if (res.ok) {
                 setDocuments(prev => prev.filter(d => d.path !== path));
-                // Update stats locally or reload
+                addToast("success", "Document deleted");
                 if (stats) {
                     const doc = documents.find(d => d.path === path);
                     if (doc) {
-                        setStats({
-                            ...stats,
-                            points_count: stats.points_count - doc.chunk_count,
-                            // vectors count hard to estimate with hybrid... just reload if needed
-                        });
+                        setStats({ ...stats, points_count: stats.points_count - doc.chunk_count });
                     }
                 }
             } else {
-                alert("Failed to delete document");
+                addToast("error", "Failed to delete document");
             }
         } catch (e) {
             console.error("Delete failed", e);
-            alert("Error deleting document");
+            addToast("error", "Error deleting document");
         }
     };
 
@@ -109,6 +108,7 @@ export default function KnowledgePage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-3 pl-10 pr-4 text-slate-200 focus:outline-none focus:border-indigo-500 transition-colors"
+                    aria-label="Search documents"
                 />
             </div>
 
@@ -163,8 +163,9 @@ export default function KnowledgePage() {
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
-                                            onClick={() => handleDelete(doc.path)}
+                                            onClick={() => setDeleteTarget(doc.path)}
                                             className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
+                                            aria-label={`Delete document ${doc.path}`}
                                             title="Delete Document"
                                         >
                                             <Trash2 className="w-4 h-4" />
@@ -177,5 +178,17 @@ export default function KnowledgePage() {
                 </table>
             </div>
         </div>
+        <ConfirmDialog
+            open={deleteTarget !== null}
+            title="Delete Document"
+            message={`Are you sure you want to delete "${deleteTarget}"? This will remove all its vectors.`}
+            variant="danger"
+            confirmLabel="Delete"
+            onConfirm={() => {
+                if (deleteTarget) handleDelete(deleteTarget);
+                setDeleteTarget(null);
+            }}
+            onCancel={() => setDeleteTarget(null)}
+        />
     );
 }

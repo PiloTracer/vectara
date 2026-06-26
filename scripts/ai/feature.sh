@@ -5,7 +5,7 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
-FEATURES_DIR="$ROOT_DIR/.ai/features"
+FEATURES_DIR="$ROOT_DIR/.ai.original/features"
 
 mkdir -p "$FEATURES_DIR"
 cd "$FEATURES_DIR" || exit 1

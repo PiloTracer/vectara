@@ -4,7 +4,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use crate::server::state::AppState;
 use tauri_plugin_dialog::DialogExt;
 use base64::{Engine as _, engine::general_purpose};
@@ -21,7 +21,7 @@ pub struct ReadFileRequest {
 #[derive(Serialize)]
 pub struct ReadFileResponse {
     pub content: String,
-    pub is_binary: bool, // If true, content is base64-encoded
+    pub is_binary: bool,
     pub success: bool,
     pub error: Option<String>,
 }
@@ -70,27 +70,30 @@ pub struct OpenDialogResponse {
 
 // --- Helper Functions ---
 
-fn resolve_path(base_path: &PathBuf, relative_path: &str) -> Result<PathBuf, String> {
-    let full_path = base_path.join(relative_path);
-    
-    // Security check: canonicalize to resolve .. and symlinks to ensure it's inside base_path
-    // Note: canonicalize requires the path to exist for resolution, which works for reading.
-    // For writing new files, we check the parent.
-    // A simpler strict prefix check without canonicalization prevents most traversal if input is sanitized,
-    // but canonicalization is safest. However, strict strict starts_with on the joined path 
-    // without .. resolution is often used too.
-    
-    // Simple check: does the string contain ".." component?
-    if relative_path.contains("..") {
-        return Err("Path traversal detected (..)".to_string());
+fn resolve_path(base_path: &Path, relative_path: &str) -> Result<PathBuf, String> {
+    let base_canonical = base_path.canonicalize()
+        .map_err(|e| format!("Cannot resolve base path: {}", e))?;
+    let full_path = base_canonical.join(relative_path);
+
+    // Normalize by canonicalizing if the path exists, otherwise try parent canonicalization
+    let resolved = if full_path.exists() {
+        full_path.canonicalize()
+            .map_err(|e| format!("Cannot resolve path: {}", e))?
+    } else {
+        // For new files, canonicalize parent and append filename
+        let parent = full_path.parent().ok_or("Invalid path: no parent")?;
+        let file_name = full_path.file_name().ok_or("Invalid path: no filename")?;
+        let parent_canonical = parent.canonicalize()
+            .map_err(|e| format!("Cannot resolve parent path: {}", e))?;
+        parent_canonical.join(file_name)
+    };
+
+    // Verify resolved path starts with base canonical path
+    if !resolved.starts_with(&base_canonical) {
+        return Err("Path traversal detected".to_string());
     }
-    
-    // Ensure the resulting path starts with the base path
-    if !full_path.starts_with(base_path) {
-         return Err("Path traversal detected".to_string());
-    }
-    
-    Ok(full_path)
+
+    Ok(resolved)
 }
 
 // --- Handlers ---

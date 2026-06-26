@@ -1,6 +1,6 @@
 "use server";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://back-dl:8000";
+import { BACKEND_URL } from "../lib/backend";
 
 export interface Agent {
     id: string;
@@ -38,26 +38,26 @@ export interface UpdateAgentData {
 }
 
 export async function getRolePresets(): Promise<RolePreset[]> {
-    const res = await fetch(`${API_BASE}/agents/presets/roles`, { cache: "no-store" });
+    const res = await fetch(`${BACKEND_URL}/agents/presets/roles`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch role presets");
     const data = await res.json();
     return data.roles;
 }
 
 export async function getAgents(envId: string): Promise<Agent[]> {
-    const res = await fetch(`${API_BASE}/agents/env/${envId}`, { cache: "no-store" });
+    const res = await fetch(`${BACKEND_URL}/agents/env/${envId}`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch agents");
     return res.json();
 }
 
 export async function getAgent(agentId: string): Promise<Agent> {
-    const res = await fetch(`${API_BASE}/agents/${agentId}`, { cache: "no-store" });
+    const res = await fetch(`${BACKEND_URL}/agents/${agentId}`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch agent");
     return res.json();
 }
 
 export async function createAgent(data: CreateAgentData): Promise<Agent> {
-    const res = await fetch(`${API_BASE}/agents/`, {
+    const res = await fetch(`${BACKEND_URL}/agents/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -70,7 +70,7 @@ export async function createAgent(data: CreateAgentData): Promise<Agent> {
 }
 
 export async function updateAgent(id: string, data: UpdateAgentData): Promise<Agent> {
-    const res = await fetch(`${API_BASE}/agents/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/agents/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -83,7 +83,7 @@ export async function updateAgent(id: string, data: UpdateAgentData): Promise<Ag
 }
 
 export async function deleteAgent(id: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/agents/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/agents/${id}`, {
         method: "DELETE",
     });
     if (!res.ok) throw new Error("Failed to delete agent");

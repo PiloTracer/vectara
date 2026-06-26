@@ -6,9 +6,9 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
 cd "$ROOT_DIR"
 
-FOCUS_FILE=".ai/context/CURRENT_FOCUS.md"
-HANDOFF_FILE=".ai/context/HANDOFF.md"
-FEATURES_DIR=".ai/features"
+FOCUS_FILE=".ai.original/context/CURRENT_FOCUS.md"
+HANDOFF_FILE=".ai.original/context/HANDOFF.md"
+FEATURES_DIR=".ai.original/features"
 
 function show_usage() {
     echo "Usage: ./scripts/ai/session.sh [command]"
@@ -66,7 +66,8 @@ function start_session() {
     echo "✅ Context ready. Paste the above into your AI agent."
     echo ""
     echo "Quick command for AI tools:"
-    echo "   read .ai/context/HANDOFF.md"
+    echo "   read .ai.original/context/HANDOFF.md"
+    echo "   read .work/context/HANDOFF.md"
     echo ""
 }
 
@@ -241,9 +242,9 @@ EOF
             if [[ -f "$file" ]]; then
                 BASENAME=$(basename "$file")
                 TITLE=$(grep "^# Feature:" "$file" | head -n 1 | sed 's/# Feature: //')
-                ACTIVE_FEATURES+="- **$TITLE** (Ref: \`.ai/features/$BASENAME\`)"$'\n'
+                ACTIVE_FEATURES+="- **$TITLE** (Ref: \`.ai.original/features/$BASENAME\`)"$'\n'
             fi
-        done < <(find .ai/features -name "*.md" -mtime -1 2>/dev/null)
+        done < <(find .ai.original/features -name "*.md" -mtime -1 2>/dev/null)
         
         TEMP_FILE=$(mktemp)
         echo "# Current Development Focus" > "$TEMP_FILE"
@@ -263,7 +264,8 @@ EOF
         echo "" >> "$TEMP_FILE"
         
         echo "## Context for AI Assistant" >> "$TEMP_FILE"
-        echo "- Read \`.ai/context/HANDOFF.md\` for working memory" >> "$TEMP_FILE"
+        echo "- Read \`.work/context/HANDOFF.md\` for current working memory" >> "$TEMP_FILE"
+        echo "- Read \`.ai.original/context/HANDOFF.md\` for historical context" >> "$TEMP_FILE"
         echo "- Focus on the active feature and immediate next steps" >> "$TEMP_FILE"
         echo "" >> "$TEMP_FILE"
         echo "Last updated: $(date +%Y-%m-%d)" >> "$TEMP_FILE"

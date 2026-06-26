@@ -4,14 +4,18 @@ import React, { useEffect, useState } from "react";
 import { useEnvironment } from "../../../context/EnvironmentContext";
 import { getModels, getProviders, createModel, deleteModel, updateModel, LLMModel, LLMProvider } from "../../../actions/models";
 import { Loader2, Plus, Cpu, Cloud, Trash2, Star, Settings, ExternalLink, X } from "lucide-react";
+import { useToast } from "../../../components/ui/Toast";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export default function ModelsPage() {
+    const { addToast } = useToast();
     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
 
     const [models, setModels] = useState<LLMModel[]>([]);
     const [providers, setProviders] = useState<LLMProvider[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
     // Form state
     const [selectedProvider, setSelectedProvider] = useState<LLMProvider | null>(null);
@@ -74,17 +78,18 @@ export default function ModelsPage() {
             fetchData();
         } catch (err) {
             console.error("Failed to create model:", err);
-            alert("Failed to create model");
+            addToast("error", "Failed to create model");
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Remove this model configuration?")) return;
         try {
             await deleteModel(id);
             fetchData();
+            addToast("success", "Model deleted");
         } catch (err) {
             console.error("Failed to delete:", err);
+            addToast("error", "Failed to delete model");
         }
     };
 
@@ -170,9 +175,11 @@ export default function ModelsPage() {
                         <button
                             onClick={() => { setIsCreating(false); setSelectedProvider(null); }}
                             style={{ padding: 8, background: "rgba(255,255,255,0.05)", border: "none", borderRadius: 8, cursor: "pointer", color: "rgba(255,255,255,0.4)" }}
+                            aria-label="Close"
                         >
                             <X style={{ width: 20, height: 20 }} />
                         </button>
+                    </div>
                     </div>
 
                     {!selectedProvider ? (
@@ -495,7 +502,7 @@ export default function ModelsPage() {
                                         )}
                                     </div>
                                     <button
-                                        onClick={() => handleDelete(model.id)}
+                                        onClick={() => setDeleteTarget(model.id)}
                                         style={{
                                             padding: 8,
                                             background: "transparent",
@@ -504,6 +511,7 @@ export default function ModelsPage() {
                                             color: "rgba(255,255,255,0.2)",
                                             cursor: "pointer",
                                         }}
+                                        aria-label="Delete model"
                                     >
                                         <Trash2 style={{ width: 16, height: 16 }} />
                                     </button>
@@ -514,5 +522,17 @@ export default function ModelsPage() {
                 </div>
             )}
         </div>
+        <ConfirmDialog
+            open={deleteTarget !== null}
+            title="Delete Model"
+            message="Remove this model configuration?"
+            variant="danger"
+            confirmLabel="Delete"
+            onConfirm={() => {
+                if (deleteTarget) handleDelete(deleteTarget);
+                setDeleteTarget(null);
+            }}
+            onCancel={() => setDeleteTarget(null)}
+        />
     );
 }

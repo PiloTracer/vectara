@@ -71,6 +71,18 @@ If primary paths are unavailable:
 
 ---
 
+## Migration Note — `.ai.original/`
+
+The legacy `.ai.original/` directory contains **historical context** from before the three-framework OS was adopted:
+- **Session history** (`.ai.original/context/HANDOFF.md`) — last session Jan 26, 2026
+- **24 feature specs** (`.ai.original/features/`) — implemented, pending, and planning
+- **Architectural decisions** (`.ai.original/context/DECISIONS.md`) — 7 ADRs
+- **AI workflow docs** (`.ai.original/context/`) — system architecture, MCP integration
+
+**Use `.work/` for active work.** The historical data in `.ai.original/` is preserved for reference. If you need context about past sessions, decisions, or feature status, read from `.ai.original/`. New work should be tracked in `.work/`.
+
+---
+
 ## Quick Start
 
 ```text

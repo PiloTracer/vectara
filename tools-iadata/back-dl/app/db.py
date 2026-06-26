@@ -1,18 +1,9 @@
-import os
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.orm import sessionmaker
-from .models import Base 
-# Import all models to ensure they are registered with Base metadata
-from .models import * 
+from . import models  # noqa: F401 - registers all models with Base metadata
+from .models import Base
+from .config import settings
 
-# Database Configuration
-POSTGRES_USER = os.getenv("DB_USER", "postgres")
-POSTGRES_PASSWORD = os.getenv("DB_PASSWORD", "password")
-POSTGRES_HOST = "pg-dl" # internal docker service name
-POSTGRES_PORT = "5432"
-POSTGRES_DB = os.getenv("DB_NAME", "tools_iadata")
-
-DATABASE_URL = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
+DATABASE_URL = settings.DB_URL
 
 # Optimization: Connection Pooling for Concurrency
 engine = create_async_engine(

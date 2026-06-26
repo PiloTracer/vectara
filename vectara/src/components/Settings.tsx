@@ -71,8 +71,10 @@ export default function Settings() {
         }
     }
 
+    const [showRestartConfirm, setShowRestartConfirm] = useState(false);
+
     async function handleRestartDocker() {
-        if (!confirm("This will restart the Docker stack. Continue?")) return;
+        setShowRestartConfirm(false);
         setLoading(true);
         try {
             await invoke("restart_docker");
@@ -263,7 +265,7 @@ export default function Settings() {
                     <button style={{ ...styles.button, backgroundColor: '#2196F3' }} onClick={handleSave}>
                         Save Changes
                     </button>
-                    <button style={{ ...styles.button, backgroundColor: '#FF9800' }} onClick={handleRestartDocker}>
+                    <button style={{ ...styles.button, backgroundColor: '#FF9800' }} onClick={() => setShowRestartConfirm(true)}>
                         Restart Services
                     </button>
                     <button style={styles.button} onClick={() => window.location.hash = ""}>
@@ -272,6 +274,44 @@ export default function Settings() {
                 </div>
             </div>
         </div>
+
+        {showRestartConfirm && (
+            <div style={{
+                position: "fixed" as const, top: 0, left: 0, right: 0, bottom: 0,
+                backgroundColor: "rgba(0,0,0,0.6)", display: "flex",
+                alignItems: "center", justifyContent: "center", zIndex: 1000
+            }}>
+                <div style={{
+                    backgroundColor: "#222", padding: 30, borderRadius: 12,
+                    maxWidth: 400, textAlign: "center" as const, border: "1px solid #444"
+                }}>
+                    <h3 style={{ color: "#fff", marginBottom: 16 }}>Restart Docker Stack?</h3>
+                    <p style={{ color: "#aaa", marginBottom: 24, fontSize: 14 }}>
+                        This will restart the Docker stack. Continue?
+                    </p>
+                    <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+                        <button
+                            onClick={() => setShowRestartConfirm(false)}
+                            style={{
+                                padding: "10px 24px", borderRadius: 8, border: "1px solid #555",
+                                backgroundColor: "transparent", color: "#ccc", cursor: "pointer"
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleRestartDocker}
+                            style={{
+                                padding: "10px 24px", borderRadius: 8, border: "none",
+                                backgroundColor: "#FF9800", color: "#fff", cursor: "pointer", fontWeight: "bold"
+                            }}
+                        >
+                            Restart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
     );
 }
 

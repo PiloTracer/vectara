@@ -5,8 +5,11 @@ import { useEnvironment } from "../../../context/EnvironmentContext";
 import { getAgents, getRolePresets, createAgent, deleteAgent, updateAgent, Agent, RolePreset } from "../../../actions/agents";
 import { getModels, LLMModel } from "../../../actions/models";
 import { Loader2, Plus, Trash2, Bot, Edit2, Save, X } from "lucide-react";
+import { useToast } from "../../../components/ui/Toast";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 export default function AgentsPage() {
+    const { addToast } = useToast();
     const { activeEnvironmentId, activeEnvironment } = useEnvironment();
 
     const [agents, setAgents] = useState<Agent[]>([]);
@@ -15,6 +18,7 @@ export default function AgentsPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
     const [editPrompt, setEditPrompt] = useState("");
     const [selectedRole, setSelectedRole] = useState<RolePreset | null>(null);
     const [formData, setFormData] = useState({ name: "", system_prompt: "", model_id: "" });
@@ -65,13 +69,19 @@ export default function AgentsPage() {
             fetchData();
         } catch (err) {
             console.error("Failed to create agent:", err);
-            alert("Failed to create agent");
+            addToast("error", "Failed to create agent");
         }
     };
 
     const handleDelete = async (id: string) => {
-        if (!confirm("Delete this agent?")) return;
-        try { await deleteAgent(id); fetchData(); } catch (err) { console.error("Failed to delete:", err); }
+        try {
+            await deleteAgent(id);
+            fetchData();
+            addToast("success", "Agent deleted");
+        } catch (err) {
+            console.error("Failed to delete:", err);
+            addToast("error", "Failed to delete agent");
+        }
     };
 
     const handleUpdate = async (agent: Agent, updates: { system_prompt?: string }) => {
@@ -274,7 +284,7 @@ export default function AgentsPage() {
                                         >
                                             <Edit2 style={{ width: 16, height: 16 }} />
                                         </button>
-                                        <button onClick={() => handleDelete(agent.id)} style={{ padding: 8, background: "transparent", border: "none", borderRadius: 8, cursor: "pointer", color: "rgba(255,255,255,0.2)" }}>
+                                        <button onClick={() => setDeleteTarget(agent.id)} style={{ padding: 8, background: "transparent", border: "none", borderRadius: 8, cursor: "pointer", color: "rgba(255,255,255,0.2)" }} aria-label="Delete agent">
                                             <Trash2 style={{ width: 16, height: 16 }} />
                                         </button>
                                     </div>
@@ -328,5 +338,17 @@ export default function AgentsPage() {
                 </div>
             )}
         </div>
+        <ConfirmDialog
+            open={deleteTarget !== null}
+            title="Delete Agent"
+            message="Delete this agent?"
+            variant="danger"
+            confirmLabel="Delete"
+            onConfirm={() => {
+                if (deleteTarget) handleDelete(deleteTarget);
+                setDeleteTarget(null);
+            }}
+            onCancel={() => setDeleteTarget(null)}
+        />
     );
 }

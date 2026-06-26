@@ -7,12 +7,34 @@ from app.db import init_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Init DB
     print("Initializing Database...")
     await init_db()
     print("Database Initialized.")
+
+    try:
+        from app.services.vector_service import VectorService
+        from app.services.embedding_service import EmbeddingService
+        from app.services.llm_service import LLMService
+        from app.services.ocr_service import OCRService
+        from app.config import settings
+
+        vs = VectorService()
+        vs.ensure_collection()
+
+        if settings.USE_LOCAL_EMBEDDING:
+            embed = EmbeddingService()
+            await embed.ensure_model_available()
+
+        llm = LLMService()
+        await llm.ensure_model_available()
+
+        if settings.USE_LOCAL_OCR:
+            ocr = OCRService()
+            await ocr.ensure_model_available()
+    except Exception as e:
+        print(f"Warning: Service init failed (will retry on demand): {e}")
+
     yield
-    # Shutdown logic if needed
 
 app = FastAPI(
     title="Tools IADATA API",

@@ -21,6 +21,7 @@ class Environment(Base):
     mcp_servers = relationship("MCPServer", back_populates="environment", cascade="all, delete")
     agents = relationship("Agent", back_populates="environment", cascade="all, delete")
     chat_sessions = relationship("ChatSession", back_populates="environment", cascade="all, delete")
+    llm_models = relationship("LLMModel", back_populates="environment", cascade="all, delete")
 
 class EnvironmentAccess(Base):
     __tablename__ = "environment_access"

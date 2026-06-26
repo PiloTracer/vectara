@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createEnvironment } from "../../../actions/environments";
 import { useRouter } from "next/navigation";
+import { useToast } from "../../ui/Toast";
+import { Loader2, X } from "lucide-react";
 
 interface CreateEnvironmentModalProps {
     isOpen: boolean;
@@ -14,6 +16,38 @@ export default function CreateEnvironmentModal({ isOpen, onClose }: CreateEnviro
     const [description, setDescription] = useState("");
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const { addToast } = useToast();
+    const nameRef = useRef<HTMLInputElement>(null);
+    const dialogRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isOpen) {
+            nameRef.current?.focus();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape") onClose();
+            if (e.key === "Tab" && dialogRef.current) {
+                const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last?.focus();
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first?.focus();
+                }
+            }
+        };
+        document.addEventListener("keydown", handleKey);
+        return () => document.removeEventListener("keydown", handleKey);
+    }, [isOpen, onClose]);
 
     if (!isOpen) return null;
 
@@ -26,61 +60,89 @@ export default function CreateEnvironmentModal({ isOpen, onClose }: CreateEnviro
             onClose();
             setName("");
             setDescription("");
+            addToast("success", "Environment created");
         } catch (err) {
             console.error(err);
-            alert("Failed to create environment");
+            addToast("error", "Failed to create environment");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div style={{
-            position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)",
-            display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100
-        }}>
-            <div style={{
-                backgroundColor: "#1e293b", border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "16px", padding: "32px", width: "100%", maxWidth: "500px",
-                boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-            }}>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#f8fafc", marginBottom: "24px" }}>
-                    Create Environment
-                </h2>
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="create-env-title"
+        >
+            <div
+                ref={dialogRef}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-8 w-full max-w-lg shadow-2xl"
+            >
+                <div className="flex items-center justify-between mb-6">
+                    <h2 id="create-env-title" className="text-xl font-bold text-slate-100">
+                        Create Environment
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                        aria-label="Close dialog"
+                    >
+                        <X className="w-5 h-5 text-slate-400" />
+                    </button>
+                </div>
 
-                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
                     <div>
-                        <label style={{ display: "block", color: "#cbd5e1", fontSize: "0.875rem", marginBottom: "8px" }}>Name</label>
+                        <label htmlFor="env-name" className="block text-sm text-slate-300 mb-2">
+                            Name
+                        </label>
                         <input
+                            id="env-name"
+                            ref={nameRef}
                             required
-                            value={name} onChange={(e) => setName(e.target.value)}
-                            style={{ width: "100%", padding: "12px", borderRadius: "8px", backgroundColor: "#0f172a", border: "1px solid #334155", color: "white", outline: "none" }}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors"
                             placeholder="e.g. Engineering Sandbox"
                         />
                     </div>
 
                     <div>
-                        <label style={{ display: "block", color: "#cbd5e1", fontSize: "0.875rem", marginBottom: "8px" }}>Description</label>
+                        <label htmlFor="env-desc" className="block text-sm text-slate-300 mb-2">
+                            Description
+                        </label>
                         <textarea
-                            value={description} onChange={(e) => setDescription(e.target.value)}
-                            style={{ width: "100%", padding: "12px", borderRadius: "8px", backgroundColor: "#0f172a", border: "1px solid #334155", color: "white", outline: "none", minHeight: "100px" }}
+                            id="env-desc"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            className="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-600 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors min-h-[100px] resize-y"
                             placeholder="Brief description of this context..."
                         />
                     </div>
 
-                    <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "12px" }}>
+                    <div className="flex justify-end gap-3 mt-4">
                         <button
-                            type="button" onClick={onClose}
-                            style={{ padding: "10px 20px", borderRadius: "8px", backgroundColor: "transparent", color: "#94a3b8", border: "none", cursor: "pointer" }}
+                            type="button"
+                            onClick={onClose}
+                            className="px-5 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
-                            type="submit" disabled={loading}
-                            style={{ padding: "10px 20px", borderRadius: "8px", backgroundColor: "#3b82f6", color: "white", border: "none", cursor: loading ? "not-allowed" : "pointer", fontWeight: "600" }}
+                            type="submit"
+                            disabled={loading}
+                            className="px-5 py-2.5 rounded-lg text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            {loading ? "Creating..." : "Create Environment"}
+                            {loading ? (
+                                <span className="flex items-center gap-2">
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                    Creating...
+                                </span>
+                            ) : "Create Environment"}
                         </button>
                     </div>
                 </form>

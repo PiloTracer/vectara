@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, MessageSquare, ArrowRight, Calendar } from "lucide-react";
+import { useToast } from "../../../components/ui/Toast";
+import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
 
 interface Session {
     id: string;
@@ -11,24 +13,25 @@ interface Session {
     updated_at: string;
 }
 
-const API_BASE = "http://localhost:18080";
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:18080";
 
 export function ListSessions({ initialSessions }: { initialSessions: Session[] }) {
+    const { addToast } = useToast();
     const [sessions, setSessions] = useState<Session[]>(initialSessions);
+    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
     const router = useRouter();
 
-    const deleteSession = async (e: React.MouseEvent, id: string) => {
-        e.stopPropagation();
-        if (!confirm("Are you sure you want to delete this session?")) return;
-
+    const deleteSession = async (id: string) => {
         try {
             const res = await fetch(`${API_BASE}/sessions/${id}`, { method: "DELETE" });
             if (res.ok) {
                 setSessions(prev => prev.filter(s => s.id !== id));
                 router.refresh();
+                addToast("success", "Session deleted");
             }
         } catch (error) {
             console.error("Failed to delete session", error);
+            addToast("error", "Failed to delete session");
         }
     };
 
@@ -78,8 +81,9 @@ export function ListSessions({ initialSessions }: { initialSessions: Session[] }
                             <MessageSquare className="w-5 h-5" />
                         </div>
                         <button
-                            onClick={(e) => deleteSession(e, session.id)}
+                            onClick={(e) => { e.stopPropagation(); setDeleteTarget(session.id); }}
                             className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors z-10"
+                            aria-label="Delete session"
                             title="Delete Session"
                         >
                             <Trash2 className="w-4 h-4" />
@@ -103,5 +107,17 @@ export function ListSessions({ initialSessions }: { initialSessions: Session[] }
                 </div>
             ))}
         </div>
+        <ConfirmDialog
+            open={deleteTarget !== null}
+            title="Delete Session"
+            message="Are you sure you want to delete this session?"
+            variant="danger"
+            confirmLabel="Delete"
+            onConfirm={() => {
+                if (deleteTarget) deleteSession(deleteTarget);
+                setDeleteTarget(null);
+            }}
+            onCancel={() => setDeleteTarget(null)}
+        />
     );
 }

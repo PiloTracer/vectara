@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { createSource } from "../../actions/resources";
 import { Loader2, Folder, Link as LinkIcon, Save, X, Cloud, Building2 } from "lucide-react";
+import { useToast } from "../ui/Toast";
 
 interface DataSourceFormProps {
     envId: string;
@@ -11,6 +12,7 @@ interface DataSourceFormProps {
 }
 
 export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormProps) {
+    const { addToast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
     // Feature flag: Hide "LOCAL" if not enabled.
@@ -50,11 +52,11 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
                     setName(parts[parts.length - 1] || "Local Folder");
                 }
             } else if (data.error) {
-                alert("Error: " + data.error);
+                addToast("error", data.error);
             }
         } catch (e) {
             console.error(e);
-            alert("Could not connect to Bridge Server (localhost:3737). Is the Desktop App running?");
+            addToast("error", "Could not connect to Bridge Server. Is the Desktop App running?");
         } finally {
             setIsBridgeLoading(false);
         }
@@ -70,7 +72,7 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
         if (type === "LOCAL") {
             if (subType === "BRIDGE") {
                 if (!bridgeId) {
-                    alert("Please select a folder first.");
+                    addToast("warning", "Please select a folder first.");
                     setIsLoading(false);
                     return;
                 }
@@ -85,7 +87,7 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
             config = { folder_id: folderId || "root" };
         } else if (type === "SHAREPOINT") {
             if (!siteUrl) {
-                alert("Please enter the SharePoint site URL.");
+                addToast("warning", "Please enter the SharePoint site URL.");
                 setIsLoading(false);
                 return;
             }
@@ -102,7 +104,7 @@ export function DataSourceForm({ envId, onSuccess, onCancel }: DataSourceFormPro
             onSuccess();
         } catch (err) {
             console.error("Failed to create source:", err);
-            alert("Failed to create source");
+            addToast("error", "Failed to create source");
         } finally {
             setIsLoading(false);
         }

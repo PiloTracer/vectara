@@ -1,6 +1,6 @@
 "use server";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://back-dl:8000";
+import { BACKEND_URL } from "../lib/backend";
 
 export interface LLMModel {
     id: string;
@@ -50,7 +50,7 @@ export interface UpdateModelData {
 }
 
 export async function getProviders(): Promise<LLMProvider[]> {
-    const res = await fetch(`${API_BASE}/models/providers`, { cache: "no-store" });
+    const res = await fetch(`${BACKEND_URL}/models/providers`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch providers");
     const data = await res.json();
     return data.providers;
@@ -58,15 +58,15 @@ export async function getProviders(): Promise<LLMProvider[]> {
 
 export async function getModels(envId?: string): Promise<LLMModel[]> {
     const url = envId
-        ? `${API_BASE}/models/env/${envId}`
-        : `${API_BASE}/models/`;
+        ? `${BACKEND_URL}/models/env/${envId}`
+        : `${BACKEND_URL}/models/`;
     const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch models");
     return res.json();
 }
 
 export async function createModel(data: CreateModelData): Promise<LLMModel> {
-    const res = await fetch(`${API_BASE}/models/`, {
+    const res = await fetch(`${BACKEND_URL}/models/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -79,7 +79,7 @@ export async function createModel(data: CreateModelData): Promise<LLMModel> {
 }
 
 export async function updateModel(id: string, data: UpdateModelData): Promise<LLMModel> {
-    const res = await fetch(`${API_BASE}/models/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/models/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -92,7 +92,7 @@ export async function updateModel(id: string, data: UpdateModelData): Promise<LL
 }
 
 export async function deleteModel(id: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/models/${id}`, {
+    const res = await fetch(`${BACKEND_URL}/models/${id}`, {
         method: "DELETE",
     });
     if (!res.ok) throw new Error("Failed to delete model");
